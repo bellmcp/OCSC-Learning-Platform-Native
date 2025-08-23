@@ -9,8 +9,11 @@ import {
   View,
 } from 'react-native'
 
-import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
+import { type Curriculum } from '@/components/CurriculumItem'
 import MyCourseItem, { type RegisteredCourse } from '@/components/MyCourseItem'
+import MyCurriculumItem, {
+  type RegisteredCurriculum,
+} from '@/components/MyCurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -43,8 +46,11 @@ const convertCurriculumRegistrationToDisplayFormat = (
 // Use raw registered course data
 const registeredCourses: RegisteredCourse[] = courseRegistrations
 
-// Convert registered curriculum data for search
-const registeredCurriculums: Curriculum[] = curriculumRegistrations.map(
+// Use raw registered curriculum data
+const registeredCurriculums: RegisteredCurriculum[] = curriculumRegistrations
+
+// Convert registered curriculum data for search (keeping for search functionality)
+const curriculumDisplayItems: Curriculum[] = curriculumRegistrations.map(
   convertCurriculumRegistrationToDisplayFormat
 )
 
@@ -70,9 +76,9 @@ export default function LearnScreen() {
   }, [])
   const [filteredCourses, setFilteredCourses] =
     useState<RegisteredCourse[]>(registeredCourses)
-  const [filteredCurriculums, setFilteredCurriculums] = useState<Curriculum[]>(
-    registeredCurriculums
-  )
+  const [filteredCurriculums, setFilteredCurriculums] = useState<
+    RegisteredCurriculum[]
+  >(registeredCurriculums)
 
   // Search functionality
   const handleSearch = (query: string) => {
@@ -98,10 +104,10 @@ export default function LearnScreen() {
     // Filter registered curriculums
     const curriculumsResults = registeredCurriculums.filter(
       (curriculum) =>
-        curriculum.title.toLowerCase().includes(searchLower) ||
-        curriculum.description.toLowerCase().includes(searchLower) ||
-        curriculum.id.toLowerCase().includes(searchLower) ||
-        curriculum.type.toLowerCase().includes(searchLower)
+        curriculum.name.toLowerCase().includes(searchLower) ||
+        curriculum.learningObjective.toLowerCase().includes(searchLower) ||
+        curriculum.code.toLowerCase().includes(searchLower) ||
+        curriculum.learningTopic.toLowerCase().includes(searchLower)
     )
 
     setFilteredCourses(coursesResults)
@@ -124,14 +130,26 @@ export default function LearnScreen() {
     </View>
   )
 
-  const renderCurriculumItem = ({ item }: { item: Curriculum }) => (
+  const renderCurriculumItem = ({ item }: { item: RegisteredCurriculum }) => (
     <View style={styles.curriculumItemWrapper}>
-      <CurriculumItem
-        item={item}
-        variant='fullWidth'
-        onPress={(curriculum) =>
-          router.push(`/curriculum-detail?id=${curriculum.id}`)
+      <MyCurriculumItem
+        registeredCurriculum={item}
+        myCourses={registeredCourses}
+        onPress={(curriculum: RegisteredCurriculum) =>
+          router.push(`/curriculum-detail?id=${curriculum.code}`)
         }
+        onUpdateSatisfactionScore={(curriculumId: number, score: number) => {
+          // TODO: Implement satisfaction score update
+          console.log('Update satisfaction score:', curriculumId, score)
+        }}
+        onUnregister={(curriculumId: number, curriculumName: string) => {
+          // TODO: Implement unregister functionality
+          console.log(
+            'Unregister from curriculum:',
+            curriculumId,
+            curriculumName
+          )
+        }}
       />
     </View>
   )
@@ -150,12 +168,12 @@ export default function LearnScreen() {
   const renderListItem = ({
     item,
   }: {
-    item: RegisteredCourse | Curriculum
+    item: RegisteredCourse | RegisteredCurriculum
   }) => {
     if (activeTab === 'courses') {
       return renderCourseItem({ item: item as RegisteredCourse })
     } else {
-      return renderCurriculumItem({ item: item as Curriculum })
+      return renderCurriculumItem({ item: item as RegisteredCurriculum })
     }
   }
 
@@ -334,7 +352,7 @@ export default function LearnScreen() {
             keyExtractor={(item) =>
               activeTab === 'courses'
                 ? (item as RegisteredCourse).id.toString()
-                : (item as Curriculum).id
+                : (item as RegisteredCurriculum).id.toString()
             }
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContainer}

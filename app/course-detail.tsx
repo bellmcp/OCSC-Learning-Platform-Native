@@ -92,7 +92,7 @@ export default function CourseDetailScreen() {
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
-            รายละเอียดรายวิชา
+            รายวิชา
           </ThemedText>
           <View style={styles.backButton} />
         </View>
