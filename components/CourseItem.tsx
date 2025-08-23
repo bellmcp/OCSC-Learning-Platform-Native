@@ -82,17 +82,14 @@ export default function CourseItem({
         <ThemedText
           type='defaultSemiBold'
           style={styles.courseTitle}
-          numberOfLines={isFullWidth ? 2 : 1}
+          numberOfLines={1}
         >
           {item.title || 'รายวิชา'}
         </ThemedText>
         <ThemedText style={styles.courseId} numberOfLines={1}>
           {item.id || 'รหัสรายวิชา'}
         </ThemedText>
-        <ThemedText
-          style={styles.courseDescription}
-          numberOfLines={isFullWidth ? 2 : 3}
-        >
+        <ThemedText style={styles.courseDescription} numberOfLines={2}>
           {item.description || 'ไม่มีข้อมูล'}
         </ThemedText>
         <ThemedView style={styles.courseFooter}>
@@ -127,14 +124,14 @@ const styles = StyleSheet.create({
     width: '100%',
     marginRight: 0,
     flexDirection: 'row',
-    height: 120,
+    height: 140,
   },
   courseImage: {
     width: '100%',
     height: 200,
   },
   courseImageFullWidth: {
-    width: 120,
+    width: 140,
     height: '100%',
     flexShrink: 0,
   },
@@ -144,6 +141,7 @@ const styles = StyleSheet.create({
   },
   courseContentFullWidth: {
     padding: 12,
+    paddingBottom: 16,
     flex: 1,
     justifyContent: 'space-between',
   },
@@ -154,13 +152,13 @@ const styles = StyleSheet.create({
   },
   courseId: {
     fontSize: 14,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   courseDescription: {
     fontSize: 14,
     lineHeight: 20,
     color: '#6B7280',
-    marginBottom: 12,
+    marginBottom: 6,
     flex: 1,
   },
   courseFooter: {

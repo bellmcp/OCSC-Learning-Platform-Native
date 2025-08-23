@@ -138,22 +138,24 @@ export default function CurriculumsScreen() {
             onChangeText={setSearchQuery}
           />
         </View>
+      </ThemedView>
 
-        {/* Type Filter */}
+      {/* Type Filter - Outside header for full width scrolling */}
+      <ThemedView style={styles.filterSection}>
         <FlatList
           data={curriculumTypes}
           renderItem={renderTypeChip}
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.typeContainer}
+          contentContainerStyle={styles.filterContainer}
         />
       </ThemedView>
 
       {/* Scrollable Content */}
       <ThemedView style={styles.content}>
         <ThemedText style={styles.resultCount}>
-          พบ {filteredCurriculums.length} หลักสูตร
+          ผลลัพธ์ {filteredCurriculums.length} รายการ
         </ThemedText>
 
         <FlatList
@@ -177,8 +179,6 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingHorizontal: 20,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
   headerTop: {
     flexDirection: 'row',
@@ -204,7 +204,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 16,
   },
   searchIcon: {
     marginRight: 8,
@@ -214,8 +213,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
   },
-  typeContainer: {
-    paddingVertical: 8,
+  filterSection: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  filterContainer: {
+    paddingLeft: 20,
+    paddingBottom: 16,
   },
   typeChip: {
     backgroundColor: '#F0F0F0',

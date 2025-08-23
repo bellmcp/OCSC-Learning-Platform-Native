@@ -74,17 +74,14 @@ export default function CurriculumItem({
         <ThemedText
           type='defaultSemiBold'
           style={styles.curriculumTitle}
-          numberOfLines={isFullWidth ? 2 : 1}
+          numberOfLines={1}
         >
           {item.title}
         </ThemedText>
         <ThemedText style={styles.curriculumId} numberOfLines={1}>
           {item.id}
         </ThemedText>
-        <ThemedText
-          style={styles.curriculumDescription}
-          numberOfLines={isFullWidth ? 2 : 3}
-        >
+        <ThemedText style={styles.curriculumDescription} numberOfLines={2}>
           {item.description}
         </ThemedText>
       </ThemedView>
@@ -106,17 +103,16 @@ const styles = StyleSheet.create({
     width: '100%',
     marginRight: 0,
     flexDirection: 'row',
-    height: 120,
+    height: 140,
   },
   imageContainer: {
     borderLeftWidth: 8,
     borderLeftColor: 'rgb(255, 193, 7)',
   },
   imageContainerFullWidth: {
-    borderLeftWidth: 0,
-    borderTopWidth: 8,
-    borderTopColor: 'rgb(255, 193, 7)',
-    width: 120,
+    borderLeftWidth: 8,
+    borderLeftColor: 'rgb(255, 193, 7)',
+    width: 140,
     height: '100%',
     flexShrink: 0,
   },
@@ -134,22 +130,24 @@ const styles = StyleSheet.create({
   },
   curriculumContentFullWidth: {
     padding: 12,
+    paddingBottom: 16,
     flex: 1,
     justifyContent: 'space-between',
   },
   curriculumTitle: {
     fontSize: 16,
     fontWeight: 'medium',
-    marginBottom: 0,
+    marginBottom: 2,
   },
   curriculumId: {
     fontSize: 14,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   curriculumDescription: {
     fontSize: 14,
     lineHeight: 20,
     color: '#6B7280',
+    marginBottom: 6,
     flex: 1,
   },
   curriculumFooter: {

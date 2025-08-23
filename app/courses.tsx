@@ -128,22 +128,24 @@ export default function CoursesScreen() {
             onChangeText={setSearchQuery}
           />
         </View>
+      </ThemedView>
 
-        {/* Category Filter */}
+      {/* Category Filter - Outside header for full width scrolling */}
+      <ThemedView style={styles.filterSection}>
         <FlatList
           data={[{ id: null, courseCategory: 'ทั้งหมด' }, ...courseCategories]}
           renderItem={renderCategoryChip}
           keyExtractor={(item) => item.id?.toString() || 'all'}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryContainer}
+          contentContainerStyle={styles.filterContainer}
         />
       </ThemedView>
 
       {/* Scrollable Content */}
       <ThemedView style={styles.content}>
         <ThemedText style={styles.resultCount}>
-          พบ {filteredCourses.length} รายวิชา
+          ผลลัพธ์ {filteredCourses.length} รายการ
         </ThemedText>
 
         <FlatList
@@ -167,8 +169,6 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingHorizontal: 20,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
   headerTop: {
     flexDirection: 'row',
@@ -194,7 +194,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 16,
   },
   searchIcon: {
     marginRight: 8,
@@ -204,8 +203,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
   },
-  categoryContainer: {
-    paddingVertical: 8,
+  filterSection: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  filterContainer: {
+    paddingLeft: 20,
+    paddingBottom: 16,
   },
   categoryChip: {
     backgroundColor: '#F0F0F0',
