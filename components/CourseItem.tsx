@@ -100,7 +100,11 @@ export default function CourseItem({
                 { backgroundColor: getCategoryColor(item.courseCategoryId) },
               ]}
             />
-            <ThemedText style={styles.categoryText} numberOfLines={1}>
+            <ThemedText
+              style={styles.categoryText}
+              numberOfLines={1}
+              ellipsizeMode='tail'
+            >
               {item.category}
             </ThemedText>
           </ThemedView>
@@ -140,7 +144,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   courseContentFullWidth: {
-    padding: 12,
+    padding: 16,
     paddingBottom: 16,
     flex: 1,
     justifyContent: 'space-between',
@@ -167,15 +171,19 @@ const styles = StyleSheet.create({
   categoryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    width: '100%',
   },
   categoryDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     marginRight: 8,
+    flexShrink: 0,
   },
   categoryText: {
     fontSize: 14,
     fontWeight: '600',
+    flex: 1,
+    minWidth: 0,
   },
 })

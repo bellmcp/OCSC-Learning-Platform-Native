@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   curriculumContentFullWidth: {
-    padding: 12,
+    padding: 16,
     paddingBottom: 16,
     flex: 1,
     justifyContent: 'space-between',

@@ -9,9 +9,8 @@ import {
   View,
 } from 'react-native'
 
-import { type Course } from '@/components/CourseItem'
+import CourseItem, { type Course } from '@/components/CourseItem'
 import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
-import MyCourseItem from '@/components/MyCourseItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -145,7 +144,7 @@ export default function LearnScreen() {
 
   const renderCourseItem = ({ item }: { item: Course }) => (
     <View style={styles.courseItemWrapper}>
-      <MyCourseItem
+      <CourseItem
         item={item}
         variant='fullWidth'
         onPress={(course) => router.push(`/course-detail?id=${course.id}`)}
@@ -157,6 +156,7 @@ export default function LearnScreen() {
     <View style={styles.curriculumItemWrapper}>
       <CurriculumItem
         item={item}
+        variant='fullWidth'
         onPress={(curriculum) =>
           router.push(`/curriculum-detail?id=${curriculum.id}`)
         }
@@ -350,22 +350,16 @@ export default function LearnScreen() {
           </ThemedView>
         )}
 
-        {/* Results with count */}
+        {/* Results */}
         {!showWelcome && !showNoResults && (
-          <>
-            <ThemedText style={styles.resultCount}>
-              ผลลัพธ์ {currentData.length} รายการ
-            </ThemedText>
-
-            <FlatList
-              data={currentData}
-              renderItem={renderListItem}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.listContainer}
-              style={styles.list}
-            />
-          </>
+          <FlatList
+            data={currentData}
+            renderItem={renderListItem}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContainer}
+            style={styles.list}
+          />
         )}
       </ThemedView>
       <StatusBarGradient />
@@ -406,10 +400,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     fontFamily: 'Prompt-Regular',
   },
-  tabSection: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
+  tabSection: {},
   tabContainer: {
     flexDirection: 'row',
     paddingHorizontal: 20,
@@ -419,7 +410,7 @@ const styles = StyleSheet.create({
   tabButton: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 26,
     alignItems: 'center',
@@ -487,13 +478,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     paddingHorizontal: 20,
   },
-  resultCount: {
-    fontSize: 16,
-    fontFamily: 'Prompt-Medium',
-    marginTop: 16,
-    marginBottom: 16,
-    color: '#666',
-  },
+
   list: {
     flex: 1,
   },
