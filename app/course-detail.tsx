@@ -12,20 +12,41 @@ import {
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { curriculums } from '@/constants/Curriculums'
+import { courseCategories } from '@/constants/CourseCategories'
+import { courses } from '@/constants/Courses'
 import { useThemeColor } from '@/hooks/useThemeColor'
 
-export default function CurriculumDetailScreen() {
+// Category colors following Material-UI color palette
+const getCategoryColor = (categoryId: number) => {
+  const colors: { [key: number]: string } = {
+    1: '#9C27B0', // purple[500] - การพัฒนาองค์ความรู้
+    2: '#3F51B5', // indigo[500] - การพัฒนากรอบความคิด
+    3: '#E91E63', // pink[500] - ทักษะเชิงยุทธศาสตร์และภาวะผู้นำ
+    4: '#FF9800', // orange[500] - ทักษะดิจิทัล
+    5: '#4CAF50', // green[500] - ทักษะด้านภาษา
+    6: '#2196F3', // blue[500]
+    7: '#795548', // brown[500]
+  }
+  return colors[categoryId] || '#9E9E9E' // grey[500] as default
+}
+
+export default function CourseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const backgroundColor = useThemeColor({}, 'background')
   const iconColor = useThemeColor({}, 'icon')
   const textColor = useThemeColor({}, 'text')
   const tintColor = useThemeColor({}, 'tint')
 
-  // Find the curriculum by code (id)
-  const curriculum = curriculums.find((curr) => curr.code === id)
+  // Find the course by code (id)
+  const course = courses.find((course) => course.code === id)
 
-  if (!curriculum) {
+  // Find the course category
+  const courseCategory = courseCategories.find(
+    (cat: { id: number; courseCategory: string }) =>
+      cat.id === course?.courseCategoryId
+  )
+
+  if (!course) {
     return (
       <ThemedView style={[styles.container, { backgroundColor }]}>
         <ThemedView style={styles.header}>
@@ -37,7 +58,7 @@ export default function CurriculumDetailScreen() {
               <IconSymbol name='chevron.left' size={24} color={iconColor} />
             </TouchableOpacity>
             <ThemedText type='title' style={styles.headerTitle}>
-              ไม่พบหลักสูตร
+              ไม่พบรายวิชา
             </ThemedText>
             <View style={styles.backButton} />
           </View>
@@ -71,7 +92,7 @@ export default function CurriculumDetailScreen() {
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
-            รายละเอียดหลักสูตร
+            รายละเอียดรายวิชา
           </ThemedText>
           <View style={styles.backButton} />
         </View>
@@ -86,7 +107,7 @@ export default function CurriculumDetailScreen() {
         {/* Hero Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: curriculum.thumbnail }}
+            source={{ uri: course.thumbnail }}
             style={styles.heroImage}
             contentFit='cover'
             transition={200}
@@ -95,30 +116,46 @@ export default function CurriculumDetailScreen() {
           <View style={styles.imageOverlay} />
           <View style={styles.gradientOverlay} />
           <View style={styles.heroContent}>
-            <ThemedText style={styles.curriculumType}>หลักสูตร</ThemedText>
-            <ThemedText style={styles.heroTitle}>{curriculum.name}</ThemedText>
-            <ThemedText style={styles.curriculumCode}>
-              {curriculum.code}
-            </ThemedText>
+            <ThemedText style={styles.heroTitle}>{course.name}</ThemedText>
+            <ThemedText style={styles.courseCode}>{course.code}</ThemedText>
+            <View style={styles.categoryContainer}>
+              <View
+                style={[
+                  styles.categoryDot,
+                  {
+                    backgroundColor: getCategoryColor(course.courseCategoryId),
+                  },
+                ]}
+              />
+              <ThemedText style={styles.courseType}>
+                {courseCategory?.courseCategory || 'ทั่วไป'}
+              </ThemedText>
+            </View>
           </View>
         </View>
 
         {/* Course Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <IconSymbol name='clock' size={18} color={tintColor} />
-            <ThemedText style={styles.statLabel}>ระยะเวลา</ThemedText>
-            <ThemedText style={styles.statValue}>8 ชั่วโมง</ThemedText>
+            <IconSymbol name='chart.bar' size={18} color={tintColor} />
+            <ThemedText style={styles.statLabel}>วิธีการประเมินผล</ThemedText>
+            <ThemedText style={styles.statValue}>
+              ทำแบบทดสอบหลังเรียนได้ตั้งแต่ 60 % ขึ้นไป
+            </ThemedText>
           </View>
           <View style={styles.statCard}>
-            <IconSymbol name='star' size={18} color={tintColor} />
-            <ThemedText style={styles.statLabel}>ระดับ</ThemedText>
-            <ThemedText style={styles.statValue}>เริ่มต้น</ThemedText>
+            <IconSymbol name='target' size={18} color={tintColor} />
+            <ThemedText style={styles.statLabel}>กลุ่มเป้าหมาย</ThemedText>
+            <ThemedText style={styles.statValue}>
+              บุคลากรภาครัฐ{'\n'}บุคคลทั่วไป
+            </ThemedText>
           </View>
           <View style={styles.statCard}>
-            <IconSymbol name='person.3' size={18} color={tintColor} />
-            <ThemedText style={styles.statLabel}>ผู้เรียน</ThemedText>
-            <ThemedText style={styles.statValue}>156 คน</ThemedText>
+            <IconSymbol name='info.circle' size={18} color={tintColor} />
+            <ThemedText style={styles.statLabel}>หมายเหตุ</ThemedText>
+            <ThemedText style={styles.statValue}>
+              ไม่มีข้อกำหนดข้อมูลสำเนีอื่นนอกจาก
+            </ThemedText>
           </View>
         </View>
 
@@ -129,24 +166,37 @@ export default function CurriculumDetailScreen() {
             <View style={styles.sectionHeader}>
               <IconSymbol name='target' size={20} color={tintColor} />
               <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                วัตถุประสงค์การเรียนรู้
+                เป้าหมายการเรียนรู้
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.learningObjective)}
+              {cleanHtmlText(course.learningObjective)}
             </ThemedText>
           </ThemedView>
 
-          {/* Learning Topics Section */}
+          {/* Instructor Section */}
           <ThemedView style={styles.section}>
             <View style={styles.sectionHeader}>
-              <IconSymbol name='book.closed' size={20} color={tintColor} />
+              <IconSymbol name='person.circle' size={20} color={tintColor} />
               <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                หัวข้อการเรียนรู้
+                วิทยากร
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.learningTopic)}
+              {cleanHtmlText(course.instructor)}
+            </ThemedText>
+          </ThemedView>
+
+          {/* Assessment Section */}
+          <ThemedView style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <IconSymbol name='checkmark.circle' size={20} color={tintColor} />
+              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                ประเด็นการเรียนรู้
+              </ThemedText>
+            </View>
+            <ThemedText style={styles.sectionContent}>
+              {cleanHtmlText(course.learningTopic)}
             </ThemedText>
           </ThemedView>
 
@@ -159,21 +209,32 @@ export default function CurriculumDetailScreen() {
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.targetGroup)}
+              {cleanHtmlText(course.targetGroup)}
             </ThemedText>
           </ThemedView>
 
           {/* Assessment Section */}
           <ThemedView style={styles.section}>
             <View style={styles.sectionHeader}>
-              <IconSymbol name='checkmark.circle' size={20} color={tintColor} />
+              <IconSymbol name='chart.bar' size={20} color={tintColor} />
               <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                การประเมินผล
+                หมายเหตุ
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.assessment)}
+              ไม่มีข้อกำหนดเอกสารใดนอกจากไฟล์
             </ThemedText>
+          </ThemedView>
+
+          {/* Learning Hours Section */}
+          <ThemedView style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <IconSymbol name='clock' size={20} color={tintColor} />
+              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                จำนวนชั่วโมงการเรียนรู้
+              </ThemedText>
+            </View>
+            <ThemedText style={styles.sectionContent}>4 ชั่วโมง</ThemedText>
           </ThemedView>
         </View>
       </ScrollView>
@@ -229,8 +290,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     height: 300,
     position: 'relative',
-    borderLeftWidth: 8,
-    borderLeftColor: 'rgb(255, 193, 7)',
   },
   heroImage: {
     width: '100%',
@@ -260,7 +319,7 @@ const styles = StyleSheet.create({
     left: 25,
     right: 20,
   },
-  curriculumBadge: {
+  courseBadge: {
     backgroundColor: 'rgba(255, 193, 7, 0.2)',
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -270,14 +329,25 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: 12,
   },
-  curriculumType: {
+  categoryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    marginTop: 12,
+  },
+  categoryDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  courseType: {
     fontSize: 14,
-    color: '#ffc107',
+    color: 'white',
     fontFamily: 'Prompt-SemiBold',
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-    marginBottom: 4,
   },
   heroTitle: {
     fontSize: 28,
@@ -289,7 +359,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
-  curriculumCode: {
+  courseCode: {
     fontSize: 16,
     color: 'white',
     fontFamily: 'Prompt-Medium',
@@ -312,6 +382,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     minWidth: 100,
+    flex: 1,
+    marginHorizontal: 4,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -327,11 +399,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 4,
     fontFamily: 'Prompt-Regular',
+    textAlign: 'center',
   },
   statValue: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#374151',
     fontFamily: 'Prompt-SemiBold',
+    textAlign: 'center',
+    lineHeight: 16,
   },
   mainContent: {
     padding: 20,

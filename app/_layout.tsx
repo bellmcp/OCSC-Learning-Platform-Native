@@ -222,6 +222,10 @@ export default function RootLayout() {
               options={{ headerShown: false }}
             />
             <Stack.Screen name='+not-found' />
+            <Stack.Screen
+              name='course-detail'
+              options={{ headerShown: false }}
+            />
           </Stack>
           <StatusBar style='dark' backgroundColor='transparent' translucent />
         </ThemeProvider>

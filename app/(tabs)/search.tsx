@@ -24,6 +24,7 @@ import { courseCategories } from '@/constants/CourseCategories'
 import { courses } from '@/constants/Courses'
 import { curriculums } from '@/constants/Curriculums'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import { router } from 'expo-router'
 
 // Utility function to convert real course data to display format
 const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
@@ -137,7 +138,7 @@ export default function SearchScreen() {
   const renderCourseItem = ({ item }: { item: Course }) => (
     <CourseItem
       item={item}
-      onPress={(course) => console.log('Course selected:', course)}
+      onPress={(course) => router.push(`/course-detail?id=${course.id}`)}
     />
   )
 

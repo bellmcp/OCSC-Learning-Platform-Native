@@ -84,7 +84,11 @@ export default function CoursesScreen() {
 
   const renderCourseItem = ({ item }: { item: Course }) => (
     <View style={styles.courseItemWrapper}>
-      <CourseItem item={item} variant='fullWidth' />
+      <CourseItem
+        item={item}
+        variant='fullWidth'
+        onPress={(course) => router.push(`/course-detail?id=${course.id}`)}
+      />
     </View>
   )
 

@@ -203,11 +203,17 @@ export default function HomeScreen() {
   )
 
   const renderCourseItem = ({ item }: { item: Course }) => (
-    <CourseItem item={item} />
+    <CourseItem
+      item={item}
+      onPress={(course) => router.push(`/course-detail?id=${course.id}`)}
+    />
   )
 
   const renderRecommendedItem = ({ item }: { item: Course }) => (
-    <CourseItem item={item} />
+    <CourseItem
+      item={item}
+      onPress={(course) => router.push(`/course-detail?id=${course.id}`)}
+    />
   )
 
   const handleCurriculumPress = (item: Curriculum) => {
