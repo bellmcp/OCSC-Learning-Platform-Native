@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
   secondaryButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#0a7ea4',
+    borderColor: '#183A7C',
   },
   actionButtonText: {
     fontSize: 16,

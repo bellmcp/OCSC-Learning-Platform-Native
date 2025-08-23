@@ -20,16 +20,16 @@ const theme = {
   colors: {
     ...DefaultReactNativePaperTheme.colors,
     // Primary colors
-    primary: '#2E9AB6',
+    primary: '#183A7C',
     onPrimary: '#FFFFFF',
-    primaryContainer: '#B8E6F0',
-    onPrimaryContainer: '#0A4A57',
+    primaryContainer: '#D6E3FF',
+    onPrimaryContainer: '#0C1D3E',
 
     // Secondary colors
-    secondary: '#183A7C',
+    secondary: '#2E9AB6',
     onSecondary: '#FFFFFF',
-    secondaryContainer: '#D6E3FF',
-    onSecondaryContainer: '#0C1D3E',
+    secondaryContainer: '#B8E6F0',
+    onSecondaryContainer: '#0A4A57',
 
     // Tertiary colors
     tertiary: '#00A69C',
@@ -54,7 +54,7 @@ const theme = {
     // Inverse colors
     inverseSurface: '#313033',
     inverseOnSurface: '#F4EFF4',
-    inversePrimary: '#7DD3EA',
+    inversePrimary: '#8BB5FF',
 
     // Error colors (keep default)
     error: '#BA1A1A',

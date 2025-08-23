@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D1D5DB',
   },
   activeDot: {
-    backgroundColor: '#0a7ea4',
+    backgroundColor: '#183A7C',
   },
 
   // Recommended card styles
