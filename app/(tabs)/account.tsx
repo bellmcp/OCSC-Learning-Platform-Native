@@ -1,12 +1,19 @@
 import { Image } from 'expo-image'
-import React, { useRef } from 'react'
-import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
+import React, { useContext, useRef, useState } from 'react'
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import { LoginContext } from './_layout'
 
 // Mock user data
 const mockUser = {
@@ -27,6 +34,14 @@ export default function AccountScreen() {
   const iconColor = useThemeColor({}, 'icon')
   const scrollViewRef = useRef<ScrollView>(null)
 
+  // Use shared login context instead of local state
+  const { isLoggedIn, setIsLoggedIn } = useContext(LoginContext)
+
+  // Local form state
+  const [citizenId, setCitizenId] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+
   // Reset scroll position when component mounts or becomes visible
   React.useEffect(() => {
     const timeout = setTimeout(() => {
@@ -36,6 +51,147 @@ export default function AccountScreen() {
     return () => clearTimeout(timeout)
   }, [])
 
+  const handleLogin = () => {
+    // Bypass all validation - allow login with any input or empty fields
+    setIsLoggedIn(true)
+    setCitizenId('')
+    setPassword('')
+  }
+
+  const handleLogout = () => {
+    Alert.alert('ยืนยันการออกจากระบบ', 'คุณต้องการออกจากระบบหรือไม่?', [
+      { text: 'ยกเลิก', style: 'cancel' },
+      {
+        text: 'ออกจากระบบ',
+        style: 'destructive',
+        onPress: () => setIsLoggedIn(false),
+      },
+    ])
+  }
+
+  // Login Form Component
+  const LoginForm = () => (
+    <ThemedView style={styles.loginContainer}>
+      {/* Header */}
+      <ThemedView style={styles.loginHeader}>
+        <ThemedText type='title' style={styles.loginHeaderTitle}>
+          เข้าสู่ระบบ
+        </ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.loginCard}>
+        {/* Citizen ID Input */}
+        <ThemedView style={styles.inputContainer}>
+          <ThemedText style={styles.inputLabel}>
+            เลขประจำตัวประชาชน{' '}
+            <ThemedText style={styles.required}>*</ThemedText>
+          </ThemedText>
+          <ThemedView style={styles.inputWrapper}>
+            <IconSymbol
+              name='person'
+              size={20}
+              color={iconColor}
+              style={styles.inputIcon}
+            />
+            <TextInput
+              style={styles.textInput}
+              value={citizenId}
+              onChangeText={setCitizenId}
+              placeholder='กรอกเลขประจำตัวประชาชน'
+              placeholderTextColor='#999'
+              keyboardType='numeric'
+              maxLength={13}
+            />
+          </ThemedView>
+        </ThemedView>
+
+        {/* Password Input */}
+        <ThemedView style={styles.inputContainer}>
+          <ThemedText style={styles.inputLabel}>
+            รหัสผ่าน <ThemedText style={styles.required}>*</ThemedText>
+          </ThemedText>
+          <ThemedView style={styles.inputWrapper}>
+            <IconSymbol
+              name='lock'
+              size={20}
+              color={iconColor}
+              style={styles.inputIcon}
+            />
+            <TextInput
+              style={styles.textInput}
+              value={password}
+              onChangeText={setPassword}
+              placeholder='กรอกรหัสผ่าน'
+              placeholderTextColor='#999'
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.passwordToggle}
+            >
+              <IconSymbol
+                name={showPassword ? 'eye.slash' : 'eye'}
+                size={20}
+                color={iconColor}
+              />
+            </TouchableOpacity>
+          </ThemedView>
+        </ThemedView>
+
+        {/* Forgot Password */}
+        <TouchableOpacity style={styles.forgotPassword}>
+          <ThemedText style={styles.forgotPasswordText}>ลืมรหัสผ่าน</ThemedText>
+        </TouchableOpacity>
+
+        {/* Login Button */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            { backgroundColor: tintColor, marginTop: 16 },
+          ]}
+          onPress={handleLogin}
+        >
+          <IconSymbol name='arrow.right.square' size={20} color='white' />
+          <ThemedText style={styles.actionButtonText}>เข้าสู่ระบบ</ThemedText>
+        </TouchableOpacity>
+
+        {/* Divider */}
+        <ThemedView style={styles.divider} />
+
+        {/* Registration Link */}
+        <ThemedView style={styles.registrationContainer}>
+          <ThemedText style={styles.registrationText}>
+            ยังไม่มีบัญชีใช่ไหม?
+          </ThemedText>
+          <TouchableOpacity style={styles.registrationLink}>
+            <ThemedText
+              style={[styles.registrationLinkText, { color: tintColor }]}
+            >
+              สมัครสมาชิก
+            </ThemedText>
+            <IconSymbol
+              name='chevron.right'
+              size={16}
+              color={tintColor}
+              style={styles.arrowIcon}
+            />
+          </TouchableOpacity>
+        </ThemedView>
+      </ThemedView>
+    </ThemedView>
+  )
+
+  // If not logged in, show login form
+  if (!isLoggedIn) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <LoginForm />
+        <StatusBarGradient />
+      </ThemedView>
+    )
+  }
+
+  // If logged in, show account profile
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <ScrollView ref={scrollViewRef} style={styles.scrollContainer}>
@@ -168,6 +324,7 @@ export default function AccountScreen() {
               styles.actionButton,
               { backgroundColor: tintColor, marginTop: 16 },
             ]}
+            onPress={handleLogout}
           >
             <IconSymbol name='arrow.right.square' size={20} color='white' />
             <ThemedText style={styles.actionButtonText}>ออกจากระบบ</ThemedText>
@@ -186,6 +343,110 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
   },
+  required: {
+    color: '#ff4444',
+  },
+  // Login styles
+  loginContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 100,
+  },
+  loginHeader: {
+    paddingTop: 80,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  loginHeaderTitle: {
+    textAlign: 'center',
+    marginTop: 24,
+    marginBottom: 0,
+  },
+  loginCard: {
+    width: '100%',
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  inputContainer: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'Prompt-SemiBold',
+    marginBottom: 8,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    fontFamily: 'Prompt-Regular',
+  },
+  passwordToggle: {
+    padding: 4,
+  },
+  forgotPassword: {
+    alignSelf: 'flex-start',
+    marginBottom: 24,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: '#666',
+    textDecorationLine: 'underline',
+  },
+
+  divider: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginBottom: 24,
+  },
+  registrationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  registrationText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  registrationLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  registrationLinkText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  arrowIcon: {
+    marginLeft: 2,
+  },
+  // Existing account styles
   header: {
     alignItems: 'center',
     paddingTop: 100,
