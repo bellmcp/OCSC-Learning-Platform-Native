@@ -301,6 +301,32 @@ export default function ClassroomScreen() {
     }
   }
 
+  const convertToEmbedUrl = (url: string): string => {
+    // Convert YouTube URLs to embed format with autoplay
+    let videoId = ''
+
+    if (url.includes('youtu.be/')) {
+      // Extract video ID from youtu.be/VIDEO_ID format
+      videoId = url.split('youtu.be/')[1].split('?')[0]
+    } else if (url.includes('youtube.com/watch?v=')) {
+      // Extract video ID from youtube.com/watch?v=VIDEO_ID format
+      videoId = url.split('v=')[1].split('&')[0]
+    } else if (url.includes('youtube.com/embed/')) {
+      // Already in embed format, just add autoplay if not present
+      if (url.includes('autoplay=1')) {
+        return url
+      }
+      const separator = url.includes('?') ? '&' : '?'
+      return `${url}${separator}autoplay=1&playsinline=1&rel=0&modestbranding=1`
+    }
+
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1`
+    }
+
+    return url // Return original URL if not a recognized YouTube format
+  }
+
   const renderContent = () => {
     if (!selectedContent)
       return (
@@ -319,7 +345,17 @@ export default function ClassroomScreen() {
       if (selectedContent.type === 'e') {
         return 'https://docs.google.com/forms/d/e/1FAIpQLSdMockEval/viewform' // Mock evaluation URL
       }
-      return selectedContent.content1 || selectedContent.content2 || null
+
+      // Handle YouTube URLs
+      const rawUrl = selectedContent.content1 || selectedContent.content2
+      if (
+        rawUrl &&
+        (rawUrl.includes('youtube.com') || rawUrl.includes('youtu.be'))
+      ) {
+        return convertToEmbedUrl(rawUrl)
+      }
+
+      return rawUrl || null
     }
 
     const contentUrl = getContentUrl()
@@ -346,7 +382,10 @@ export default function ClassroomScreen() {
         style={styles.webView}
         allowsFullscreenVideo={true}
         javaScriptEnabled={true}
+        domStorageEnabled={true}
         startInLoadingState={true}
+        mediaPlaybackRequiresUserAction={false}
+        allowsInlineMediaPlayback={true}
         onLoadStart={() => {
           if (!contentStartTime.current) {
             contentStartTime.current = Date.now()
@@ -374,75 +413,46 @@ export default function ClassroomScreen() {
     return (
       <TouchableOpacity
         key={item.id}
-        style={[
-          styles.contentItem,
-          isSelected && styles.selectedContentItem,
-          isCompleted && styles.completedContentItem,
-        ]}
+        style={[styles.contentItem, isSelected && styles.selectedContentItem]}
         onPress={() => handleContentSelect(item.id)}
       >
         <ThemedView style={styles.contentItemContainer}>
-          <ThemedView style={styles.contentItemLeft}>
-            <ThemedView style={styles.contentIconContainer}>
-              <IconSymbol
-                name={getContentIcon(item.type)}
-                size={20}
-                color='#183A7C'
-              />
-              <ThemedText style={styles.contentNo}>{item.no}</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.contentTextContainer}>
-              <ThemedText
-                style={[
-                  styles.contentItemTitle,
-                  isSelected && styles.selectedContentItemTitle,
-                  isCompleted && styles.completedContentItemTitle,
-                ]}
-                numberOfLines={2}
-              >
-                {item.name}
-              </ThemedText>
-              <ThemedView style={styles.contentMetaContainer}>
-                <ThemedText style={styles.contentTypeLabel}>
-                  {getContentTypeLabel(item.type)}
-                </ThemedText>
-                {item.minutes && (
-                  <ThemedText style={styles.contentItemDuration}>
-                    • {formatDuration(item.minutes)}
-                  </ThemedText>
-                )}
+          <ThemedView style={styles.iconContainer}>
+            <IconSymbol
+              name={item.type === 't' ? 'doc.text.fill' : 'play.circle.fill'}
+              size={40}
+              color='#6B7280'
+            />
+            {isCompleted && (
+              <ThemedView style={styles.completedBadge}>
+                <IconSymbol
+                  name='checkmark.circle.fill'
+                  size={20}
+                  color='#4CAF50'
+                />
               </ThemedView>
-              {/* Progress bar for content type */}
-              {item.type === 'c' && progress > 0 && (
-                <ThemedView style={styles.progressContainer}>
-                  <ThemedView style={styles.progressBarBackground}>
-                    <ThemedView
-                      style={[
-                        styles.progressBarFill,
-                        { width: `${progressPercentage}%` },
-                      ]}
-                    />
-                  </ThemedView>
-                  <ThemedText style={styles.progressText}>
-                    {progressPercentage}%
-                  </ThemedText>
-                </ThemedView>
+            )}
+          </ThemedView>
+          <ThemedView style={styles.contentTextContainer}>
+            <ThemedText
+              style={[
+                styles.contentItemTitle,
+                isSelected && styles.selectedContentItemTitle,
+              ]}
+              numberOfLines={2}
+            >
+              {item.name}
+            </ThemedText>
+            <ThemedView style={styles.contentMetaContainer}>
+              <ThemedText style={styles.contentTypeLabel}>
+                {getContentTypeLabel(item.type)}
+              </ThemedText>
+              {item.minutes && (
+                <ThemedText style={styles.contentItemDuration}>
+                  , {formatDuration(item.minutes)}
+                </ThemedText>
               )}
             </ThemedView>
-          </ThemedView>
-          <ThemedView style={styles.contentItemRight}>
-            {isCompleted && (
-              <IconSymbol
-                name='checkmark.circle.fill'
-                size={24}
-                color='#4CAF50'
-              />
-            )}
-            {item.testScore !== null && item.testScore !== undefined && (
-              <ThemedText style={styles.testScore}>
-                {item.testScore}%
-              </ThemedText>
-            )}
           </ThemedView>
         </ThemedView>
       </TouchableOpacity>
@@ -463,9 +473,6 @@ export default function ClassroomScreen() {
           <ThemedText style={styles.headerTitle} numberOfLines={1}>
             {courseData.name}
           </ThemedText>
-          <ThemedText style={styles.headerSubtitle}>
-            {courseData.code}
-          </ThemedText>
         </ThemedView>
         <TouchableOpacity style={styles.menuButton}>
           <IconSymbol name='ellipsis' size={20} color={textColor} />
@@ -479,25 +486,15 @@ export default function ClassroomScreen() {
           {selectedContent && (
             <ThemedView style={styles.contentHeader}>
               <ThemedView style={styles.contentTitleRow}>
-                <IconSymbol
-                  name={getContentIcon(selectedContent.type)}
-                  size={20}
-                  color='#183A7C'
-                />
                 <ThemedText style={styles.contentTitle} numberOfLines={1}>
                   {selectedContent.name}
                 </ThemedText>
               </ThemedView>
-              <ThemedView style={styles.contentMetaRow}>
-                <ThemedText style={styles.contentTypeLabel}>
-                  {getContentTypeLabel(selectedContent.type)}
-                </ThemedText>
-                {selectedContent.minutes && (
-                  <ThemedText style={styles.contentDuration}>
-                    • {formatDuration(selectedContent.minutes)}
-                  </ThemedText>
-                )}
-              </ThemedView>
+              <ThemedText style={styles.contentMeta}>
+                {getContentTypeLabel(selectedContent.type)}
+                {selectedContent.minutes &&
+                  ` • ${formatDuration(selectedContent.minutes)}`}
+              </ThemedText>
             </ThemedView>
           )}
 
@@ -576,39 +573,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   contentHeader: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
   contentTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   contentTitle: {
     fontSize: 16,
     fontFamily: 'Prompt-SemiBold',
-    marginLeft: 8,
     flex: 1,
+    color: '#1F2937',
   },
-  contentMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  contentMeta: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontFamily: 'Prompt-Regular',
   },
   contentTypeLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
     backgroundColor: '#F3F4F6',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
-  },
-  contentDuration: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontFamily: 'Prompt-Regular',
-    marginLeft: 8,
   },
   contentContainer: {
     flex: 1,
@@ -693,36 +685,29 @@ const styles = StyleSheet.create({
     marginBottom: 1,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: 'transparent',
   },
   selectedContentItem: {
     backgroundColor: '#F0F7FF',
     borderLeftColor: '#183A7C',
   },
-  completedContentItem: {
-    backgroundColor: '#F8FFF8',
-  },
   contentItemContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  contentItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    flex: 1,
-  },
-  contentIconContainer: {
+  iconContainer: {
+    position: 'relative',
+    marginRight: 16,
     alignItems: 'center',
-    marginRight: 12,
-    minWidth: 30,
+    justifyContent: 'center',
   },
-  contentNo: {
-    fontSize: 10,
-    fontFamily: 'Prompt-Medium',
-    color: '#6B7280',
-    marginTop: 2,
+  completedBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
   },
   contentTextContainer: {
     flex: 1,
@@ -732,14 +717,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 4,
   },
-  contentItemRight: {
-    alignItems: 'center',
-    marginLeft: 12,
-  },
   contentItemTitle: {
-    fontSize: 15,
-    fontFamily: 'Prompt-Regular',
-    lineHeight: 20,
+    fontSize: 16,
+    fontFamily: 'Prompt-Medium',
+    lineHeight: 22,
     color: '#1F2937',
     marginBottom: 4,
   },
@@ -747,42 +728,9 @@ const styles = StyleSheet.create({
     color: '#183A7C',
     fontFamily: 'Prompt-SemiBold',
   },
-  completedContentItemTitle: {
-    color: '#4CAF50',
-  },
   contentItemDuration: {
     fontSize: 12,
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
-    marginLeft: 4,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  progressBarBackground: {
-    flex: 1,
-    height: 4,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 2,
-    marginRight: 8,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#4CAF50',
-    borderRadius: 2,
-  },
-  progressText: {
-    fontSize: 10,
-    fontFamily: 'Prompt-Medium',
-    color: '#6B7280',
-    minWidth: 30,
-  },
-  testScore: {
-    fontSize: 12,
-    fontFamily: 'Prompt-SemiBold',
-    color: '#4CAF50',
-    marginTop: 4,
   },
 })
