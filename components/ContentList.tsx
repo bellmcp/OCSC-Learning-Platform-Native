@@ -59,7 +59,10 @@ export function ContentList({
         style={[
           styles.contentItem,
           isCompleted && styles.completedContentItem,
-          isSelected && styles.selectedContentItem,
+          isSelected &&
+            (isCompleted
+              ? styles.selectedCompletedContentItem
+              : styles.selectedContentItem),
         ]}
         onPress={() => onContentSelect(item.id)}
       >
@@ -75,7 +78,7 @@ export function ContentList({
                 <IconSymbol
                   name='checkmark.circle.fill'
                   size={20}
-                  color='#4CAF50'
+                  color='#2e7d32'
                 />
               </ThemedView>
             )}
@@ -90,12 +93,14 @@ export function ContentList({
             >
               {item.name}
             </ThemedText>
-            <View style={styles.contentMetaContainer}>
-              <ThemedText style={styles.contentMeta}>
-                {getContentTypeLabel(item.type)}
-                {item.minutes && ` • ${formatDuration(item.minutes)}`}
-              </ThemedText>
-            </View>
+            {item.type === 'c' && (
+              <View style={styles.contentMetaContainer}>
+                <ThemedText style={styles.contentMeta}>
+                  {getContentTypeLabel(item.type)}
+                  {item.minutes && ` • ${formatDuration(item.minutes)}`}
+                </ThemedText>
+              </View>
+            )}
           </View>
         </View>
       </TouchableOpacity>
@@ -107,7 +112,7 @@ export function ContentList({
       <ThemedView style={styles.sectionHeader}>
         <ThemedText style={styles.sectionTitle}>สารบัญ</ThemedText>
         <ThemedText style={styles.progressSummary}>
-          เรียนจบ {completedContents.size}/{contents.length} รายการ
+          สำเร็จแล้ว {completedContents.size}/{contents.length} รายการ
         </ThemedText>
       </ThemedView>
       <ThemedView style={styles.contentListWrapper}>
@@ -158,6 +163,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   completedContentItem: {
+    borderLeftColor: '#2e7d32',
+  },
+  selectedCompletedContentItem: {
+    backgroundColor: '#F0F7FF',
     borderLeftColor: '#2e7d32',
   },
   selectedContentItem: {
