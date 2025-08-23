@@ -41,7 +41,7 @@ export default function CurriculumCoursesScreen() {
   }
 
   const handleCoursePress = (course: RegisteredCourse) => {
-    router.push(`/course-detail?id=${course.code}`)
+    router.push(`/classroom?courseId=${course.id}`)
   }
 
   const renderCourseItem = ({

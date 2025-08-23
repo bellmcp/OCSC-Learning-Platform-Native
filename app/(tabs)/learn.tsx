@@ -125,7 +125,7 @@ export default function LearnScreen() {
     <View style={styles.courseItemWrapper}>
       <MyCourseItem
         registeredCourse={item}
-        onPress={(course) => router.push(`/course-detail?id=${course.code}`)}
+        onPress={(course) => router.push(`/classroom?courseId=${course.id}`)}
       />
     </View>
   )

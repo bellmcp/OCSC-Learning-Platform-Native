@@ -230,6 +230,7 @@ export default function RootLayout() {
               name='curriculum-courses'
               options={{ headerShown: false }}
             />
+            <Stack.Screen name='classroom' options={{ headerShown: false }} />
           </Stack>
           <StatusBar style='dark' backgroundColor='transparent' translucent />
         </ThemeProvider>
