@@ -159,7 +159,7 @@ export default function SupportScreen() {
           >
             <IconSymbol name='paperclip' size={20} color={iconColor} />
             <ThemedText style={[styles.fileUploadText, { color: iconColor }]}>
-              {selectedFile ? selectedFile.name : 'Choose File'}
+              {selectedFile ? selectedFile.name : 'เลือกไฟล์'}
             </ThemedText>
           </TouchableOpacity>
         </ThemedView>
