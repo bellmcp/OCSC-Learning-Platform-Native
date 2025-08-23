@@ -106,9 +106,11 @@ export function ContentView({
   }
 
   const isVideoContent =
-    selectedContent.type === 'c' &&
-    (selectedContent.content1?.includes('youtube') ||
-      selectedContent.content2?.includes('youtube'))
+    (selectedContent.type === 'c' &&
+      (selectedContent.content1?.includes('youtube') ||
+        selectedContent.content2?.includes('youtube'))) ||
+    selectedContent.content1?.includes('youtu.be') ||
+    selectedContent.content2?.includes('youtu.be')
 
   if (isVideoContent) {
     return (

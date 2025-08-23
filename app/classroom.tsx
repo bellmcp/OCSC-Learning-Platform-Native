@@ -317,10 +317,8 @@ const styles = StyleSheet.create({
   },
   contentArea: {
     backgroundColor: '#FFFFFF',
-    minHeight: height * 0.6, // Minimum height for content area
   },
   contentContainer: {
-    flex: 1,
     justifyContent: 'flex-start',
   },
 })

@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingBottom: Platform.OS === 'ios' ? 40 : 16,
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   },
   secondsText: {
     fontSize: 12,
-    fontFamily: 'Prompt-SemiBold',
+    fontFamily: 'Prompt-Medium',
     color: '#1F2937',
   },
   minutesContainer: {
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   minutesText: {
     fontSize: 12,
-    fontFamily: 'Prompt-SemiBold',
+    fontFamily: 'Prompt-Medium',
     color: '#1F2937',
   },
   circularProgressRing: {
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   percentageText: {
     fontSize: 12,
-    fontFamily: 'Prompt-SemiBold',
+    fontFamily: 'Prompt-Medium',
     color: '#1F2937',
     textAlign: 'center',
     minWidth: 30,
