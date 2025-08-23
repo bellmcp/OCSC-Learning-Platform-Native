@@ -78,7 +78,11 @@ export default function CurriculumDetailScreen() {
       </ThemedView>
 
       {/* Scrollable Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Hero Image */}
         <View style={styles.imageContainer}>
           <Image
@@ -150,18 +154,20 @@ export default function CurriculumDetailScreen() {
               {cleanHtmlText(curriculum.assessment)}
             </ThemedText>
           </ThemedView>
-
-          {/* Registration Button */}
-          <TouchableOpacity
-            style={[styles.registerButton, { backgroundColor: tintColor }]}
-          >
-            <IconSymbol name='arrow.right.square' size={20} color='white' />
-            <ThemedText style={styles.registerButtonText}>
-              ลงทะเบียนเรียน
-            </ThemedText>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Fixed Registration Button */}
+      <View style={[styles.fixedButtonContainer, { backgroundColor }]}>
+        <TouchableOpacity
+          style={[styles.registerButton, { backgroundColor: tintColor }]}
+        >
+          <IconSymbol name='arrow.right.square' size={20} color='white' />
+          <ThemedText style={styles.registerButtonText}>
+            ลงทะเบียนเรียน
+          </ThemedText>
+        </TouchableOpacity>
+      </View>
     </ThemedView>
   )
 }
@@ -196,11 +202,14 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 100, // Add space for fixed button
+  },
   imageContainer: {
     height: 300,
     position: 'relative',
-    borderLeftWidth: 8,
-    borderLeftColor: 'rgb(255, 193, 7)',
+    borderTopWidth: 8,
+    borderTopColor: 'rgb(255, 193, 7)',
   },
   heroImage: {
     width: '100%',
@@ -225,22 +234,19 @@ const styles = StyleSheet.create({
     color: '#ffc107',
     fontFamily: 'Prompt-SemiBold',
     marginBottom: 8,
-    textAlign: 'center',
   },
   heroTitle: {
     fontSize: 28,
     color: 'white',
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     lineHeight: 36,
     marginBottom: 8,
-    textAlign: 'center',
   },
   curriculumCode: {
     fontSize: 16,
     color: 'white',
     fontFamily: 'Prompt-Medium',
     opacity: 0.9,
-    textAlign: 'center',
   },
   mainContent: {
     padding: 20,
@@ -275,14 +281,24 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
   },
+  fixedButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    borderTopWidth: 0.5,
+    borderTopColor: '#F0F0F0',
+  },
   registerButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
-    marginVertical: 24,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
