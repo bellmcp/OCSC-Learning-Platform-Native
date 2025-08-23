@@ -231,6 +231,7 @@ export default function RootLayout() {
               options={{ headerShown: false }}
             />
             <Stack.Screen name='classroom' options={{ headerShown: false }} />
+            <Stack.Screen name='test' options={{ headerShown: false }} />
           </Stack>
           <StatusBar style='dark' backgroundColor='transparent' translucent />
         </ThemeProvider>

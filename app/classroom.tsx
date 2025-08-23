@@ -1,3 +1,4 @@
+import { router } from 'expo-router'
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert, Dimensions, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -235,6 +236,18 @@ export default function ClassroomScreen() {
     Alert.alert('สำเร็จ', 'คุณได้คะแนน 85% ผ่านแบบทดสอบแล้ว')
   }
 
+  const handleOpenTest = () => {
+    if (selectedContent) {
+      router.push({
+        pathname: '/test',
+        params: {
+          contentId: selectedContent.id.toString(),
+          courseName: courseData.name,
+        },
+      })
+    }
+  }
+
   const handleContentLoadStart = () => {
     if (!contentStartTime.current) {
       contentStartTime.current = Date.now()
@@ -255,7 +268,9 @@ export default function ClassroomScreen() {
       >
         {/* Content Display Area */}
         <ThemedView style={styles.contentArea}>
-          <ContentHeader selectedContent={selectedContent} />
+          {selectedContent?.type === 'c' && (
+            <ContentHeader selectedContent={selectedContent} />
+          )}
 
           <ThemedView style={styles.contentContainer}>
             <ContentView
@@ -263,6 +278,7 @@ export default function ClassroomScreen() {
               courseName={courseData.name}
               onTestStart={handleTestStart}
               onContentLoadStart={handleContentLoadStart}
+              onOpenTest={handleOpenTest}
             />
           </ThemedView>
         </ThemedView>
