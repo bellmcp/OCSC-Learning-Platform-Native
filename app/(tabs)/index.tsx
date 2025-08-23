@@ -238,7 +238,11 @@ export default function HomeScreen() {
         {/* Header */}
         <ThemedView style={styles.header}>
           <ThemedText type='title' style={styles.headerTitle}>
-            หน้าหลัก
+            OCSC Learning Space
+          </ThemedText>
+          <ThemedText type='subtitle' style={styles.headerSubtitle}>
+            โลกแห่งการเรียนรู้ ไม่มีวันจบสิ้น{'\n'}ยิ่งเรียนยิ่งรู้
+            ยิ่งเพิ่มพลังทางปัญญา
           </ThemedText>
         </ThemedView>
 
@@ -387,36 +391,90 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: Platform.OS === 'ios' ? 80 : 40,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
   headerTitle: {
+    fontSize: 28,
     textAlign: 'center',
     marginTop: 24,
     marginBottom: 0,
   },
+  headerSubtitle: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 16,
+    opacity: 0.7,
+  },
+  heroSection: {
+    height: 300, // Adjust height as needed
+    position: 'relative',
+    marginBottom: 32,
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  heroOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark overlay
+    padding: 20,
+  },
+  heroTitle: {
+    color: 'white',
+    fontSize: 36,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+    fontFamily: 'Prompt-Bold',
+  },
+  heroSubtitle: {
+    color: 'white',
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 16,
+    fontFamily: 'Prompt-Medium',
+  },
+  heroDescription: {
+    color: 'white',
+    fontSize: 18,
+    textAlign: 'center',
+    fontFamily: 'Prompt-Regular',
+  },
   section: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: -0.3,
   },
   seeAllText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     fontFamily: 'Prompt-Medium',
   },
   seeAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
   },
   seeAllIcon: {
     marginTop: 1,
@@ -430,11 +488,19 @@ const styles = StyleSheet.create({
     width: screenWidth - 40,
     height: 250,
     marginRight: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
     position: 'relative',
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: '#F8F9FA',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   bannerImage: {
     width: '100%',
@@ -442,40 +508,44 @@ const styles = StyleSheet.create({
   },
   bannerPillContainer: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
+    bottom: 24,
+    left: 24,
+    right: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
   bannerPill: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 28,
     maxWidth: '90%',
+    backdropFilter: 'blur(10px)',
   },
   bannerPillText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     textAlign: 'center',
     fontFamily: 'Prompt-Medium',
+    letterSpacing: 0.2,
   },
   dotsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
-    gap: 8,
+    marginTop: 20,
+    gap: 10,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#D1D5DB',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#E5E7EB',
   },
   activeDot: {
     backgroundColor: '#183A7C',
+    width: 20,
+    borderRadius: 3,
   },
 })
