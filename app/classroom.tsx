@@ -3,10 +3,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import {
   Alert,
   Dimensions,
-  FlatList,
   Platform,
+  ScrollView,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import WebView from 'react-native-webview'
@@ -321,7 +322,7 @@ export default function ClassroomScreen() {
     }
 
     if (videoId) {
-      return `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1`
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&controls=1&showinfo=0&fs=1&iv_load_policy=3`
     }
 
     return url // Return original URL if not a recognized YouTube format
@@ -375,6 +376,40 @@ export default function ClassroomScreen() {
       )
     }
 
+    const isVideoContent =
+      selectedContent.type === 'c' &&
+      (selectedContent.content1?.includes('youtube') ||
+        selectedContent.content2?.includes('youtube'))
+
+    if (isVideoContent) {
+      return (
+        <ThemedView style={styles.videoContainer}>
+          <WebView
+            ref={webViewRef}
+            source={{ uri: contentUrl }}
+            style={styles.videoWebView}
+            allowsFullscreenVideo={true}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            startInLoadingState={true}
+            mediaPlaybackRequiresUserAction={false}
+            allowsInlineMediaPlayback={true}
+            scalesPageToFit={false}
+            bounces={false}
+            scrollEnabled={false}
+            onLoadStart={() => {
+              if (!contentStartTime.current) {
+                contentStartTime.current = Date.now()
+              }
+            }}
+            onError={() => {
+              Alert.alert('ข้อผิดพลาด', 'ไม่สามารถโหลดเนื้อหาได้')
+            }}
+          />
+        </ThemedView>
+      )
+    }
+
     return (
       <WebView
         ref={webViewRef}
@@ -416,7 +451,7 @@ export default function ClassroomScreen() {
         style={[styles.contentItem, isSelected && styles.selectedContentItem]}
         onPress={() => handleContentSelect(item.id)}
       >
-        <ThemedView style={styles.contentItemContainer}>
+        <View style={styles.contentItemContainer}>
           <ThemedView style={styles.iconContainer}>
             <IconSymbol
               name={item.type === 't' ? 'doc.text.fill' : 'play.circle.fill'}
@@ -433,7 +468,7 @@ export default function ClassroomScreen() {
               </ThemedView>
             )}
           </ThemedView>
-          <ThemedView style={styles.contentTextContainer}>
+          <View style={styles.contentTextContainer}>
             <ThemedText
               style={[
                 styles.contentItemTitle,
@@ -443,18 +478,14 @@ export default function ClassroomScreen() {
             >
               {item.name}
             </ThemedText>
-            <ThemedView style={styles.contentMetaContainer}>
-              <ThemedText style={styles.contentTypeLabel}>
+            <View style={styles.contentMetaContainer}>
+              <ThemedText style={styles.contentMeta}>
                 {getContentTypeLabel(item.type)}
+                {item.minutes && ` • ${formatDuration(item.minutes)}`}
               </ThemedText>
-              {item.minutes && (
-                <ThemedText style={styles.contentItemDuration}>
-                  , {formatDuration(item.minutes)}
-                </ThemedText>
-              )}
-            </ThemedView>
-          </ThemedView>
-        </ThemedView>
+            </View>
+          </View>
+        </View>
       </TouchableOpacity>
     )
   }
@@ -480,7 +511,12 @@ export default function ClassroomScreen() {
       </ThemedView>
 
       {/* Main Content Container */}
-      <ThemedView style={styles.mainContainer}>
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+      >
         {/* Content Display Area */}
         <ThemedView style={styles.contentArea}>
           {selectedContent && (
@@ -503,25 +539,76 @@ export default function ClassroomScreen() {
           </ThemedView>
         </ThemedView>
 
-        {/* Content List Bottom Section */}
+        {/* Content List Section */}
         <ThemedView style={styles.bottomSection}>
           <ThemedView style={styles.sectionHeader}>
-            <ThemedText style={styles.sectionTitle}>เนื้อหาบทเรียน</ThemedText>
+            <ThemedText style={styles.sectionTitle}>สารบัญ</ThemedText>
             <ThemedText style={styles.progressSummary}>
               เรียนจบ {completedContents.size}/{courseData.contents.length}{' '}
               รายการ
             </ThemedText>
           </ThemedView>
-          <FlatList
-            data={courseData.contents}
-            renderItem={({ item, index }) => renderContentItem({ item, index })}
-            keyExtractor={(item) => item.id.toString()}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.contentListContainer}
-            style={styles.contentList}
-          />
+          <ThemedView style={styles.contentListWrapper}>
+            {courseData.contents.map((item, index) => (
+              <ThemedView key={item.id.toString()}>
+                {renderContentItem({ item, index })}
+              </ThemedView>
+            ))}
+          </ThemedView>
         </ThemedView>
-      </ThemedView>
+      </ScrollView>
+
+      {/* Fixed Bottom Progress Bar */}
+      <View style={[styles.fixedBottomContainer, { backgroundColor }]}>
+        <View style={styles.progressBar}>
+          {/* Left: Circular Progress */}
+          <View style={styles.circularProgress}>
+            <ThemedText style={styles.progressText}>
+              {completedContents.size}/{courseData.contents.length}
+            </ThemedText>
+          </View>
+
+          {/* Center: Time Progress */}
+          <View style={styles.timeProgress}>
+            <ThemedText style={styles.timeProgressText}>
+              {selectedContent
+                ? `${Math.floor(
+                    (contentProgress.get(selectedContent.id) || 0) *
+                      (selectedContent.minutes || 0)
+                  )}/${selectedContent.minutes || 0} นาที`
+                : `0/${courseData.contents.reduce(
+                    (total, content) => total + (content.minutes || 0),
+                    0
+                  )} นาที`}
+            </ThemedText>
+          </View>
+
+          {/* Right: Percentage Progress */}
+          <View style={styles.percentageProgress}>
+            <View style={styles.percentageBarContainer}>
+              <View style={styles.percentageBar}>
+                <View
+                  style={[
+                    styles.percentageFill,
+                    {
+                      width: `${Math.round(
+                        (completedContents.size / courseData.contents.length) *
+                          100
+                      )}%`,
+                    },
+                  ]}
+                />
+              </View>
+              <ThemedText style={styles.percentageText}>
+                {Math.round(
+                  (completedContents.size / courseData.contents.length) * 100
+                )}
+                %
+              </ThemedText>
+            </View>
+          </View>
+        </View>
+      </View>
     </SafeAreaView>
   )
 }
@@ -565,12 +652,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  mainContainer: {
+  scrollContainer: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 100, // Add space for fixed bottom bar
+  },
   contentArea: {
-    flex: 1,
     backgroundColor: '#FFFFFF',
+    minHeight: height * 0.6, // Minimum height for content area
   },
   contentHeader: {
     paddingHorizontal: 20,
@@ -597,13 +688,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+  },
+  selectedContentTypeLabel: {
+    color: '#6B7280', // Keep original gray color
   },
   contentContainer: {
     flex: 1,
+    justifyContent: 'flex-start',
+  },
+  videoContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+  },
+  videoWebView: {
+    flex: 1,
+    backgroundColor: 'transparent',
   },
   webView: {
     flex: 1,
@@ -649,12 +750,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   bottomSection: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent', // Make section background transparent
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
     paddingTop: 20,
-    minHeight: 200, // Minimum height to ensure visibility
-    maxHeight: height * 0.4, // 40% of screen height
+    paddingBottom: 40, // Add bottom padding for safe area
   },
   sectionHeader: {
     paddingHorizontal: 20,
@@ -673,34 +773,36 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Regular',
     color: '#6B7280',
   },
-  contentList: {
-    flex: 1,
-  },
-  contentListContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+  contentListWrapper: {
+    paddingHorizontal: 0,
   },
   contentItem: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent', // Make background transparent
     marginBottom: 1,
     paddingVertical: 16,
-    paddingHorizontal: 20,
     borderLeftWidth: 4,
     borderLeftColor: 'transparent',
+    width: '100%', // Ensure full width
   },
   selectedContentItem: {
-    backgroundColor: '#F0F7FF',
-    borderLeftColor: '#183A7C',
+    backgroundColor: '#F0F7FF', // Transparent blue background
+    borderLeftColor: '#183A7C', // Solid blue left border
   },
   contentItemContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    paddingHorizontal: 20, // Move padding here for proper full-width effect
+    backgroundColor: 'transparent', // Ensure no background color
   },
   iconContainer: {
     position: 'relative',
     marginRight: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    width: 40,
+    height: 40,
+    backgroundColor: 'transparent', // Make icon background transparent
+    borderRadius: 10,
   },
   completedBadge: {
     position: 'absolute',
@@ -715,22 +817,90 @@ const styles = StyleSheet.create({
   contentMetaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
   },
   contentItemTitle: {
     fontSize: 16,
     fontFamily: 'Prompt-Medium',
     lineHeight: 22,
     color: '#1F2937',
-    marginBottom: 4,
   },
-  selectedContentItemTitle: {
-    color: '#183A7C',
-    fontFamily: 'Prompt-SemiBold',
-  },
+  selectedContentItemTitle: {},
   contentItemDuration: {
     fontSize: 12,
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
+  },
+  selectedContentItemDuration: {
+    color: '#6B7280', // Keep original gray color
+  },
+  // Fixed Bottom Progress Bar Styles
+  fixedBottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+  },
+  progressBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  circularProgress: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+  },
+  progressText: {
+    fontSize: 12,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+  },
+  timeProgress: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  timeProgressText: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Medium',
+    color: '#374151',
+  },
+  percentageProgress: {
+    alignItems: 'flex-end',
+    minWidth: 60,
+  },
+  percentageBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  percentageBar: {
+    width: 60,
+    height: 6,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 3,
+    marginBottom: 4,
+    overflow: 'hidden',
+  },
+  percentageFill: {
+    height: '100%',
+    backgroundColor: '#183A7C',
+    borderRadius: 3,
+  },
+  percentageText: {
+    fontSize: 12,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+    textAlign: 'center',
   },
 })
