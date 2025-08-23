@@ -210,8 +210,15 @@ export default function HomeScreen() {
     <CourseItem item={item} />
   )
 
+  const handleCurriculumPress = (item: Curriculum) => {
+    router.push({
+      pathname: '/curriculum-detail',
+      params: { id: item.id },
+    })
+  }
+
   const renderCurriculumItem = ({ item }: { item: Curriculum }) => (
-    <CurriculumItem item={item} />
+    <CurriculumItem item={item} onPress={handleCurriculumPress} />
   )
 
   return (

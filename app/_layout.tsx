@@ -217,6 +217,10 @@ export default function RootLayout() {
             <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
             <Stack.Screen name='courses' options={{ headerShown: false }} />
             <Stack.Screen name='curriculums' options={{ headerShown: false }} />
+            <Stack.Screen
+              name='curriculum-detail'
+              options={{ headerShown: false }}
+            />
             <Stack.Screen name='+not-found' />
           </Stack>
           <StatusBar style='dark' backgroundColor='transparent' translucent />

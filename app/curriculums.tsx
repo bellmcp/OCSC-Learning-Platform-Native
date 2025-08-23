@@ -64,9 +64,20 @@ export default function CurriculumsScreen() {
     return matchesSearch
   })
 
+  const handleCurriculumPress = (item: Curriculum) => {
+    router.push({
+      pathname: '/curriculum-detail',
+      params: { id: item.id },
+    })
+  }
+
   const renderCurriculumItem = ({ item }: { item: Curriculum }) => (
     <View style={styles.curriculumItemWrapper}>
-      <CurriculumItem item={item} variant='fullWidth' />
+      <CurriculumItem
+        item={item}
+        variant='fullWidth'
+        onPress={handleCurriculumPress}
+      />
     </View>
   )
 
