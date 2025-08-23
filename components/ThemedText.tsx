@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     lineHeight: 40,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   subtitle: {
     fontSize: 20,

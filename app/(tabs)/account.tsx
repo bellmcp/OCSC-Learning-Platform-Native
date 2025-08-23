@@ -10,11 +10,10 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 const mockUser = {
   id: 'USR-2024-001',
   name: 'วุฒิภัทร คำนวนสินธุ์',
-  email: 'alex.johnson@ocsc.go.th',
-  avatar:
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+  email: 'wutipat.k@ocsc.go.th',
+  avatar: 'https://bellmcp.work/img/Profile.jpg',
   role: 'Senior Developer',
-  department: 'Digital Innovation',
+  department: 'Software Engineer',
   joinDate: 'January 2023',
   completedCourses: 12,
   totalHours: 48,
@@ -65,21 +64,21 @@ export default function AccountScreen() {
         <ThemedView style={styles.statDivider} />
 
         <ThemedView style={styles.statItem}>
-          <IconSymbol name='clock' size={32} color={tintColor} />
+          <IconSymbol name='star.circle' size={32} color={tintColor} />
           <ThemedText
             type='title'
             style={[styles.statNumber, { color: tintColor }]}
           >
             {mockUser.totalHours}
           </ThemedText>
-          <ThemedText style={styles.statLabel}>ชั่วโมงที่เรียน</ThemedText>
+          <ThemedText style={styles.statLabel}>จำนวนเหรียญสะสม</ThemedText>
         </ThemedView>
       </ThemedView>
 
       {/* Profile Details */}
       <ThemedView style={styles.detailsContainer}>
         <ThemedText type='subtitle' style={styles.sectionTitle}>
-          รายละเอียดผู้ใช้งาน
+          ข้อมูลส่วนตัว
         </ThemedText>
 
         <ThemedView style={styles.detailItem}>
@@ -111,18 +110,42 @@ export default function AccountScreen() {
 
       {/* Action Buttons */}
       <ThemedView style={styles.actionsContainer}>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: tintColor }]}
-        >
-          <IconSymbol name='gear' size={20} color='white' />
-          <ThemedText style={styles.actionButtonText}>ตั้งค่า</ThemedText>
+        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
+          <IconSymbol name='printer' size={20} color={tintColor} />
+          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+            พิมพ์ประกาศนียบัตร ก.พ.
+          </ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
-          <IconSymbol name='arrow.right.square' size={20} color={tintColor} />
+          <IconSymbol name='doc.text' size={20} color={tintColor} />
           <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
-            ออกจากระบบ
+            ประวัติการเรียน
           </ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
+          <IconSymbol name='pencil' size={20} color={tintColor} />
+          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+            แก้ไขข้อมูลส่วนบุคคล
+          </ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
+          <IconSymbol name='lock' size={20} color={tintColor} />
+          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+            เปลี่ยนรหัสผ่าน
+          </ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            { backgroundColor: tintColor, marginTop: 16 },
+          ]}
+        >
+          <IconSymbol name='arrow.right.square' size={20} color='white' />
+          <ThemedText style={styles.actionButtonText}>ออกจากระบบ</ThemedText>
         </TouchableOpacity>
       </ThemedView>
     </ScrollView>
@@ -135,7 +158,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    paddingTop: 60,
+    paddingTop: 100,
     paddingBottom: 30,
     paddingHorizontal: 20,
   },
@@ -304,7 +327,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,
     shadowColor: '#000',
@@ -318,7 +341,7 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#0a7ea4',
   },
   actionButtonText: {

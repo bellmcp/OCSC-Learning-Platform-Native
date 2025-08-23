@@ -3,6 +3,7 @@ import { BottomNavigation, useTheme } from 'react-native-paper'
 import AccountScreen from './account'
 import ExploreScreen from './explore'
 import HomeScreen from './index'
+import SupportScreen from './support'
 
 const HomeRoute = () => <HomeScreen />
 
@@ -10,7 +11,7 @@ const SearchRoute = () => <ExploreScreen />
 
 const LearnRoute = () => <ExploreScreen />
 
-const HelpRoute = () => <ExploreScreen />
+const SupportRoute = () => <SupportScreen />
 
 const AccountRoute = () => <AccountScreen />
 
@@ -37,7 +38,7 @@ export default function TabLayout() {
       unfocusedIcon: 'play-outline',
     },
     {
-      key: 'help',
+      key: 'support',
       title: 'ช่วยเหลือ',
       focusedIcon: 'help-circle',
       unfocusedIcon: 'help-circle-outline',
@@ -54,7 +55,7 @@ export default function TabLayout() {
     home: HomeRoute,
     search: SearchRoute,
     learn: LearnRoute,
-    help: HelpRoute,
+    support: SupportRoute,
     account: AccountRoute,
   })
 
