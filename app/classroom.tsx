@@ -102,6 +102,7 @@ export default function ClassroomScreen() {
   )
 
   const contentStartTime = useRef<number | null>(null)
+  const scrollViewRef = useRef<ScrollView>(null)
 
   // Use hardcoded demo data
   const courseData = createDemoData()
@@ -254,6 +255,10 @@ export default function ClassroomScreen() {
     }
   }
 
+  const scrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true })
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
@@ -261,6 +266,7 @@ export default function ClassroomScreen() {
 
       {/* Main Content Container */}
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -289,6 +295,7 @@ export default function ClassroomScreen() {
           selectedContentId={selectedContentId}
           completedContents={completedContents}
           onContentSelect={handleContentSelect}
+          onScrollToTop={scrollToTop}
         />
       </ScrollView>
 

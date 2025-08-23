@@ -25,7 +25,7 @@ export function ClassroomHeader({ courseName }: ClassroomHeaderProps) {
         </ThemedText>
       </ThemedView>
       <TouchableOpacity style={styles.menuButton}>
-        <IconSymbol name='ellipsis' size={20} color={textColor} />
+        {/* <IconSymbol name='ellipsis' size={20} color={textColor} /> */}
       </TouchableOpacity>
     </ThemedView>
   )

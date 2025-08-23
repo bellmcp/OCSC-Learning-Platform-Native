@@ -12,6 +12,7 @@ interface ContentListProps {
   selectedContentId: number | null
   completedContents: Set<number>
   onContentSelect: (contentId: number) => void
+  onScrollToTop?: () => void
 }
 
 const formatDuration = (minutes?: number | null): string => {
@@ -42,6 +43,7 @@ export function ContentList({
   selectedContentId,
   completedContents,
   onContentSelect,
+  onScrollToTop,
 }: ContentListProps) {
   const renderContentItem = ({
     item,
@@ -64,7 +66,10 @@ export function ContentList({
               ? styles.selectedCompletedContentItem
               : styles.selectedContentItem),
         ]}
-        onPress={() => onContentSelect(item.id)}
+        onPress={() => {
+          onContentSelect(item.id)
+          onScrollToTop?.()
+        }}
       >
         <View style={styles.contentItemContainer}>
           <ThemedView style={styles.iconContainer}>
