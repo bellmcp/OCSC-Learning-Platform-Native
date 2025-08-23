@@ -83,114 +83,111 @@ export default function SupportScreen() {
     ])
   }
 
-  const renderContactForm = () => (
-    <>
-      <ThemedText type='title' style={styles.formTitle}>
-        ช่วยเหลือ
-      </ThemedText>
-      <ThemedView style={styles.formContainer}>
-        {/* Name Input */}
-        <ThemedView style={styles.inputGroup}>
-          <ThemedText style={styles.inputLabel}>
-            ปัญหาที่พบ <ThemedText style={styles.required}>*</ThemedText>
-          </ThemedText>
-          <TextInput
-            style={[
-              styles.textInput,
-              { color: textColor, borderColor: '#F0F0F0' },
-            ]}
-            value={formData.name}
-            onChangeText={(value: string) => handleInputChange('name', value)}
-            placeholder='กรุณากรอกปัญหาที่พบ'
-            placeholderTextColor={iconColor}
-          />
-        </ThemedView>
-
-        {/* Message Input */}
-        <ThemedView style={styles.inputGroup}>
-          <ThemedText style={styles.inputLabel}>รายละเอียด (ถ้ามี)</ThemedText>
-          <TextInput
-            style={[
-              styles.textAreaInput,
-              { color: textColor, borderColor: '#F0F0F0' },
-            ]}
-            value={formData.message}
-            onChangeText={(value: string) =>
-              handleInputChange('message', value)
-            }
-            placeholder='กรุณาระบุรายละเอียดปัญหา'
-            placeholderTextColor={iconColor}
-            multiline
-            numberOfLines={4}
-            textAlignVertical='top'
-          />
-        </ThemedView>
-
-        {/* Phone Input */}
-        <ThemedView style={styles.inputGroup}>
-          <ThemedText style={styles.inputLabel}>
-            ช่องทางติดต่อกลับ <ThemedText style={styles.required}>*</ThemedText>
-          </ThemedText>
-          <TextInput
-            style={[
-              styles.textInput,
-              { color: textColor, borderColor: '#F0F0F0' },
-            ]}
-            value={formData.phone}
-            onChangeText={(value: string) => handleInputChange('phone', value)}
-            placeholder='กรุณากรอกช่องทางติดต่อกลับ'
-            placeholderTextColor={iconColor}
-            keyboardType='phone-pad'
-          />
-          <ThemedText style={styles.fileHint}>
-            เบอร์โทรศัพท์ หรือ อีเมล และเวลาที่สะดวกติดต่อกลับ (ถ้ามี)
-          </ThemedText>
-        </ThemedView>
-
-        {/* File Upload */}
-        <ThemedView style={styles.inputGroup}>
-          <ThemedText style={styles.inputLabel}>ไฟล์แนบ (ถ้ามี)</ThemedText>
-          <ThemedText style={styles.fileHint}>
-            รองรับไฟล์ JPG, PNG, PDF, ZIP ขนาดไม่เกิน 20 MB
-          </ThemedText>
-
-          <TouchableOpacity
-            style={[styles.fileUploadButton, { borderColor: '#F0F0F0' }]}
-            onPress={handleFileUpload}
-          >
-            <IconSymbol name='paperclip' size={20} color={iconColor} />
-            <ThemedText style={[styles.fileUploadText, { color: iconColor }]}>
-              {selectedFile ? selectedFile.name : 'เลือกไฟล์...'}
-            </ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-      </ThemedView>
-      {/* Submit Button */}
-      <TouchableOpacity
-        style={[styles.submitButton, { backgroundColor: tintColor }]}
-        onPress={handleSubmit}
-      >
-        <IconSymbol name='paperplane' size={20} color='white' />
-        <ThemedText style={styles.submitButtonText}>ส่ง</ThemedText>
-      </TouchableOpacity>
-    </>
-  )
-
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
+      {/* Header */}
+      <ThemedView style={styles.header}>
+        <ThemedText type='title' style={styles.headerTitle}>
+          ช่วยเหลือ
+        </ThemedText>
+      </ThemedView>
+
       <ScrollView style={styles.scrollContainer}>
-        <ThemedView
-          style={[styles.mainContent, isTablet && styles.tabletLayout]}
-        >
-          {isTablet ? (
-            <ThemedView style={styles.desktopLayout}>
-              <ThemedView style={styles.formSection}>
-                {renderContactForm()}
-              </ThemedView>
+        <ThemedView style={styles.formSection}>
+          <ThemedView style={styles.formContainer}>
+            {/* Name Input */}
+            <ThemedView style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>
+                ปัญหาที่พบ <ThemedText style={styles.required}>*</ThemedText>
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.textInput,
+                  { color: textColor, borderColor: '#F0F0F0' },
+                ]}
+                value={formData.name}
+                onChangeText={(value: string) =>
+                  handleInputChange('name', value)
+                }
+                placeholder='กรุณากรอกปัญหาที่พบ'
+                placeholderTextColor={iconColor}
+              />
             </ThemedView>
-          ) : (
-            <ThemedView>{renderContactForm()}</ThemedView>
-          )}
+
+            {/* Message Input */}
+            <ThemedView style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>
+                รายละเอียด (ถ้ามี)
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.textAreaInput,
+                  { color: textColor, borderColor: '#F0F0F0' },
+                ]}
+                value={formData.message}
+                onChangeText={(value: string) =>
+                  handleInputChange('message', value)
+                }
+                placeholder='กรุณาระบุรายละเอียดปัญหา'
+                placeholderTextColor={iconColor}
+                multiline
+                numberOfLines={4}
+                textAlignVertical='top'
+              />
+            </ThemedView>
+
+            {/* Phone Input */}
+            <ThemedView style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>
+                ช่องทางติดต่อกลับ{' '}
+                <ThemedText style={styles.required}>*</ThemedText>
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.textInput,
+                  { color: textColor, borderColor: '#F0F0F0' },
+                ]}
+                value={formData.phone}
+                onChangeText={(value: string) =>
+                  handleInputChange('phone', value)
+                }
+                placeholder='กรุณากรอกช่องทางติดต่อกลับ'
+                placeholderTextColor={iconColor}
+                keyboardType='phone-pad'
+              />
+              <ThemedText style={styles.fileHint}>
+                เบอร์โทรศัพท์ หรือ อีเมล และเวลาที่สะดวกติดต่อกลับ (ถ้ามี)
+              </ThemedText>
+            </ThemedView>
+
+            {/* File Upload */}
+            <ThemedView style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>ไฟล์แนบ (ถ้ามี)</ThemedText>
+              <ThemedText style={styles.fileHint}>
+                รองรับไฟล์ JPG, PNG, PDF, ZIP ขนาดไม่เกิน 20 MB
+              </ThemedText>
+
+              <TouchableOpacity
+                style={[styles.fileUploadButton, { borderColor: '#F0F0F0' }]}
+                onPress={handleFileUpload}
+              >
+                <IconSymbol name='paperclip' size={20} color={iconColor} />
+                <ThemedText
+                  style={[styles.fileUploadText, { color: iconColor }]}
+                >
+                  {selectedFile ? selectedFile.name : 'เลือกไฟล์...'}
+                </ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
+          </ThemedView>
+          {/* Submit Button */}
+          <TouchableOpacity
+            style={[styles.submitButton, { backgroundColor: tintColor }]}
+            onPress={handleSubmit}
+          >
+            <IconSymbol name='paperplane' size={20} color='white' />
+            <ThemedText style={styles.submitButtonText}>ส่ง</ThemedText>
+          </TouchableOpacity>
         </ThemedView>
       </ScrollView>
       <StatusBarGradient />
@@ -206,7 +203,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainContent: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    paddingTop: Platform.OS === 'ios' ? 80 : 20,
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
@@ -229,6 +226,9 @@ const styles = StyleSheet.create({
 
   // Form Styles
   formContainer: {
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    marginBottom: 20,
     padding: 20,
     borderRadius: 16,
     shadowColor: '#000',
@@ -239,12 +239,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
-    marginBottom: isTablet ? 0 : 20,
   },
-  formTitle: {
-    marginTop: 24,
-    marginBottom: 24,
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 80 : 40,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  headerTitle: {
     textAlign: 'center',
+    marginTop: 24,
+    marginBottom: 0,
   },
   inputGroup: {
     marginBottom: 20,
@@ -312,6 +316,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    marginHorizontal: 20,
+    marginBottom: 40,
   },
   submitButtonText: {
     fontSize: 16,
