@@ -1,9 +1,24 @@
 import { Image } from 'expo-image'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 
+// Original interface for real curriculum data
+export interface RealCurriculum {
+  id: number
+  code: string
+  name: string
+  learningObjective: string
+  learningTopic: string
+  targetGroup: string
+  assessment: string
+  thumbnail: string
+  ocscCurriculumCoursePair: any[]
+  ocscCurriculumRegistration: any[]
+}
+
+// Interface for display purposes
 export interface Curriculum {
   id: string
   title: string
@@ -23,26 +38,28 @@ export default function CurriculumItem({ item, onPress }: CurriculumItemProps) {
       style={styles.curriculumCard}
       onPress={() => onPress?.(item)}
     >
-      <Image
-        source={{ uri: item.image }}
-        style={styles.curriculumImage}
-        contentFit='cover'
-      />
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: item.image }}
+          style={styles.curriculumImage}
+          contentFit='cover'
+        />
+      </View>
       <ThemedView style={styles.curriculumContent}>
+        <ThemedText style={styles.curriculumType}>หลักสูตร</ThemedText>
         <ThemedText
           type='defaultSemiBold'
           style={styles.curriculumTitle}
-          numberOfLines={2}
+          numberOfLines={1}
         >
           {item.title}
         </ThemedText>
-        <ThemedText style={styles.curriculumId}>{item.id}</ThemedText>
-        <ThemedText style={styles.curriculumDescription} numberOfLines={1}>
+        <ThemedText style={styles.curriculumId} numberOfLines={1}>
+          {item.id}
+        </ThemedText>
+        <ThemedText style={styles.curriculumDescription} numberOfLines={3}>
           {item.description}
         </ThemedText>
-        <ThemedView style={styles.curriculumFooter}>
-          <ThemedText style={styles.curriculumType}>{item.type}</ThemedText>
-        </ThemedView>
       </ThemedView>
     </TouchableOpacity>
   )
@@ -50,7 +67,7 @@ export default function CurriculumItem({ item, onPress }: CurriculumItemProps) {
 
 const styles = StyleSheet.create({
   curriculumCard: {
-    width: 260,
+    width: 225,
     marginRight: 16,
     backgroundColor: 'white',
     borderRadius: 12,
@@ -58,9 +75,13 @@ const styles = StyleSheet.create({
     borderColor: '#F0F0F0',
     overflow: 'hidden',
   },
+  imageContainer: {
+    borderLeftWidth: 8,
+    borderLeftColor: 'rgb(255, 193, 7)',
+  },
   curriculumImage: {
     width: '100%',
-    height: 130,
+    height: 200,
   },
   curriculumContent: {
     padding: 16,
@@ -68,28 +89,26 @@ const styles = StyleSheet.create({
   },
   curriculumTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
-    lineHeight: 22,
+    fontWeight: 'medium',
+    marginBottom: 0,
   },
   curriculumId: {
     fontSize: 14,
-    color: '#6B7280',
     marginBottom: 8,
   },
   curriculumDescription: {
     fontSize: 14,
     lineHeight: 20,
-    color: '#374151',
-    marginBottom: 12,
+    color: '#6B7280',
     flex: 1,
   },
   curriculumFooter: {
     marginTop: 'auto',
   },
   curriculumType: {
-    fontSize: 12,
-    color: '#7C3AED',
-    fontWeight: '600',
+    fontSize: 14,
+    color: '#ffc107',
+    fontFamily: 'Prompt-SemiBold',
+    marginBottom: 4,
   },
 })

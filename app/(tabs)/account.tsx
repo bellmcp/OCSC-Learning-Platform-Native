@@ -70,7 +70,7 @@ export default function AccountScreen() {
               {mockUser.completedCourses}
             </ThemedText>
             <ThemedText style={styles.statLabel}>
-              หลักสูตรที่เรียนจบแล้ว
+              เนื้อหาที่เรียนจบแล้ว
             </ThemedText>
           </ThemedView>
 

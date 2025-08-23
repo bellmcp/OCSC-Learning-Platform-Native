@@ -8,154 +8,76 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
-import CourseItem, { type Course } from '@/components/CourseItem'
-import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
+import CourseItem, {
+  type Course,
+  type RealCourse,
+} from '@/components/CourseItem'
+import CurriculumItem, {
+  type Curriculum,
+  type RealCurriculum,
+} from '@/components/CurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
+import { courseCategories } from '@/constants/CourseCategories'
+import { courses } from '@/constants/Courses'
+import { curriculums } from '@/constants/Curriculums'
 import { useThemeColor } from '@/hooks/useThemeColor'
 
-// Mock data for courses
-const mockCourses: Course[] = [
-  {
-    id: 'DS26',
-    title: 'AI Basic',
-    description:
-      'ในโลกส่องรันขิง คนเราเคยพัฒนะ AI และ AI นั้นมีบทบาทไหนทำนำยำลังข้างม AI ดวย หลักแกนป้ในทำอยำสมัยไตไอ AI หำกชลกกก',
-    image:
-      'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=300&h=200&fit=crop',
-    category: 'AI',
-    level: 'ทักษะดีดัล',
-    badge: 'Microsoft',
-  },
-  {
-    id: 'DS27',
-    title: 'AI Skills for All',
-    description:
-      'หลักสูตรเทคโนโลยี AI สำหรับการพัฒนาศักยภาพของ AI และเพื่อเป็นพื้นฐานไปสู่เยติม้านำหำป้หำเกเก',
-    image:
-      'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=300&h=200&fit=crop',
-    category: 'AI',
-    level: 'ทักษะดีดัล',
-    badge: 'Microsoft',
-  },
-  {
-    id: 'KD56',
-    title: 'ความรู้เกี่ยวกับการบริหารเทะ',
-    description:
-      'วิชาวำส้านีกับการเก้าลกการทำยสกทำนด์ ก็วิปยำก้ปรดับลง ช้านั้งดังรูป',
-    image:
-      'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop',
-    category: 'ทักษะการแก้ปัญหา',
-    level: 'ทักษะขั้นกลาง',
-    badge: 'กรอบผลลัพธ์การปฏิรังม',
-  },
-  {
-    id: 'KD59',
-    title: 'ความรู้เกี่ยวกับการเดินเนิน',
-    description:
-      'วิชาเคลำส้านทำเย้ลดลำกส์ ระบบยำย ผายำยำดื้อ ช่วยไป รายยำสี ขสำเสำกำร',
-    image:
-      'https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=200&fit=crop',
-    category: 'ทักษะการเดินทาง',
-    level: 'ทักษะสำหรับส่วนรวม',
-    badge: 'การพัฒนาองค์กร',
-  },
-  {
-    id: 'DS01',
-    title: 'Data Visualization',
-    description: 'วิชาป่วยการส่ายทำลองการกำ Data Visualization ได้',
-    image:
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&h=200&fit=crop',
-    category: 'Data Science',
-    level: 'ทักษะดีดัล',
-    badge: 'ทักษะดีดัล',
-  },
-  {
-    id: 'DS02',
-    title: 'Data Analysis Foundation',
-    description:
-      'เพิ่นความสากอย่ามใจ Data Analysis Essential และก็เพิ่นแส่งการสอยสืน',
-    image:
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&h=200&fit=crop',
-    category: 'Data Science',
-    level: 'ทักษะขั้นต้น',
-    badge: 'ทักษะดีดัล',
-  },
-  {
-    id: 'CS101',
-    title: 'Programming Fundamentals',
-    description: 'หลักสูตรพื้นฐานการเขียนโปรแกรมสำหรับผู้เริ่มต้น',
-    image:
-      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=200&fit=crop',
-    category: 'Programming',
-    level: 'ทักษะขั้นต้น',
-    badge: 'ทักษะดีดัล',
-  },
-  {
-    id: 'SEC01',
-    title: 'ความมันคงปลอดภัยสื่อ',
-    description: 'เพิ่นชำนาบลนะการคพำนการไลคนใน ส้าที่เข้าไหศไสานั่งสั่ง',
-    image:
-      'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=300&h=200&fit=crop',
-    category: 'Security',
-    level: 'ทักษะขั้นกลาง',
-    badge: 'ทักษะดีดัล',
-  },
-]
+// Utility function to convert real course data to display format
+const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
+  const category = courseCategories.find(
+    (cat) => cat.id === realCourse.courseCategoryId
+  )
+  const cleanDescription =
+    realCourse.learningObjective
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/\n/g, ' ') // Replace newlines with spaces
+      .trim()
+      .substring(0, 100) + '...' // Limit length
 
-// Mock data for curriculums
-const mockCurriculums: Curriculum[] = [
-  {
-    id: '00M',
-    title: 'ฝึกอบรมข้าราชการบรรจุใหม่',
-    description: 'ในหลักสูตรนี้จะในส่งกระทรวง',
-    image:
-      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=200&fit=crop',
-    type: 'หลักสูตร',
-  },
-  {
-    id: 'MPM',
-    title: 'การบริหารจัดการทรัพยากรแนวใหม่',
-    description: 'หลักสูตรการบริหารทรัพยากรบุคคลแนวใหม่',
-    image:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop',
-    type: 'mini MPM',
-  },
-  {
-    id: 'MBA',
-    title: 'การบริหารจัดการธุรกิจแนวใหม่',
-    description: 'หลักสูตรการบริหารธุรกิจสำหรับผู้บริหาร',
-    image:
-      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=300&h=200&fit=crop',
-    type: 'mini MBA',
-  },
-  {
-    id: 'LEAD01',
-    title: 'การพัฒนาภาวะผู้นำ',
-    description: 'หลักสูตรพัฒนาทักษะความเป็นผู้นำในองค์กร',
-    image:
-      'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=300&h=200&fit=crop',
-    type: 'หลักสูตร',
-  },
-  {
-    id: 'INNO01',
-    title: 'นวัตกรรมและความคิดสร้างสรรค์',
-    description: 'พัฒนาทักษะการคิดเชิงนวัตกรรม',
-    image:
-      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&h=200&fit=crop',
-    type: 'หลักสูตร',
-  },
-  {
-    id: 'COMM01',
-    title: 'การสื่อสารเชิงกลยุทธ์',
-    description: 'ทักษะการสื่อสารที่มีประสิทธิภาพ',
-    image:
-      'https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=300&h=200&fit=crop',
-    type: 'หลักสูตร',
-  },
-]
+  return {
+    id: realCourse.code,
+    title: realCourse.name,
+    description: cleanDescription,
+    image: realCourse.thumbnail,
+    category: category?.courseCategory || 'ทั่วไป',
+    courseCategoryId: realCourse.courseCategoryId,
+    level: 'ทักษะขั้นพื้นฐาน',
+    badge: category?.courseCategory || 'ทั่วไป',
+  }
+}
+
+// Utility function to convert real curriculum data to display format
+const convertCurriculumToDisplayFormat = (
+  realCurriculum: RealCurriculum
+): Curriculum => {
+  const cleanDescription =
+    realCurriculum.learningObjective
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/\n/g, ' ') // Replace newlines with spaces
+      .trim()
+      .substring(0, 80) + '...' // Limit length
+
+  return {
+    id: realCurriculum.code,
+    title: realCurriculum.name,
+    description: cleanDescription,
+    image: realCurriculum.thumbnail,
+    type: realCurriculum.code.includes('mini')
+      ? realCurriculum.code
+      : 'หลักสูตร',
+  }
+}
+
+// Convert real course data for search
+const mockCourses: Course[] = courses.map(convertCourseToDisplayFormat)
+
+// Convert real curriculum data for search
+const mockCurriculums: Curriculum[] = curriculums.map(
+  convertCurriculumToDisplayFormat
+)
 
 export default function SearchScreen() {
   const backgroundColor = useThemeColor({}, 'background')

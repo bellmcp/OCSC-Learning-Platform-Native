@@ -151,6 +151,9 @@ export default function SupportScreen() {
                 ช่องทางติดต่อกลับ{' '}
                 <ThemedText style={styles.required}>*</ThemedText>
               </ThemedText>
+              <ThemedText style={styles.fileHint}>
+                เบอร์โทรศัพท์ หรือ อีเมล และเวลาที่สะดวกติดต่อกลับ (ถ้ามี)
+              </ThemedText>
               <TextInput
                 style={[
                   styles.textInput,
@@ -164,9 +167,6 @@ export default function SupportScreen() {
                 placeholderTextColor={iconColor}
                 keyboardType='phone-pad'
               />
-              <ThemedText style={styles.fileHint}>
-                เบอร์โทรศัพท์ หรือ อีเมล และเวลาที่สะดวกติดต่อกลับ (ถ้ามี)
-              </ThemedText>
             </ThemedView>
 
             {/* File Upload */}
