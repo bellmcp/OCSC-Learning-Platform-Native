@@ -1,4 +1,5 @@
 import { Image } from 'expo-image'
+import { router } from 'expo-router'
 import React, { useContext, useRef, useState } from 'react'
 import {
   Alert,
@@ -67,6 +68,10 @@ export default function AccountScreen() {
         onPress: () => setIsLoggedIn(false),
       },
     ])
+  }
+
+  const handlePrintCertificate = () => {
+    router.push('/certificate')
   }
 
   // Login Form Component
@@ -303,6 +308,7 @@ export default function AccountScreen() {
         <ThemedView style={styles.actionsContainer}>
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
+            onPress={handlePrintCertificate}
           >
             <IconSymbol name='printer' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
