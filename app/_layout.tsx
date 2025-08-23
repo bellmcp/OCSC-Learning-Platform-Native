@@ -13,6 +13,7 @@ import {
 import 'react-native-reanimated'
 
 import { useColorScheme } from '@/hooks/useColorScheme'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 const theme = {
   ...DefaultReactNativePaperTheme,
@@ -207,14 +208,18 @@ export default function RootLayout() {
   }
 
   return (
-    <PaperProvider theme={theme}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-          <Stack.Screen name='+not-found' />
-        </Stack>
-        <StatusBar style='auto' />
-      </ThemeProvider>
-    </PaperProvider>
+    <SafeAreaProvider>
+      <PaperProvider theme={theme}>
+        <ThemeProvider
+          value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+        >
+          <Stack>
+            <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+            <Stack.Screen name='+not-found' />
+          </Stack>
+          <StatusBar style='dark' backgroundColor='transparent' translucent />
+        </ThemeProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
   )
 }

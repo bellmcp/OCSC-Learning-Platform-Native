@@ -11,6 +11,7 @@ import {
 
 import CourseItem, { type Course } from '@/components/CourseItem'
 import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
+import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
@@ -240,137 +241,141 @@ export default function HomeScreen() {
   )
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor }]}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Header */}
-      <ThemedView style={styles.header}>
-        <ThemedText type='title' style={styles.headerTitle}>
-          หน้าหลัก
-        </ThemedText>
-      </ThemedView>
-
-      {/* Banner Carousel */}
-      <ThemedView style={styles.section}>
-        <FlatList
-          ref={bannerFlatListRef}
-          data={bannerData}
-          renderItem={renderBannerItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled={true}
-          snapToInterval={screenWidth - 24}
-          snapToAlignment='center'
-          decelerationRate='fast'
-          bounces={false}
-          onMomentumScrollEnd={handleBannerScroll}
-          onScrollEndDrag={handleBannerScroll}
-          contentContainerStyle={styles.carouselContainer}
-          getItemLayout={(data, index) => ({
-            length: screenWidth - 24,
-            offset: (screenWidth - 24) * index,
-            index,
-          })}
-        />
-        <ThemedView style={styles.dotsContainer}>
-          {bannerData.map((_, index) => (
-            <ThemedView
-              key={index}
-              style={[
-                styles.dot,
-                index === currentBannerIndex && styles.activeDot,
-              ]}
-            />
-          ))}
-        </ThemedView>
-      </ThemedView>
-
-      {/* Courses Section */}
-      <ThemedView style={styles.section}>
-        <ThemedView style={styles.sectionHeader}>
-          <ThemedText type='subtitle' style={styles.sectionTitle}>
-            รายการแนะนำ
+    <ThemedView style={[styles.container, { backgroundColor }]}>
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <ThemedView style={styles.header}>
+          <ThemedText type='title' style={styles.headerTitle}>
+            หน้าหลัก
           </ThemedText>
-          <TouchableOpacity style={styles.seeAllButton}>
-            <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
-              ดูทั้งหมด
-            </ThemedText>
-            <IconSymbol
-              name='chevron.right'
-              size={18}
-              color={tintColor}
-              style={styles.seeAllIcon}
-            />
-          </TouchableOpacity>
         </ThemedView>
-        <FlatList
-          data={coursesData}
-          renderItem={renderCourseItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.carouselContainer}
-        />
-      </ThemedView>
 
-      {/* Recommended Section */}
-      <ThemedView style={styles.section}>
-        <ThemedView style={styles.sectionHeader}>
-          <ThemedText type='subtitle' style={styles.sectionTitle}>
-            รายวิชา
-          </ThemedText>
-          <TouchableOpacity style={styles.seeAllButton}>
-            <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
-              ดูทั้งหมด
-            </ThemedText>
-            <IconSymbol
-              name='chevron.right'
-              size={18}
-              color={tintColor}
-              style={styles.seeAllIcon}
-            />
-          </TouchableOpacity>
+        {/* Banner Carousel */}
+        <ThemedView style={styles.section}>
+          <FlatList
+            ref={bannerFlatListRef}
+            data={bannerData}
+            renderItem={renderBannerItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled={true}
+            snapToInterval={screenWidth - 24}
+            snapToAlignment='center'
+            decelerationRate='fast'
+            bounces={false}
+            onMomentumScrollEnd={handleBannerScroll}
+            onScrollEndDrag={handleBannerScroll}
+            contentContainerStyle={styles.carouselContainer}
+            getItemLayout={(data, index) => ({
+              length: screenWidth - 24,
+              offset: (screenWidth - 24) * index,
+              index,
+            })}
+          />
+          <ThemedView style={styles.dotsContainer}>
+            {bannerData.map((_, index) => (
+              <ThemedView
+                key={index}
+                style={[
+                  styles.dot,
+                  index === currentBannerIndex && styles.activeDot,
+                ]}
+              />
+            ))}
+          </ThemedView>
         </ThemedView>
-        <FlatList
-          data={recommendedData}
-          renderItem={renderRecommendedItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.carouselContainer}
-        />
-      </ThemedView>
 
-      {/* Curriculum Section */}
-      <ThemedView style={styles.section}>
-        <ThemedView style={styles.sectionHeader}>
-          <ThemedText type='subtitle' style={styles.sectionTitle}>
-            หลักสูตร
-          </ThemedText>
-          <TouchableOpacity style={styles.seeAllButton}>
-            <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
-              ดูทั้งหมด
+        {/* Courses Section */}
+        <ThemedView style={styles.section}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              รายการแนะนำ
             </ThemedText>
-            <IconSymbol
-              name='chevron.right'
-              size={18}
-              color={tintColor}
-              style={styles.seeAllIcon}
-            />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.seeAllButton}>
+              <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
+                ดูทั้งหมด
+              </ThemedText>
+              <IconSymbol
+                name='chevron.right'
+                size={18}
+                color={tintColor}
+                style={styles.seeAllIcon}
+              />
+            </TouchableOpacity>
+          </ThemedView>
+          <FlatList
+            data={coursesData}
+            renderItem={renderCourseItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.carouselContainer}
+          />
         </ThemedView>
-        <FlatList
-          data={curriculumData}
-          renderItem={renderCurriculumItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.carouselContainer}
-        />
-      </ThemedView>
-    </ScrollView>
+
+        {/* Recommended Section */}
+        <ThemedView style={styles.section}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              รายวิชา
+            </ThemedText>
+            <TouchableOpacity style={styles.seeAllButton}>
+              <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
+                ดูทั้งหมด
+              </ThemedText>
+              <IconSymbol
+                name='chevron.right'
+                size={18}
+                color={tintColor}
+                style={styles.seeAllIcon}
+              />
+            </TouchableOpacity>
+          </ThemedView>
+          <FlatList
+            data={recommendedData}
+            renderItem={renderRecommendedItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.carouselContainer}
+          />
+        </ThemedView>
+
+        {/* Curriculum Section */}
+        <ThemedView style={styles.section}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              หลักสูตร
+            </ThemedText>
+            <TouchableOpacity style={styles.seeAllButton}>
+              <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
+                ดูทั้งหมด
+              </ThemedText>
+              <IconSymbol
+                name='chevron.right'
+                size={18}
+                color={tintColor}
+                style={styles.seeAllIcon}
+              />
+            </TouchableOpacity>
+          </ThemedView>
+          <FlatList
+            data={curriculumData}
+            renderItem={renderCurriculumItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.carouselContainer}
+          />
+        </ThemedView>
+      </ScrollView>
+      <StatusBarGradient />
+    </ThemedView>
   )
 }
 
@@ -378,8 +383,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingTop: 0, // Allow content to start from the very top
+  },
+  testContent: {
+    backgroundColor: '#FF6B6B', // Red background to make it visible
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    marginTop: 0,
+  },
+  testText: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    paddingTop: Platform.OS === 'ios' ? 80 : 40,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },

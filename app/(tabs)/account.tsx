@@ -1,6 +1,7 @@
 import { Image } from 'expo-image'
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 
+import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
@@ -25,135 +26,153 @@ export default function AccountScreen() {
   const iconColor = useThemeColor({}, 'icon')
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor }]}>
-      {/* Header Section */}
-      <ThemedView style={styles.header}>
-        <ThemedView style={styles.avatarContainer}>
-          <Image
-            source={{ uri: mockUser.avatar }}
-            style={styles.avatar}
-            contentFit='cover'
-          />
-        </ThemedView>
-
-        <ThemedView style={styles.userInfo}>
-          <ThemedText type='title' style={styles.userName}>
-            {mockUser.name}
-          </ThemedText>
-          <ThemedText style={[styles.userRole, { color: tintColor }]}>
-            1909802321001
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
-
-      {/* Stats Section */}
-      <ThemedView style={styles.statsContainer}>
-        <ThemedView style={styles.statItem}>
-          <IconSymbol name='book.closed' size={32} color={tintColor} />
-          <ThemedText
-            type='title'
-            style={[styles.statNumber, { color: tintColor }]}
-          >
-            {mockUser.completedCourses}
-          </ThemedText>
-          <ThemedText style={styles.statLabel}>
-            หลักสูตรที่เรียนจบแล้ว
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedView style={styles.statDivider} />
-
-        <ThemedView style={styles.statItem}>
-          <IconSymbol name='star.circle' size={32} color={tintColor} />
-          <ThemedText
-            type='title'
-            style={[styles.statNumber, { color: tintColor }]}
-          >
-            {mockUser.totalHours}
-          </ThemedText>
-          <ThemedText style={styles.statLabel}>จำนวนเหรียญสะสม</ThemedText>
-        </ThemedView>
-      </ThemedView>
-
-      {/* Profile Details */}
-      <ThemedView style={styles.detailsContainer}>
-        <ThemedText type='subtitle' style={styles.sectionTitle}>
-          ข้อมูลส่วนตัว
-        </ThemedText>
-
-        <ThemedView style={styles.detailItem}>
-          <IconSymbol name='calendar' size={20} color={iconColor} />
-          <ThemedView style={styles.detailContent}>
-            <ThemedText style={styles.detailLabel}>สมัครสมาชิกเมื่อ</ThemedText>
-            <ThemedText type='defaultSemiBold'>{mockUser.joinDate}</ThemedText>
+    <ThemedView style={[styles.container, { backgroundColor }]}>
+      <ScrollView style={styles.scrollContainer}>
+        {/* Header Section */}
+        <ThemedView style={styles.header}>
+          <ThemedView style={styles.avatarContainer}>
+            <Image
+              source={{ uri: mockUser.avatar }}
+              style={styles.avatar}
+              contentFit='cover'
+            />
           </ThemedView>
-        </ThemedView>
 
-        <ThemedView style={styles.detailItem}>
-          <IconSymbol name='envelope' size={20} color={iconColor} />
-          <ThemedView style={styles.detailContent}>
-            <ThemedText style={styles.detailLabel}>อีเมล</ThemedText>
-            <ThemedText type='defaultSemiBold'>{mockUser.email}</ThemedText>
-          </ThemedView>
-        </ThemedView>
-
-        <ThemedView style={styles.detailItem}>
-          <IconSymbol name='building.2' size={20} color={iconColor} />
-          <ThemedView style={styles.detailContent}>
-            <ThemedText style={styles.detailLabel}>หน่วยงาน</ThemedText>
-            <ThemedText type='defaultSemiBold'>
-              {mockUser.department}
+          <ThemedView style={styles.userInfo}>
+            <ThemedText type='title' style={styles.userName}>
+              {mockUser.name}
+            </ThemedText>
+            <ThemedText style={[styles.userRole, { color: tintColor }]}>
+              1909802321001
             </ThemedText>
           </ThemedView>
         </ThemedView>
-      </ThemedView>
 
-      {/* Action Buttons */}
-      <ThemedView style={styles.actionsContainer}>
-        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
-          <IconSymbol name='printer' size={20} color={tintColor} />
-          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
-            พิมพ์ประกาศนียบัตร ก.พ.
+        {/* Stats Section */}
+        <ThemedView style={styles.statsContainer}>
+          <ThemedView style={styles.statItem}>
+            <IconSymbol name='book.closed' size={32} color={tintColor} />
+            <ThemedText
+              type='title'
+              style={[styles.statNumber, { color: tintColor }]}
+            >
+              {mockUser.completedCourses}
+            </ThemedText>
+            <ThemedText style={styles.statLabel}>
+              หลักสูตรที่เรียนจบแล้ว
+            </ThemedText>
+          </ThemedView>
+
+          <ThemedView style={styles.statDivider} />
+
+          <ThemedView style={styles.statItem}>
+            <IconSymbol name='star.circle' size={32} color={tintColor} />
+            <ThemedText
+              type='title'
+              style={[styles.statNumber, { color: tintColor }]}
+            >
+              {mockUser.totalHours}
+            </ThemedText>
+            <ThemedText style={styles.statLabel}>จำนวนเหรียญสะสม</ThemedText>
+          </ThemedView>
+        </ThemedView>
+
+        {/* Profile Details */}
+        <ThemedView style={styles.detailsContainer}>
+          <ThemedText type='subtitle' style={styles.sectionTitle}>
+            ข้อมูลส่วนตัว
           </ThemedText>
-        </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
-          <IconSymbol name='doc.text' size={20} color={tintColor} />
-          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
-            ประวัติการเรียน
-          </ThemedText>
-        </TouchableOpacity>
+          <ThemedView style={styles.detailItem}>
+            <IconSymbol name='calendar' size={20} color={iconColor} />
+            <ThemedView style={styles.detailContent}>
+              <ThemedText style={styles.detailLabel}>
+                สมัครสมาชิกเมื่อ
+              </ThemedText>
+              <ThemedText type='defaultSemiBold'>
+                {mockUser.joinDate}
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
 
-        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
-          <IconSymbol name='pencil' size={20} color={tintColor} />
-          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
-            แก้ไขข้อมูลส่วนบุคคล
-          </ThemedText>
-        </TouchableOpacity>
+          <ThemedView style={styles.detailItem}>
+            <IconSymbol name='envelope' size={20} color={iconColor} />
+            <ThemedView style={styles.detailContent}>
+              <ThemedText style={styles.detailLabel}>อีเมล</ThemedText>
+              <ThemedText type='defaultSemiBold'>{mockUser.email}</ThemedText>
+            </ThemedView>
+          </ThemedView>
 
-        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
-          <IconSymbol name='lock' size={20} color={tintColor} />
-          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
-            เปลี่ยนรหัสผ่าน
-          </ThemedText>
-        </TouchableOpacity>
+          <ThemedView style={styles.detailItem}>
+            <IconSymbol name='building.2' size={20} color={iconColor} />
+            <ThemedView style={styles.detailContent}>
+              <ThemedText style={styles.detailLabel}>หน่วยงาน</ThemedText>
+              <ThemedText type='defaultSemiBold'>
+                {mockUser.department}
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
+        </ThemedView>
 
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: tintColor, marginTop: 16 },
-          ]}
-        >
-          <IconSymbol name='arrow.right.square' size={20} color='white' />
-          <ThemedText style={styles.actionButtonText}>ออกจากระบบ</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-    </ScrollView>
+        {/* Action Buttons */}
+        <ThemedView style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+          >
+            <IconSymbol name='printer' size={20} color={tintColor} />
+            <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+              พิมพ์ประกาศนียบัตร ก.พ.
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+          >
+            <IconSymbol name='doc.text' size={20} color={tintColor} />
+            <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+              ประวัติการเรียน
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+          >
+            <IconSymbol name='pencil' size={20} color={tintColor} />
+            <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+              แก้ไขข้อมูลส่วนบุคคล
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+          >
+            <IconSymbol name='lock' size={20} color={tintColor} />
+            <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+              เปลี่ยนรหัสผ่าน
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              { backgroundColor: tintColor, marginTop: 16 },
+            ]}
+          >
+            <IconSymbol name='arrow.right.square' size={20} color='white' />
+            <ThemedText style={styles.actionButtonText}>ออกจากระบบ</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+      </ScrollView>
+      <StatusBarGradient />
+    </ThemedView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollContainer: {
     flex: 1,
   },
   header: {

@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
+import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
@@ -176,24 +177,32 @@ export default function SupportScreen() {
   )
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor }]}>
-      <ThemedView style={[styles.mainContent, isTablet && styles.tabletLayout]}>
-        {isTablet ? (
-          <ThemedView style={styles.desktopLayout}>
-            <ThemedView style={styles.formSection}>
-              {renderContactForm()}
+    <ThemedView style={[styles.container, { backgroundColor }]}>
+      <ScrollView style={styles.scrollContainer}>
+        <ThemedView
+          style={[styles.mainContent, isTablet && styles.tabletLayout]}
+        >
+          {isTablet ? (
+            <ThemedView style={styles.desktopLayout}>
+              <ThemedView style={styles.formSection}>
+                {renderContactForm()}
+              </ThemedView>
             </ThemedView>
-          </ThemedView>
-        ) : (
-          <ThemedView>{renderContactForm()}</ThemedView>
-        )}
-      </ThemedView>
-    </ScrollView>
+          ) : (
+            <ThemedView>{renderContactForm()}</ThemedView>
+          )}
+        </ThemedView>
+      </ScrollView>
+      <StatusBarGradient />
+    </ThemedView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollContainer: {
     flex: 1,
   },
   mainContent: {

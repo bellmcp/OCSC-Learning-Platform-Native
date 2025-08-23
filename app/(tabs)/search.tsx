@@ -10,6 +10,7 @@ import {
 
 import CourseItem, { type Course } from '@/components/CourseItem'
 import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
+import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
@@ -358,6 +359,7 @@ export default function SearchScreen() {
           </ThemedView>
         )}
       </ScrollView>
+      <StatusBarGradient />
     </ThemedView>
   )
 }
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    paddingTop: Platform.OS === 'ios' ? 80 : 40,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
