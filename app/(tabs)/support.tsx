@@ -97,7 +97,7 @@ export default function SupportScreen() {
           <TextInput
             style={[
               styles.textInput,
-              { color: textColor, borderColor: iconColor + '40' },
+              { color: textColor, borderColor: '#F0F0F0' },
             ]}
             value={formData.name}
             onChangeText={(value: string) => handleInputChange('name', value)}
@@ -112,7 +112,7 @@ export default function SupportScreen() {
           <TextInput
             style={[
               styles.textAreaInput,
-              { color: textColor, borderColor: iconColor + '40' },
+              { color: textColor, borderColor: '#F0F0F0' },
             ]}
             value={formData.message}
             onChangeText={(value: string) =>
@@ -134,7 +134,7 @@ export default function SupportScreen() {
           <TextInput
             style={[
               styles.textInput,
-              { color: textColor, borderColor: iconColor + '40' },
+              { color: textColor, borderColor: '#F0F0F0' },
             ]}
             value={formData.phone}
             onChangeText={(value: string) => handleInputChange('phone', value)}
@@ -155,12 +155,12 @@ export default function SupportScreen() {
           </ThemedText>
 
           <TouchableOpacity
-            style={[styles.fileUploadButton, { borderColor: iconColor }]}
+            style={[styles.fileUploadButton, { borderColor: '#F0F0F0' }]}
             onPress={handleFileUpload}
           >
             <IconSymbol name='paperclip' size={20} color={iconColor} />
             <ThemedText style={[styles.fileUploadText, { color: iconColor }]}>
-              {selectedFile ? selectedFile.name : 'เลือกไฟล์'}
+              {selectedFile ? selectedFile.name : 'เลือกไฟล์...'}
             </ThemedText>
           </TouchableOpacity>
         </ThemedView>
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     color: '#ff4444',
   },
   textInput: {
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Regular',
   },
   textAreaInput: {
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,

@@ -267,21 +267,21 @@ export default function SearchScreen() {
             <IconSymbol
               name='magnifyingglass.circle'
               size={80}
-              color={iconColor + '40'}
+              color={iconColor + '60'}
             />
             <ThemedText
               type='subtitle'
-              style={[styles.welcomeTitle, { color: iconColor }]}
+              style={[styles.welcomeTitle, { color: '#000000' }]}
             >
               ค้นหาหลักสูตรและรายวิชา
             </ThemedText>
             <ThemedText
-              style={[styles.welcomeDescription, { color: iconColor + '80' }]}
+              style={[styles.welcomeDescription, { color: iconColor }]}
             >
               พิมพ์คำค้นหาในช่องด้านบน
             </ThemedText>
             <ThemedText
-              style={[styles.welcomeDescription, { color: iconColor + '80' }]}
+              style={[styles.welcomeDescription, { color: iconColor }]}
             >
               เพื่อค้นหาหลักสูตรหรือรายวิชาที่คุณสนใจ
             </ThemedText>
@@ -294,21 +294,21 @@ export default function SearchScreen() {
             <IconSymbol
               name='exclamationmark.circle'
               size={80}
-              color={iconColor + '40'}
+              color={iconColor + '60'}
             />
             <ThemedText
               type='subtitle'
-              style={[styles.noResultsTitle, { color: iconColor }]}
+              style={[styles.noResultsTitle, { color: '#000000' }]}
             >
               ไม่พบผลการค้นหา
             </ThemedText>
             <ThemedText
-              style={[styles.noResultsDescription, { color: iconColor + '80' }]}
+              style={[styles.noResultsDescription, { color: iconColor }]}
             >
               ลองค้นหาด้วยคำค้นหาอื่น
             </ThemedText>
             <ThemedText
-              style={[styles.noResultsDescription, { color: iconColor + '80' }]}
+              style={[styles.noResultsDescription, { color: iconColor }]}
             >
               หรือตรวจสอบการสะกดคำ
             </ThemedText>
