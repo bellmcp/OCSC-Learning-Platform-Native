@@ -14,7 +14,7 @@ const mockUser = {
   avatar: 'https://bellmcp.work/img/Profile.jpg',
   role: 'Senior Developer',
   department: 'Software Engineer',
-  joinDate: 'January 2023',
+  joinDate: 'มกราคม 2023',
   completedCourses: 12,
   totalHours: 48,
 }

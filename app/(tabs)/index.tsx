@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
+import CourseItem, { type Course } from '@/components/CourseItem'
+import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
@@ -41,7 +43,7 @@ const bannerData = [
   },
 ]
 
-const coursesData = [
+const coursesData: Course[] = [
   {
     id: 'DS26',
     title: 'AI Basic',
@@ -129,7 +131,7 @@ const recommendedData = [
   },
 ]
 
-const curriculumData = [
+const curriculumData: Curriculum[] = [
   {
     id: '00M',
     title: 'ฝึกอบรมข้าราชการบรรจุใหม่',
@@ -194,33 +196,8 @@ export default function HomeScreen() {
     </ThemedView>
   )
 
-  const renderCourseItem = ({ item }: { item: (typeof coursesData)[0] }) => (
-    <TouchableOpacity style={styles.courseCard}>
-      <Image
-        source={{ uri: item.image }}
-        style={styles.courseImage}
-        contentFit='cover'
-      />
-      <ThemedView style={styles.courseContent}>
-        {/* <ThemedView style={styles.courseBadge}>
-          <ThemedText style={styles.courseBadgeText}>{item.badge}</ThemedText>
-        </ThemedView> */}
-        <ThemedText
-          type='defaultSemiBold'
-          style={styles.courseTitle}
-          numberOfLines={1}
-        >
-          {item.title}
-        </ThemedText>
-        <ThemedText style={styles.courseId}>{item.id}</ThemedText>
-        <ThemedText style={styles.courseDescription} numberOfLines={3}>
-          {item.description}
-        </ThemedText>
-        <ThemedView style={styles.courseFooter}>
-          <ThemedText style={styles.courseLevel}>● {item.level}</ThemedText>
-        </ThemedView>
-      </ThemedView>
-    </TouchableOpacity>
+  const renderCourseItem = ({ item }: { item: Course }) => (
+    <CourseItem item={item} />
   )
 
   const renderRecommendedItem = ({
@@ -258,34 +235,8 @@ export default function HomeScreen() {
     </TouchableOpacity>
   )
 
-  const renderCurriculumItem = ({
-    item,
-  }: {
-    item: (typeof curriculumData)[0]
-  }) => (
-    <TouchableOpacity style={styles.curriculumCard}>
-      <Image
-        source={{ uri: item.image }}
-        style={styles.curriculumImage}
-        contentFit='cover'
-      />
-      <ThemedView style={styles.curriculumContent}>
-        <ThemedText
-          type='defaultSemiBold'
-          style={styles.curriculumTitle}
-          numberOfLines={2}
-        >
-          {item.title}
-        </ThemedText>
-        <ThemedText style={styles.curriculumId}>{item.id}</ThemedText>
-        <ThemedText style={styles.curriculumDescription} numberOfLines={1}>
-          {item.description}
-        </ThemedText>
-        <ThemedView style={styles.curriculumFooter}>
-          <ThemedText style={styles.curriculumType}>{item.type}</ThemedText>
-        </ThemedView>
-      </ThemedView>
-    </TouchableOpacity>
+  const renderCurriculumItem = ({ item }: { item: Curriculum }) => (
+    <CurriculumItem item={item} />
   )
 
   return (
@@ -518,63 +469,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a7ea4',
   },
 
-  // Course card styles
-  courseCard: {
-    width: 280,
-    marginRight: 16,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
-    overflow: 'hidden',
-  },
-  courseImage: {
-    width: '100%',
-    height: 140,
-  },
-  courseContent: {
-    padding: 16,
-    flex: 1,
-  },
-  courseBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  courseBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#92400E',
-  },
-  courseTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  courseId: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 8,
-  },
-  courseDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#374151',
-    marginBottom: 12,
-    flex: 1,
-  },
-  courseFooter: {
-    marginTop: 'auto',
-  },
-  courseLevel: {
-    fontSize: 12,
-    color: '#10B981',
-    fontWeight: '600',
-  },
-
   // Recommended card styles
   recommendedCard: {
     width: 240,
@@ -621,51 +515,6 @@ const styles = StyleSheet.create({
   recommendedBadge: {
     fontSize: 12,
     color: '#10B981',
-    fontWeight: '600',
-  },
-
-  // Curriculum card styles
-  curriculumCard: {
-    width: 260,
-    marginRight: 16,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
-    overflow: 'hidden',
-  },
-  curriculumImage: {
-    width: '100%',
-    height: 130,
-  },
-  curriculumContent: {
-    padding: 16,
-    flex: 1,
-  },
-  curriculumTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
-    lineHeight: 22,
-  },
-  curriculumId: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 8,
-  },
-  curriculumDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#374151',
-    marginBottom: 12,
-    flex: 1,
-  },
-  curriculumFooter: {
-    marginTop: 'auto',
-  },
-  curriculumType: {
-    fontSize: 12,
-    color: '#7C3AED',
     fontWeight: '600',
   },
 })

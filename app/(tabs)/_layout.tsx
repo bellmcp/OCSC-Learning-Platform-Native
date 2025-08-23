@@ -3,11 +3,12 @@ import { BottomNavigation, useTheme } from 'react-native-paper'
 import AccountScreen from './account'
 import ExploreScreen from './explore'
 import HomeScreen from './index'
+import SearchScreen from './search'
 import SupportScreen from './support'
 
 const HomeRoute = () => <HomeScreen />
 
-const SearchRoute = () => <ExploreScreen />
+const SearchRoute = () => <SearchScreen />
 
 const LearnRoute = () => <ExploreScreen />
 
@@ -69,7 +70,7 @@ export default function TabLayout() {
       barStyle={{
         backgroundColor: theme.colors.surface,
         borderTopWidth: 0.5,
-        borderTopColor: theme.colors.outlineVariant,
+        borderTopColor: '#F0F0F0',
       }}
     />
   )
