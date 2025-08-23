@@ -9,41 +9,16 @@ import {
   View,
 } from 'react-native'
 
-import CourseItem, { type Course } from '@/components/CourseItem'
 import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
+import MyCourseItem, { type RegisteredCourse } from '@/components/MyCourseItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { courseCategories } from '@/constants/CourseCategories'
 import { courseRegistrations } from '@/constants/CourseRegistrations'
 import { curriculumRegistrations } from '@/constants/CurriculumRegistrations'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { router } from 'expo-router'
-
-// Utility function to convert course registration data to display format
-const convertCourseRegistrationToDisplayFormat = (courseReg: any): Course => {
-  const category = courseCategories.find(
-    (cat) => cat.id === courseReg.categoryId
-  )
-  const cleanDescription =
-    courseReg.learningObjective
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/\n/g, ' ') // Replace newlines with spaces
-      .trim()
-      .substring(0, 100) + '...' // Limit length
-
-  return {
-    id: courseReg.code,
-    title: courseReg.name,
-    description: cleanDescription,
-    image: courseReg.thumbnail,
-    category: category?.courseCategory || 'ทั่วไป',
-    courseCategoryId: courseReg.categoryId,
-    level: 'ทักษะขั้นพื้นฐาน',
-    badge: category?.courseCategory || 'ทั่วไป',
-  }
-}
 
 // Utility function to convert curriculum registration data to display format
 const convertCurriculumRegistrationToDisplayFormat = (
@@ -65,10 +40,8 @@ const convertCurriculumRegistrationToDisplayFormat = (
   }
 }
 
-// Convert registered course data for search
-const registeredCourses: Course[] = courseRegistrations.map(
-  convertCourseRegistrationToDisplayFormat
-)
+// Use raw registered course data
+const registeredCourses: RegisteredCourse[] = courseRegistrations
 
 // Convert registered curriculum data for search
 const registeredCurriculums: Curriculum[] = curriculumRegistrations.map(
@@ -96,7 +69,7 @@ export default function LearnScreen() {
     return () => clearTimeout(timeout)
   }, [])
   const [filteredCourses, setFilteredCourses] =
-    useState<Course[]>(registeredCourses)
+    useState<RegisteredCourse[]>(registeredCourses)
   const [filteredCurriculums, setFilteredCurriculums] = useState<Curriculum[]>(
     registeredCurriculums
   )
@@ -116,10 +89,10 @@ export default function LearnScreen() {
     // Filter registered courses
     const coursesResults = registeredCourses.filter(
       (course) =>
-        course.title.toLowerCase().includes(searchLower) ||
-        course.description.toLowerCase().includes(searchLower) ||
-        course.id.toLowerCase().includes(searchLower) ||
-        course.category.toLowerCase().includes(searchLower)
+        course.name.toLowerCase().includes(searchLower) ||
+        course.learningObjective.toLowerCase().includes(searchLower) ||
+        course.code.toLowerCase().includes(searchLower) ||
+        course.courseRoundName.toLowerCase().includes(searchLower)
     )
 
     // Filter registered curriculums
@@ -142,12 +115,11 @@ export default function LearnScreen() {
     }
   }, [activeTab])
 
-  const renderCourseItem = ({ item }: { item: Course }) => (
+  const renderCourseItem = ({ item }: { item: RegisteredCourse }) => (
     <View style={styles.courseItemWrapper}>
-      <CourseItem
-        item={item}
-        variant='fullWidth'
-        onPress={(course) => router.push(`/course-detail?id=${course.id}`)}
+      <MyCourseItem
+        registeredCourse={item}
+        onPress={(course) => router.push(`/course-detail?id=${course.code}`)}
       />
     </View>
   )
@@ -175,9 +147,13 @@ export default function LearnScreen() {
   const showWelcome = !hasRegistrations
 
   // Render function that handles both types
-  const renderListItem = ({ item }: { item: Course | Curriculum }) => {
+  const renderListItem = ({
+    item,
+  }: {
+    item: RegisteredCourse | Curriculum
+  }) => {
     if (activeTab === 'courses') {
-      return renderCourseItem({ item: item as Course })
+      return renderCourseItem({ item: item as RegisteredCourse })
     } else {
       return renderCurriculumItem({ item: item as Curriculum })
     }
@@ -355,7 +331,11 @@ export default function LearnScreen() {
           <FlatList
             data={currentData}
             renderItem={renderListItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) =>
+              activeTab === 'courses'
+                ? (item as RegisteredCourse).id.toString()
+                : (item as Curriculum).id
+            }
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContainer}
             style={styles.list}
