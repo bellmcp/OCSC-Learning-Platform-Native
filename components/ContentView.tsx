@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import { EvaluationWelcomeCard } from './EvaluationWelcomeCard'
 import { TestWelcomeCard } from './TestWelcomeCard'
 
 import { ClassroomContent } from './types'
@@ -16,6 +17,7 @@ interface ContentViewProps {
   onTestStart: (contentId: number) => void
   onContentLoadStart: () => void
   onOpenTest: () => void
+  onOpenEvaluation: () => void
 }
 
 const convertToEmbedUrl = (url: string): string => {
@@ -46,6 +48,7 @@ export function ContentView({
   onTestStart,
   onContentLoadStart,
   onOpenTest,
+  onOpenEvaluation,
 }: ContentViewProps) {
   const iconColor = useThemeColor({}, 'icon')
   const webViewRef = useRef<WebView>(null)
@@ -72,11 +75,18 @@ export function ContentView({
     )
   }
 
-  const getContentUrl = () => {
-    if (selectedContent.type === 'e') {
-      return 'https://docs.google.com/forms/d/e/1FAIpQLSdMockEval/viewform'
-    }
+  // Render evaluation welcome screen for evaluation content type
+  if (selectedContent.type === 'e') {
+    return (
+      <EvaluationWelcomeCard
+        selectedContent={selectedContent}
+        courseName={courseName}
+        onOpenEvaluation={onOpenEvaluation}
+      />
+    )
+  }
 
+  const getContentUrl = () => {
     const rawUrl = selectedContent.content1 || selectedContent.content2
     if (
       rawUrl &&

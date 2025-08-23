@@ -74,7 +74,7 @@ export function TestWelcomeCard({
       <TouchableOpacity
         style={[
           styles.actionButton,
-          { backgroundColor: tintColor, marginTop: 60 },
+          { backgroundColor: tintColor, marginTop: 18 },
         ]}
         onPress={() => {
           Alert.alert(
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: '#E5E7EB',
-    marginVertical: 30,
+    marginVertical: 18,
   },
   testSubject: {
     fontSize: 16,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     paddingRight: 4,
   },
   testStatusText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Prompt-Medium',
     color: '#6B7280',
     marginBottom: 2,

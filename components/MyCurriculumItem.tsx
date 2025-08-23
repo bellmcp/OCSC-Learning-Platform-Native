@@ -277,7 +277,7 @@ export default function MyCurriculumItem({
       <ThemedView style={styles.courseIndicatorContainer}>
         <IconSymbol name='book.closed' size={16} color='#6B7280' />
         <ThemedText style={styles.courseIndicatorText}>
-          {childCourses.length} รายวิชา • แตะเพื่อดูรายละเอียด
+          {childCourses.length} รายวิชาในหลักสูตร • ดูทั้งหมด
         </ThemedText>
         <IconSymbol name='chevron.right' size={16} color='#6B7280' />
       </ThemedView>

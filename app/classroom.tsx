@@ -249,6 +249,18 @@ export default function ClassroomScreen() {
     }
   }
 
+  const handleOpenEvaluation = () => {
+    if (selectedContent) {
+      router.push({
+        pathname: '/evaluation',
+        params: {
+          contentId: selectedContent.id.toString(),
+          courseName: courseData.name,
+        },
+      })
+    }
+  }
+
   const handleContentLoadStart = () => {
     if (!contentStartTime.current) {
       contentStartTime.current = Date.now()
@@ -285,6 +297,7 @@ export default function ClassroomScreen() {
               onTestStart={handleTestStart}
               onContentLoadStart={handleContentLoadStart}
               onOpenTest={handleOpenTest}
+              onOpenEvaluation={handleOpenEvaluation}
             />
           </ThemedView>
         </ThemedView>

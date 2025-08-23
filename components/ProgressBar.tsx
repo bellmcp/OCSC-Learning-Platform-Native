@@ -80,58 +80,60 @@ export function ProgressBar({
     <View style={[styles.fixedBottomContainer, { backgroundColor }]}>
       <View style={styles.progressBar}>
         {/* Left: Circular Progress for Seconds */}
-        <View style={styles.circularProgress}>
-          <View style={styles.circularContent}>
-            <ThemedText style={styles.secondsText}>{seconds} วิ</ThemedText>
-          </View>
+        <View style={{ width: 100 }}>
+          <View style={styles.circularProgress}>
+            <View style={styles.circularContent}>
+              <ThemedText style={styles.secondsText}>{seconds} วิ</ThemedText>
+            </View>
 
-          {/* Circular progress ring with segments */}
-          <View style={styles.circularProgressRing}>
-            {/* Progress segments based on percentage */}
-            {progressPercentage > 0 && (
-              <View
-                style={[
-                  styles.progressSegment,
-                  {
-                    transform: [{ rotate: '0deg' }],
-                    opacity: progressPercentage > 0 ? 1 : 0,
-                  },
-                ]}
-              />
-            )}
-            {progressPercentage > 25 && (
-              <View
-                style={[
-                  styles.progressSegment,
-                  {
-                    transform: [{ rotate: '90deg' }],
-                    opacity: progressPercentage > 25 ? 1 : 0,
-                  },
-                ]}
-              />
-            )}
-            {progressPercentage > 50 && (
-              <View
-                style={[
-                  styles.progressSegment,
-                  {
-                    transform: [{ rotate: '180deg' }],
-                    opacity: progressPercentage > 50 ? 1 : 0,
-                  },
-                ]}
-              />
-            )}
-            {progressPercentage > 75 && (
-              <View
-                style={[
-                  styles.progressSegment,
-                  {
-                    transform: [{ rotate: '270deg' }],
-                    opacity: progressPercentage > 75 ? 1 : 0,
-                  },
-                ]}
-              />
-            )}
+            {/* Circular progress ring with segments */}
+            <View style={styles.circularProgressRing}>
+              {/* Progress segments based on percentage */}
+              {progressPercentage > 0 && (
+                <View
+                  style={[
+                    styles.progressSegment,
+                    {
+                      transform: [{ rotate: '0deg' }],
+                      opacity: progressPercentage > 0 ? 1 : 0,
+                    },
+                  ]}
+                />
+              )}
+              {progressPercentage > 25 && (
+                <View
+                  style={[
+                    styles.progressSegment,
+                    {
+                      transform: [{ rotate: '90deg' }],
+                      opacity: progressPercentage > 25 ? 1 : 0,
+                    },
+                  ]}
+                />
+              )}
+              {progressPercentage > 50 && (
+                <View
+                  style={[
+                    styles.progressSegment,
+                    {
+                      transform: [{ rotate: '180deg' }],
+                      opacity: progressPercentage > 50 ? 1 : 0,
+                    },
+                  ]}
+                />
+              )}
+              {progressPercentage > 75 && (
+                <View
+                  style={[
+                    styles.progressSegment,
+                    {
+                      transform: [{ rotate: '270deg' }],
+                      opacity: progressPercentage > 75 ? 1 : 0,
+                    },
+                  ]}
+                />
+              )}
+            </View>
           </View>
         </View>
 
@@ -143,16 +145,18 @@ export function ProgressBar({
         </View>
 
         {/* Right: Progress Bar and Percentage */}
-        <View style={styles.percentageProgress}>
-          <View style={styles.percentageBarContainer}>
-            <PaperProgressBar
-              progress={progressPercentage / 100}
-              color={theme.colors.primary}
-              style={styles.percentageBar}
-            />
-            <Text variant='labelSmall' style={styles.percentageText}>
-              {Math.round(progressPercentage)}%
-            </Text>
+        <View style={{ width: 100 }}>
+          <View style={styles.percentageProgress}>
+            <View style={styles.percentageBarContainer}>
+              <PaperProgressBar
+                progress={progressPercentage / 100}
+                color={theme.colors.primary}
+                style={styles.percentageBar}
+              />
+              <Text variant='labelSmall' style={styles.percentageText}>
+                {Math.round(progressPercentage)}%
+              </Text>
+            </View>
           </View>
         </View>
       </View>
