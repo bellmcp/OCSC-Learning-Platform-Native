@@ -1,6 +1,12 @@
 import { Image } from 'expo-image'
 import React, { useEffect, useState } from 'react'
-import { Alert, Modal, StyleSheet, TouchableOpacity } from 'react-native'
+import {
+  Alert,
+  Animated,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -113,6 +119,8 @@ export default function MyCurriculumItem({
   const [satisfactionScore, setSatisfactionScore] = useState(
     registeredCurriculum.satisfactionScore || 0
   )
+  const overlayOpacity = useState(new Animated.Value(0))[0]
+  const slideAnim = useState(new Animated.Value(300))[0]
 
   // Filter courses that belong to this curriculum
   const childCourses = myCourses.filter(
@@ -136,8 +144,41 @@ export default function MyCurriculumItem({
     onUpdateSatisfactionScore?.(registeredCurriculum.id, score)
   }
 
+  const showBottomSheet = () => {
+    setShowMenu(true)
+    Animated.parallel([
+      Animated.timing(overlayOpacity, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }
+
+  const hideBottomSheet = () => {
+    Animated.parallel([
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 300,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowMenu(false)
+    })
+  }
+
   const handleUnregister = () => {
-    setShowMenu(false)
+    hideBottomSheet()
     Alert.alert(
       'ยกเลิกการลงทะเบียนหลักสูตร',
       `คุณต้องการยกเลิกการลงทะเบียนหลักสูตร "${registeredCurriculum.name}" หรือไม่?`,
@@ -161,7 +202,7 @@ export default function MyCurriculumItem({
   }
 
   const handleShowDetails = () => {
-    setShowMenu(false)
+    hideBottomSheet()
     handlePress()
   }
 
@@ -215,9 +256,14 @@ export default function MyCurriculumItem({
             <ThemedView style={styles.actionSection}>
               <TouchableOpacity
                 style={styles.menuButton}
-                onPress={() => setShowMenu(true)}
+                onPress={showBottomSheet}
               >
-                <IconSymbol name='ellipsis' size={20} color='#6B7280' />
+                <IconSymbol
+                  name='ellipsis'
+                  size={20}
+                  color='#6B7280'
+                  style={{ transform: [{ rotate: '90deg' }] }}
+                />
               </TouchableOpacity>
             </ThemedView>
           </ThemedView>
@@ -226,6 +272,15 @@ export default function MyCurriculumItem({
 
       {/* Divider */}
       <ThemedView style={styles.divider} />
+
+      {/* Course count indicator */}
+      <ThemedView style={styles.courseIndicatorContainer}>
+        <IconSymbol name='book.closed' size={16} color='#6B7280' />
+        <ThemedText style={styles.courseIndicatorText}>
+          {childCourses.length} รายวิชา • แตะเพื่อดูรายละเอียด
+        </ThemedText>
+        <IconSymbol name='chevron.right' size={16} color='#6B7280' />
+      </ThemedView>
 
       {/* Rating and completion section */}
       <ThemedView style={styles.ratingSection}>
@@ -254,49 +309,63 @@ export default function MyCurriculumItem({
         )}
       </ThemedView>
 
-      {/* Course count indicator */}
-      <ThemedView style={styles.courseIndicatorContainer}>
-        <IconSymbol name='book.closed' size={16} color='#6B7280' />
-        <ThemedText style={styles.courseIndicatorText}>
-          {childCourses.length} รายวิชา • แตะเพื่อดูรายละเอียด
-        </ThemedText>
-        <IconSymbol name='chevron.right' size={16} color='#6B7280' />
-      </ThemedView>
-
-      {/* Options Menu */}
+      {/* Bottom Sheet */}
       <Modal
         visible={showMenu}
         transparent={true}
-        animationType='fade'
-        onRequestClose={() => setShowMenu(false)}
+        animationType='none'
+        onRequestClose={hideBottomSheet}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowMenu(false)}
+        <Animated.View
+          style={[
+            styles.bottomSheetOverlay,
+            {
+              opacity: overlayOpacity,
+            },
+          ]}
         >
-          <ThemedView style={styles.menuContainer}>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={handleShowDetails}
-            >
-              <IconSymbol name='info.circle' size={20} color='#6B7280' />
-              <ThemedText style={styles.menuItemText}>
-                ข้อมูลหลักสูตร
-              </ThemedText>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.bottomSheetBackdrop}
+            activeOpacity={1}
+            onPress={hideBottomSheet}
+          />
+          <Animated.View
+            style={[
+              styles.bottomSheetContainer,
+              {
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            {/* Handle Bar */}
+            <ThemedView style={styles.bottomSheetHandle} />
 
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={handleUnregister}
-            >
-              <IconSymbol name='trash' size={20} color='#EF4444' />
-              <ThemedText style={[styles.menuItemText, { color: '#EF4444' }]}>
-                ยกเลิกการลงทะเบียนหลักสูตร
-              </ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-        </TouchableOpacity>
+            {/* Menu Items */}
+            <ThemedView style={styles.bottomSheetContent}>
+              <TouchableOpacity
+                style={styles.bottomSheetItem}
+                onPress={handleShowDetails}
+              >
+                <IconSymbol name='info.circle' size={20} color='#6B7280' />
+                <ThemedText style={styles.bottomSheetItemText}>
+                  ข้อมูลหลักสูตร
+                </ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.bottomSheetItem}
+                onPress={handleUnregister}
+              >
+                <IconSymbol name='trash' size={20} color='#EF4444' />
+                <ThemedText
+                  style={[styles.bottomSheetItemText, { color: '#EF4444' }]}
+                >
+                  ยกเลิกการลงทะเบียนหลักสูตร
+                </ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
+          </Animated.View>
+        </Animated.View>
       </Modal>
     </TouchableOpacity>
   )
@@ -327,7 +396,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     position: 'relative',
     width: 140,
-    height: 140,
+    height: 150,
     flexShrink: 0,
   },
   statusBorder: {
@@ -452,33 +521,47 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     textAlign: 'center',
   },
-  modalOverlay: {
+  bottomSheetOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  menuContainer: {
+  bottomSheetBackdrop: {
+    flex: 1,
+  },
+  bottomSheetContainer: {
     backgroundColor: 'white',
-    borderRadius: 12,
-    paddingVertical: 8,
-    minWidth: 250,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 34, // Safe area for iOS
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: -2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 4,
+    elevation: 10,
   },
-  menuItem: {
+  bottomSheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  bottomSheetContent: {
+    paddingTop: 8,
+  },
+  bottomSheetItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 12,
   },
-  menuItemText: {
+  bottomSheetItemText: {
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
     color: '#374151',

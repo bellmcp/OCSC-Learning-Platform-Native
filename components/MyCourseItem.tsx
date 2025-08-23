@@ -110,7 +110,10 @@ export default function MyCourseItem({
           </ThemedText>
 
           <ThemedView style={styles.dateInfo}>
-            <ThemedText style={styles.dateLabel} numberOfLines={1}>
+            <ThemedText
+              style={[styles.dateLabel, { marginBottom: 4 }]}
+              numberOfLines={1}
+            >
               <ThemedText style={styles.dateLabelBold}>ลงทะเบียน </ThemedText>
               {formatThaiDate(registeredCourse.registrationDate)}
             </ThemedText>
@@ -183,15 +186,14 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   dateLabel: {
-    fontSize: 14,
-    lineHeight: 16,
+    fontSize: 12,
     color: '#6B7280',
-    marginBottom: 6,
+    lineHeight: 16,
   },
   dateLabelBold: {
-    fontSize: 14,
-    lineHeight: 16,
+    fontSize: 12,
     fontFamily: 'Prompt-SemiBold',
+    lineHeight: 16,
   },
   divider: {
     height: 1,
