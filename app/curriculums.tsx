@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import {
   FlatList,
   Platform,
-  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -14,7 +13,6 @@ import CurriculumItem, {
   type Curriculum,
   type RealCurriculum,
 } from '@/components/CurriculumItem'
-import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
@@ -109,71 +107,64 @@ export default function CurriculumsScreen() {
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      <ScrollView
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <ThemedView style={styles.header}>
-          <View style={styles.headerTop}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <IconSymbol name='chevron.left' size={24} color={iconColor} />
-            </TouchableOpacity>
-            <ThemedText type='title' style={styles.headerTitle}>
-              หลักสูตรทั้งหมด
-            </ThemedText>
-            <View style={styles.backButton} />
-          </View>
-
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <IconSymbol
-              name='magnifyingglass'
-              size={20}
-              color='#999'
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={[styles.searchInput, { color: textColor }]}
-              placeholder='ค้นหาหลักสูตร...'
-              placeholderTextColor='#999'
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-
-          {/* Type Filter */}
-          <FlatList
-            data={curriculumTypes}
-            renderItem={renderTypeChip}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.typeContainer}
-          />
-        </ThemedView>
-
-        {/* Curriculums Grid */}
-        <ThemedView style={styles.curriculumsSection}>
-          <ThemedText style={styles.resultCount}>
-            พบ {filteredCurriculums.length} หลักสูตร
+      {/* Fixed Header */}
+      <ThemedView style={styles.header}>
+        <View style={styles.headerTop}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <IconSymbol name='chevron.left' size={24} color={iconColor} />
+          </TouchableOpacity>
+          <ThemedText type='title' style={styles.headerTitle}>
+            หลักสูตรทั้งหมด
           </ThemedText>
+          <View style={styles.backButton} />
+        </View>
 
-          <FlatList
-            data={filteredCurriculums}
-            renderItem={renderCurriculumItem}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.curriculumsGrid}
-            scrollEnabled={false}
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <IconSymbol
+            name='magnifyingglass'
+            size={20}
+            color='#999'
+            style={styles.searchIcon}
           />
-        </ThemedView>
-      </ScrollView>
-      <StatusBarGradient />
+          <TextInput
+            style={[styles.searchInput, { color: textColor }]}
+            placeholder='ค้นหาหลักสูตร...'
+            placeholderTextColor='#999'
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
+        {/* Type Filter */}
+        <FlatList
+          data={curriculumTypes}
+          renderItem={renderTypeChip}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.typeContainer}
+        />
+      </ThemedView>
+
+      {/* Scrollable Content */}
+      <ThemedView style={styles.content}>
+        <ThemedText style={styles.resultCount}>
+          พบ {filteredCurriculums.length} หลักสูตร
+        </ThemedText>
+
+        <FlatList
+          data={filteredCurriculums}
+          renderItem={renderCurriculumItem}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.curriculumsGrid}
+          style={styles.curriculumsList}
+        />
+      </ThemedView>
     </ThemedView>
   )
 }
@@ -182,16 +173,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContainer: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 20,
-  },
   header: {
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
   headerTop: {
     flexDirection: 'row',
@@ -242,14 +229,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Medium',
     color: '#666',
   },
-  curriculumsSection: {
+  content: {
+    flex: 1,
     paddingHorizontal: 20,
   },
   resultCount: {
     fontSize: 16,
     fontFamily: 'Prompt-Medium',
+    marginTop: 16,
     marginBottom: 16,
     color: '#666',
+  },
+  curriculumsList: {
+    flex: 1,
   },
   curriculumsGrid: {
     paddingBottom: 20,
