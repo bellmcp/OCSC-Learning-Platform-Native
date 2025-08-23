@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { BottomNavigation, useTheme } from 'react-native-paper'
 import AccountScreen from './account'
-import ExploreScreen from './explore'
 import HomeScreen from './index'
+import LearnScreen from './learn'
 import SearchScreen from './search'
 import SupportScreen from './support'
 
@@ -49,7 +49,7 @@ export default function TabLayout() {
       case 'search':
         return <SearchScreen key={`search-${index}`} />
       case 'learn':
-        return <ExploreScreen key={`learn-${index}`} />
+        return <LearnScreen key={`learn-${index}`} />
       case 'support':
         return <SupportScreen key={`support-${index}`} />
       case 'account':
