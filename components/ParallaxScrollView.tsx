@@ -1,4 +1,5 @@
 import type { PropsWithChildren, ReactElement } from 'react'
+import { forwardRef, useImperativeHandle } from 'react'
 import { StyleSheet } from 'react-native'
 import Animated, {
   interpolate,
@@ -17,14 +18,20 @@ type Props = PropsWithChildren<{
   headerBackgroundColor: { dark: string; light: string }
 }>
 
-export default function ParallaxScrollView({
-  children,
-  headerImage,
-  headerBackgroundColor,
-}: Props) {
+export default forwardRef<any, Props>(function ParallaxScrollView(
+  { children, headerImage, headerBackgroundColor },
+  ref
+) {
   const colorScheme = useColorScheme() ?? 'light'
   const scrollRef = useAnimatedRef<Animated.ScrollView>()
   const scrollOffset = useScrollViewOffset(scrollRef)
+
+  // Expose scroll methods to parent components
+  useImperativeHandle(ref, () => ({
+    scrollTo: (options: { y: number; animated?: boolean }) => {
+      scrollRef.current?.scrollTo(options)
+    },
+  }))
   // Remove dependency on bottom tab bar height since we're using react-native-paper BottomNavigation
   const bottom = 0
   const headerAnimatedStyle = useAnimatedStyle(() => {
@@ -69,7 +76,7 @@ export default function ParallaxScrollView({
       </Animated.ScrollView>
     </ThemedView>
   )
-}
+})
 
 const styles = StyleSheet.create({
   container: {

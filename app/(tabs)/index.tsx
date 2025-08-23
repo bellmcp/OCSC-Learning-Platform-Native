@@ -1,5 +1,5 @@
 import { Image } from 'expo-image'
-import { useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   Dimensions,
   FlatList,
@@ -166,6 +166,16 @@ export default function HomeScreen() {
 
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0)
   const bannerFlatListRef = useRef<FlatList>(null)
+  const scrollViewRef = useRef<ScrollView>(null)
+
+  // Reset scroll position when component mounts or becomes visible
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false })
+    }, 100) // Small delay to ensure component is mounted
+
+    return () => clearTimeout(timeout)
+  }, [])
 
   const handleBannerScroll = (event: any) => {
     const slideWidth = screenWidth - 24 // Match the snapToInterval
@@ -243,6 +253,7 @@ export default function HomeScreen() {
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

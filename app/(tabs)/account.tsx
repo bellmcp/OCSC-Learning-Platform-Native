@@ -1,4 +1,5 @@
 import { Image } from 'expo-image'
+import React, { useRef } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
@@ -24,10 +25,20 @@ export default function AccountScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const tintColor = useThemeColor({}, 'tint')
   const iconColor = useThemeColor({}, 'icon')
+  const scrollViewRef = useRef<ScrollView>(null)
+
+  // Reset scroll position when component mounts or becomes visible
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false })
+    }, 100) // Small delay to ensure component is mounted
+
+    return () => clearTimeout(timeout)
+  }, [])
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      <ScrollView style={styles.scrollContainer}>
+      <ScrollView ref={scrollViewRef} style={styles.scrollContainer}>
         {/* Header Section */}
         <ThemedView style={styles.header}>
           <ThemedView style={styles.avatarContainer}>

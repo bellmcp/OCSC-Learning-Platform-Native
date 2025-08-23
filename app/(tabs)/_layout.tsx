@@ -6,16 +6,6 @@ import HomeScreen from './index'
 import SearchScreen from './search'
 import SupportScreen from './support'
 
-const HomeRoute = () => <HomeScreen />
-
-const SearchRoute = () => <SearchScreen />
-
-const LearnRoute = () => <ExploreScreen />
-
-const SupportRoute = () => <SupportScreen />
-
-const AccountRoute = () => <AccountScreen />
-
 export default function TabLayout() {
   const theme = useTheme()
   const [index, setIndex] = React.useState(0)
@@ -52,13 +42,22 @@ export default function TabLayout() {
     },
   ])
 
-  const renderScene = BottomNavigation.SceneMap({
-    home: HomeRoute,
-    search: SearchRoute,
-    learn: LearnRoute,
-    support: SupportRoute,
-    account: AccountRoute,
-  })
+  const renderScene = ({ route, jumpTo }: any) => {
+    switch (route.key) {
+      case 'home':
+        return <HomeScreen key={`home-${index}`} />
+      case 'search':
+        return <SearchScreen key={`search-${index}`} />
+      case 'learn':
+        return <ExploreScreen key={`learn-${index}`} />
+      case 'support':
+        return <SupportScreen key={`support-${index}`} />
+      case 'account':
+        return <AccountScreen key={`account-${index}`} />
+      default:
+        return null
+    }
+  }
 
   return (
     <BottomNavigation

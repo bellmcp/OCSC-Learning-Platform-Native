@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   FlatList,
   Platform,
@@ -163,6 +163,16 @@ export default function SearchScreen() {
   const iconColor = useThemeColor({}, 'icon')
 
   const [searchQuery, setSearchQuery] = useState('')
+  const scrollViewRef = useRef<ScrollView>(null)
+
+  // Reset scroll position when component mounts or becomes visible
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false })
+    }, 100) // Small delay to ensure component is mounted
+
+    return () => clearTimeout(timeout)
+  }, [])
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
   const [filteredCurriculums, setFilteredCurriculums] = useState<Curriculum[]>(
     []
@@ -257,6 +267,7 @@ export default function SearchScreen() {
 
       {/* Search Results */}
       <ScrollView
+        ref={scrollViewRef}
         style={styles.resultsContainer}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps='handled'

@@ -1,5 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   Alert,
   Dimensions,
@@ -46,6 +46,16 @@ export default function SupportScreen() {
     message: '',
   })
   const [selectedFile, setSelectedFile] = useState<any>(null)
+  const scrollViewRef = useRef<ScrollView>(null)
+
+  // Reset scroll position when component mounts or becomes visible
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false })
+    }, 100) // Small delay to ensure component is mounted
+
+    return () => clearTimeout(timeout)
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev: typeof formData) => ({ ...prev, [field]: value }))
@@ -85,15 +95,14 @@ export default function SupportScreen() {
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      {/* Header */}
-      <ThemedView style={styles.header}>
-        <ThemedText type='title' style={styles.headerTitle}>
-          ช่วยเหลือ
-        </ThemedText>
-      </ThemedView>
-
-      <ScrollView style={styles.scrollContainer}>
+      <ScrollView ref={scrollViewRef} style={styles.scrollContainer}>
         <ThemedView style={styles.formSection}>
+          {/* Header */}
+          <ThemedView style={styles.header}>
+            <ThemedText type='title' style={styles.headerTitle}>
+              ช่วยเหลือ
+            </ThemedText>
+          </ThemedView>
           <ThemedView style={styles.formContainer}>
             {/* Name Input */}
             <ThemedView style={styles.inputGroup}>

@@ -1,4 +1,5 @@
 import { Image } from 'expo-image'
+import React, { useRef } from 'react'
 import { Platform, StyleSheet } from 'react-native'
 
 import { Collapsible } from '@/components/Collapsible'
@@ -10,9 +11,23 @@ import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 
 export default function TabTwoScreen() {
+  const parallaxRef = useRef<any>(null)
+
+  // Reset scroll position when component mounts or becomes visible
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (parallaxRef.current?.scrollTo) {
+        parallaxRef.current.scrollTo({ y: 0, animated: false })
+      }
+    }, 100) // Small delay to ensure component is mounted
+
+    return () => clearTimeout(timeout)
+  }, [])
+
   return (
     <>
       <ParallaxScrollView
+        ref={parallaxRef}
         headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
         headerImage={
           <IconSymbol
