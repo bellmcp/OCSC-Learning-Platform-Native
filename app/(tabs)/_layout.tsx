@@ -1,16 +1,21 @@
 import * as React from 'react'
-import { BottomNavigation } from 'react-native-paper'
+import { BottomNavigation, useTheme } from 'react-native-paper'
 import AccountScreen from './account'
 import ExploreScreen from './explore'
 import HomeScreen from './index'
 
 const HomeRoute = () => <HomeScreen />
 
-const ExploreRoute = () => <ExploreScreen />
+const SearchRoute = () => <ExploreScreen />
+
+const LearnRoute = () => <ExploreScreen />
+
+const HelpRoute = () => <ExploreScreen />
 
 const AccountRoute = () => <AccountScreen />
 
 export default function TabLayout() {
+  const theme = useTheme()
   const [index, setIndex] = React.useState(0)
   const [routes] = React.useState([
     {
@@ -20,10 +25,22 @@ export default function TabLayout() {
       unfocusedIcon: 'home-outline',
     },
     {
-      key: 'explore',
+      key: 'search',
+      title: 'ค้นหา',
+      focusedIcon: 'magnify',
+      unfocusedIcon: 'magnify',
+    },
+    {
+      key: 'learn',
       title: 'เข้าเรียน',
       focusedIcon: 'play',
       unfocusedIcon: 'play-outline',
+    },
+    {
+      key: 'help',
+      title: 'ช่วยเหลือ',
+      focusedIcon: 'help-circle',
+      unfocusedIcon: 'help-circle-outline',
     },
     {
       key: 'account',
@@ -35,7 +52,9 @@ export default function TabLayout() {
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
-    explore: ExploreRoute,
+    search: SearchRoute,
+    learn: LearnRoute,
+    help: HelpRoute,
     account: AccountRoute,
   })
 
@@ -44,6 +63,13 @@ export default function TabLayout() {
       navigationState={{ index, routes }}
       onIndexChange={setIndex}
       renderScene={renderScene}
+      activeColor={theme.colors.primary}
+      inactiveColor={theme.colors.onSurfaceVariant}
+      barStyle={{
+        backgroundColor: theme.colors.surface,
+        borderTopWidth: 0.5,
+        borderTopColor: theme.colors.outlineVariant,
+      }}
     />
   )
 }

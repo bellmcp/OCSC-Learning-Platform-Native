@@ -18,8 +18,52 @@ const theme = {
   ...DefaultReactNativePaperTheme,
   colors: {
     ...DefaultReactNativePaperTheme.colors,
-    primary: 'blue',
-    secondary: 'yellow',
+    // Primary colors
+    primary: '#2E9AB6',
+    onPrimary: '#FFFFFF',
+    primaryContainer: '#B8E6F0',
+    onPrimaryContainer: '#0A4A57',
+
+    // Secondary colors
+    secondary: '#183A7C',
+    onSecondary: '#FFFFFF',
+    secondaryContainer: '#D6E3FF',
+    onSecondaryContainer: '#0C1D3E',
+
+    // Tertiary colors
+    tertiary: '#00A69C',
+    onTertiary: '#FFFFFF',
+    tertiaryContainer: '#B3F0ED',
+    onTertiaryContainer: '#004D4A',
+
+    // Surface colors
+    surface: '#FFFFFF',
+    onSurface: '#1C1B1F',
+    surfaceVariant: '#F4F4F4',
+    onSurfaceVariant: '#49454F',
+
+    // Outline colors
+    outline: '#79747E',
+    outlineVariant: '#CAC4D0',
+
+    // Background colors
+    background: '#FFFBFE',
+    onBackground: '#1C1B1F',
+
+    // Inverse colors
+    inverseSurface: '#313033',
+    inverseOnSurface: '#F4EFF4',
+    inversePrimary: '#7DD3EA',
+
+    // Error colors (keep default)
+    error: '#BA1A1A',
+    onError: '#FFFFFF',
+    errorContainer: '#FFDAD6',
+    onErrorContainer: '#410002',
+
+    // Shadow and scrim
+    shadow: '#000000',
+    scrim: '#000000',
   },
   fonts: {
     ...DefaultReactNativePaperTheme.fonts,
