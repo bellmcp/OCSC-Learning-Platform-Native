@@ -38,6 +38,7 @@ export interface Course {
 interface CourseItemProps {
   item: Course
   onPress?: (item: Course) => void
+  variant?: 'default' | 'fullWidth'
 }
 
 // Category colors following Material-UI color palette
@@ -54,27 +55,44 @@ const getCategoryColor = (categoryId: number) => {
   return colors[categoryId] || '#9E9E9E' // grey[500] as default
 }
 
-export default function CourseItem({ item, onPress }: CourseItemProps) {
+export default function CourseItem({
+  item,
+  onPress,
+  variant = 'default',
+}: CourseItemProps) {
+  const isFullWidth = variant === 'fullWidth'
+
   return (
-    <TouchableOpacity style={styles.courseCard} onPress={() => onPress?.(item)}>
+    <TouchableOpacity
+      style={[styles.courseCard, isFullWidth && styles.courseCardFullWidth]}
+      onPress={() => onPress?.(item)}
+    >
       <Image
         source={{ uri: item.image }}
-        style={styles.courseImage}
+        style={[styles.courseImage, isFullWidth && styles.courseImageFullWidth]}
         contentFit='cover'
         transition={200}
       />
-      <ThemedView style={styles.courseContent}>
+      <ThemedView
+        style={[
+          styles.courseContent,
+          isFullWidth && styles.courseContentFullWidth,
+        ]}
+      >
         <ThemedText
           type='defaultSemiBold'
           style={styles.courseTitle}
-          numberOfLines={1}
+          numberOfLines={isFullWidth ? 2 : 1}
         >
           {item.title || 'รายวิชา'}
         </ThemedText>
         <ThemedText style={styles.courseId} numberOfLines={1}>
           {item.id || 'รหัสรายวิชา'}
         </ThemedText>
-        <ThemedText style={styles.courseDescription} numberOfLines={3}>
+        <ThemedText
+          style={styles.courseDescription}
+          numberOfLines={isFullWidth ? 2 : 3}
+        >
           {item.description || 'ไม่มีข้อมูล'}
         </ThemedText>
         <ThemedView style={styles.courseFooter}>
@@ -105,13 +123,29 @@ const styles = StyleSheet.create({
     borderColor: '#F0F0F0',
     overflow: 'hidden',
   },
+  courseCardFullWidth: {
+    width: '100%',
+    marginRight: 0,
+    flexDirection: 'row',
+    height: 120,
+  },
   courseImage: {
     width: '100%',
     height: 200,
   },
+  courseImageFullWidth: {
+    width: 120,
+    height: '100%',
+    flexShrink: 0,
+  },
   courseContent: {
     padding: 16,
     flex: 1,
+  },
+  courseContentFullWidth: {
+    padding: 12,
+    flex: 1,
+    justifyContent: 'space-between',
   },
   courseTitle: {
     fontSize: 16,

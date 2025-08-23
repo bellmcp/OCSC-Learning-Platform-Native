@@ -1,4 +1,5 @@
 import { Image } from 'expo-image'
+import { router } from 'expo-router'
 import React, { useRef, useState } from 'react'
 import {
   Dimensions,
@@ -270,17 +271,6 @@ export default function HomeScreen() {
             <ThemedText type='subtitle' style={styles.sectionTitle}>
               รายการแนะนำ
             </ThemedText>
-            <TouchableOpacity style={styles.seeAllButton}>
-              <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
-                ดูทั้งหมด
-              </ThemedText>
-              <IconSymbol
-                name='chevron.right'
-                size={18}
-                color={tintColor}
-                style={styles.seeAllIcon}
-              />
-            </TouchableOpacity>
           </ThemedView>
           <FlatList
             data={recommendedData}
@@ -298,7 +288,10 @@ export default function HomeScreen() {
             <ThemedText type='subtitle' style={styles.sectionTitle}>
               รายวิชา
             </ThemedText>
-            <TouchableOpacity style={styles.seeAllButton}>
+            <TouchableOpacity
+              style={styles.seeAllButton}
+              onPress={() => router.push('/courses')}
+            >
               <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
                 ดูทั้งหมด
               </ThemedText>
@@ -326,7 +319,10 @@ export default function HomeScreen() {
             <ThemedText type='subtitle' style={styles.sectionTitle}>
               หลักสูตร
             </ThemedText>
-            <TouchableOpacity style={styles.seeAllButton}>
+            <TouchableOpacity
+              style={styles.seeAllButton}
+              onPress={() => router.push('/curriculums')}
+            >
               <ThemedText style={[styles.seeAllText, { color: tintColor }]}>
                 ดูทั้งหมด
               </ThemedText>

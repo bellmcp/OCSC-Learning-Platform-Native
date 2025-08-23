@@ -30,35 +30,61 @@ export interface Curriculum {
 interface CurriculumItemProps {
   item: Curriculum
   onPress?: (item: Curriculum) => void
+  variant?: 'default' | 'fullWidth'
 }
 
-export default function CurriculumItem({ item, onPress }: CurriculumItemProps) {
+export default function CurriculumItem({
+  item,
+  onPress,
+  variant = 'default',
+}: CurriculumItemProps) {
+  const isFullWidth = variant === 'fullWidth'
+
   return (
     <TouchableOpacity
-      style={styles.curriculumCard}
+      style={[
+        styles.curriculumCard,
+        isFullWidth && styles.curriculumCardFullWidth,
+      ]}
       onPress={() => onPress?.(item)}
     >
-      <View style={styles.imageContainer}>
+      <View
+        style={[
+          styles.imageContainer,
+          isFullWidth && styles.imageContainerFullWidth,
+        ]}
+      >
         <Image
           source={{ uri: item.image }}
-          style={styles.curriculumImage}
+          style={[
+            styles.curriculumImage,
+            isFullWidth && styles.curriculumImageFullWidth,
+          ]}
           contentFit='cover'
           transition={200}
         />
       </View>
-      <ThemedView style={styles.curriculumContent}>
+      <ThemedView
+        style={[
+          styles.curriculumContent,
+          isFullWidth && styles.curriculumContentFullWidth,
+        ]}
+      >
         <ThemedText style={styles.curriculumType}>หลักสูตร</ThemedText>
         <ThemedText
           type='defaultSemiBold'
           style={styles.curriculumTitle}
-          numberOfLines={1}
+          numberOfLines={isFullWidth ? 2 : 1}
         >
           {item.title}
         </ThemedText>
         <ThemedText style={styles.curriculumId} numberOfLines={1}>
           {item.id}
         </ThemedText>
-        <ThemedText style={styles.curriculumDescription} numberOfLines={3}>
+        <ThemedText
+          style={styles.curriculumDescription}
+          numberOfLines={isFullWidth ? 2 : 3}
+        >
           {item.description}
         </ThemedText>
       </ThemedView>
@@ -76,17 +102,40 @@ const styles = StyleSheet.create({
     borderColor: '#F0F0F0',
     overflow: 'hidden',
   },
+  curriculumCardFullWidth: {
+    width: '100%',
+    marginRight: 0,
+    flexDirection: 'row',
+    height: 120,
+  },
   imageContainer: {
     borderLeftWidth: 8,
     borderLeftColor: 'rgb(255, 193, 7)',
+  },
+  imageContainerFullWidth: {
+    borderLeftWidth: 0,
+    borderTopWidth: 8,
+    borderTopColor: 'rgb(255, 193, 7)',
+    width: 120,
+    height: '100%',
+    flexShrink: 0,
   },
   curriculumImage: {
     width: '100%',
     height: 200,
   },
+  curriculumImageFullWidth: {
+    width: '100%',
+    height: '100%',
+  },
   curriculumContent: {
     padding: 16,
     flex: 1,
+  },
+  curriculumContentFullWidth: {
+    padding: 12,
+    flex: 1,
+    justifyContent: 'space-between',
   },
   curriculumTitle: {
     fontSize: 16,
