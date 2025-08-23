@@ -1,130 +1,330 @@
 import { Image } from 'expo-image'
-import { Platform, StyleSheet } from 'react-native'
+import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 
-import { Collapsible } from '@/components/Collapsible'
-import { ExternalLink } from '@/components/ExternalLink'
-import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
+import { useThemeColor } from '@/hooks/useThemeColor'
+
+// Mock user data
+const mockUser = {
+  id: 'USR-2024-001',
+  name: 'วุฒิภัทร คำนวนสินธุ์',
+  email: 'alex.johnson@ocsc.go.th',
+  avatar:
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+  role: 'Senior Developer',
+  department: 'Digital Innovation',
+  joinDate: 'January 2023',
+  completedCourses: 12,
+  totalHours: 48,
+}
 
 export default function AccountScreen() {
+  const backgroundColor = useThemeColor({}, 'background')
+  const tintColor = useThemeColor({}, 'tint')
+  const iconColor = useThemeColor({}, 'icon')
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color='#808080'
-          name='chevron.left.forwardslash.chevron.right'
-          style={styles.headerImage}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type='title'>Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>
-        This app includes example code to help you get started.
-      </ThemedText>
-      <Collapsible title='File-based routing'>
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type='defaultSemiBold'>app/(tabs)/index.tsx</ThemedText>{' '}
-          and{' '}
-          <ThemedText type='defaultSemiBold'>app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in{' '}
-          <ThemedText type='defaultSemiBold'>app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href='https://docs.expo.dev/router/introduction'>
-          <ThemedText type='link'>Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title='Android, iOS, and web support'>
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the
-          web version, press <ThemedText type='defaultSemiBold'>w</ThemedText>{' '}
-          in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title='Images'>
-        <ThemedText>
-          For static images, you can use the{' '}
-          <ThemedText type='defaultSemiBold'>@2x</ThemedText> and{' '}
-          <ThemedText type='defaultSemiBold'>@3x</ThemedText> suffixes to
-          provide files for different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ alignSelf: 'center' }}
-        />
-        <ExternalLink href='https://reactnative.dev/docs/images'>
-          <ThemedText type='link'>Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title='Custom fonts'>
-        <ThemedText>
-          Open <ThemedText type='defaultSemiBold'>app/_layout.tsx</ThemedText>{' '}
-          to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
+    <ScrollView style={[styles.container, { backgroundColor }]}>
+      {/* Header Section */}
+      <ThemedView style={styles.header}>
+        <ThemedView style={styles.avatarContainer}>
+          <Image
+            source={{ uri: mockUser.avatar }}
+            style={styles.avatar}
+            contentFit='cover'
+          />
+        </ThemedView>
+
+        <ThemedView style={styles.userInfo}>
+          <ThemedText type='title' style={styles.userName}>
+            {mockUser.name}
           </ThemedText>
+          <ThemedText style={[styles.userRole, { color: tintColor }]}>
+            1909802321001
+          </ThemedText>
+        </ThemedView>
+      </ThemedView>
+
+      {/* Stats Section */}
+      <ThemedView style={styles.statsContainer}>
+        <ThemedView style={styles.statItem}>
+          <IconSymbol name='book.closed' size={32} color={tintColor} />
+          <ThemedText
+            type='title'
+            style={[styles.statNumber, { color: tintColor }]}
+          >
+            {mockUser.completedCourses}
+          </ThemedText>
+          <ThemedText style={styles.statLabel}>
+            หลักสูตรที่เรียนจบแล้ว
+          </ThemedText>
+        </ThemedView>
+
+        <ThemedView style={styles.statDivider} />
+
+        <ThemedView style={styles.statItem}>
+          <IconSymbol name='clock' size={32} color={tintColor} />
+          <ThemedText
+            type='title'
+            style={[styles.statNumber, { color: tintColor }]}
+          >
+            {mockUser.totalHours}
+          </ThemedText>
+          <ThemedText style={styles.statLabel}>ชั่วโมงที่เรียน</ThemedText>
+        </ThemedView>
+      </ThemedView>
+
+      {/* Profile Details */}
+      <ThemedView style={styles.detailsContainer}>
+        <ThemedText type='subtitle' style={styles.sectionTitle}>
+          รายละเอียดผู้ใช้งาน
         </ThemedText>
-        <ExternalLink href='https://docs.expo.dev/versions/latest/sdk/font'>
-          <ThemedText type='link'>Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title='Light and dark mode components'>
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type='defaultSemiBold'>useColorScheme()</ThemedText> hook
-          lets you inspect what the user&apos;s current color scheme is, and so
-          you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href='https://docs.expo.dev/develop/user-interface/color-themes/'>
-          <ThemedText type='link'>Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title='Animations'>
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type='defaultSemiBold'>
-            components/HelloWave.tsx
-          </ThemedText>{' '}
-          component uses the powerful{' '}
-          <ThemedText type='defaultSemiBold'>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The{' '}
-              <ThemedText type='defaultSemiBold'>
-                components/ParallaxScrollView.tsx
-              </ThemedText>{' '}
-              component provides a parallax effect for the header image.
+
+        <ThemedView style={styles.detailItem}>
+          <IconSymbol name='calendar' size={20} color={iconColor} />
+          <ThemedView style={styles.detailContent}>
+            <ThemedText style={styles.detailLabel}>สมัครสมาชิกเมื่อ</ThemedText>
+            <ThemedText type='defaultSemiBold'>{mockUser.joinDate}</ThemedText>
+          </ThemedView>
+        </ThemedView>
+
+        <ThemedView style={styles.detailItem}>
+          <IconSymbol name='envelope' size={20} color={iconColor} />
+          <ThemedView style={styles.detailContent}>
+            <ThemedText style={styles.detailLabel}>อีเมล</ThemedText>
+            <ThemedText type='defaultSemiBold'>{mockUser.email}</ThemedText>
+          </ThemedView>
+        </ThemedView>
+
+        <ThemedView style={styles.detailItem}>
+          <IconSymbol name='building.2' size={20} color={iconColor} />
+          <ThemedView style={styles.detailContent}>
+            <ThemedText style={styles.detailLabel}>หน่วยงาน</ThemedText>
+            <ThemedText type='defaultSemiBold'>
+              {mockUser.department}
             </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+          </ThemedView>
+        </ThemedView>
+      </ThemedView>
+
+      {/* Action Buttons */}
+      <ThemedView style={styles.actionsContainer}>
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: tintColor }]}
+        >
+          <IconSymbol name='gear' size={20} color='white' />
+          <ThemedText style={styles.actionButtonText}>ตั้งค่า</ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
+          <IconSymbol name='arrow.right.square' size={20} color={tintColor} />
+          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+            ออกจากระบบ
+          </ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
   },
-  titleContainer: {
+  header: {
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 20,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  editButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  userInfo: {
+    alignItems: 'center',
+  },
+  userName: {
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  userRole: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  userDepartment: {
+    fontSize: 16,
+    opacity: 0.7,
+  },
+  idCard: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  idHeader: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  idTitle: {
+    marginLeft: 8,
+    fontSize: 16,
+  },
+  userId: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    letterSpacing: 1,
+  },
+  userEmail: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: '#E5E5E5',
+    marginHorizontal: 20,
+  },
+  statNumber: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.7,
+  },
+  detailsContainer: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionTitle: {
+    marginBottom: 20,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  detailContent: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 14,
+    opacity: 0.7,
+    marginBottom: 2,
+  },
+  actionsContainer: {
+    marginHorizontal: 20,
+    marginBottom: 40,
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  secondaryButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#0a7ea4',
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+    color: 'white',
   },
 })

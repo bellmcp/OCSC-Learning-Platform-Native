@@ -1,12 +1,12 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
+import { StyleSheet, Text, type TextProps } from 'react-native'
 
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useThemeColor } from '@/hooks/useThemeColor'
 
 export type ThemedTextProps = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
-};
+  lightColor?: string
+  darkColor?: string
+  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link'
+}
 
 export function ThemedText({
   style,
@@ -15,7 +15,7 @@ export function ThemedText({
   type = 'default',
   ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text')
 
   return (
     <Text
@@ -30,31 +30,33 @@ export function ThemedText({
       ]}
       {...rest}
     />
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   default: {
     fontSize: 16,
     lineHeight: 24,
+    fontFamily: 'Prompt-Regular',
   },
   defaultSemiBold: {
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
+    lineHeight: 40,
+    fontFamily: 'Prompt-Bold',
   },
   subtitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   link: {
     lineHeight: 30,
     fontSize: 16,
     color: '#0a7ea4',
+    fontFamily: 'Prompt-Medium',
   },
-});
+})
