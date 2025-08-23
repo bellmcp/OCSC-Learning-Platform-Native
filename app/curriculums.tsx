@@ -43,13 +43,6 @@ const convertCurriculumToDisplayFormat = (
   }
 }
 
-// Define curriculum types for filtering
-const curriculumTypes = [
-  { id: 'all', name: 'ทั้งหมด' },
-  { id: 'mini', name: 'Mini Course' },
-  { id: 'regular', name: 'หลักสูตรปกติ' },
-]
-
 export default function CurriculumsScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const tintColor = useThemeColor({}, 'tint')
@@ -57,52 +50,24 @@ export default function CurriculumsScreen() {
   const textColor = useThemeColor({}, 'text')
 
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedType, setSelectedType] = useState<string>('all')
 
   // Convert all curriculums to display format
   const allCurriculumsData: Curriculum[] = curriculums.map(
     convertCurriculumToDisplayFormat
   )
 
-  // Filter curriculums based on search query and selected type
+  // Filter curriculums based on search query only
   const filteredCurriculums = allCurriculumsData.filter((curriculum) => {
     const matchesSearch = curriculum.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
-
-    let matchesType = true
-    if (selectedType === 'mini') {
-      matchesType = curriculum.id.includes('mini')
-    } else if (selectedType === 'regular') {
-      matchesType = !curriculum.id.includes('mini')
-    }
-
-    return matchesSearch && matchesType
+    return matchesSearch
   })
 
   const renderCurriculumItem = ({ item }: { item: Curriculum }) => (
     <View style={styles.curriculumItemWrapper}>
       <CurriculumItem item={item} variant='fullWidth' />
     </View>
-  )
-
-  const renderTypeChip = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={[
-        styles.typeChip,
-        selectedType === item.id && { backgroundColor: tintColor },
-      ]}
-      onPress={() => setSelectedType(item.id)}
-    >
-      <ThemedText
-        style={[
-          styles.typeChipText,
-          selectedType === item.id && { color: '#FFFFFF' },
-        ]}
-      >
-        {item.name}
-      </ThemedText>
-    </TouchableOpacity>
   )
 
   return (
@@ -138,18 +103,6 @@ export default function CurriculumsScreen() {
             onChangeText={setSearchQuery}
           />
         </View>
-      </ThemedView>
-
-      {/* Type Filter - Outside header for full width scrolling */}
-      <ThemedView style={styles.filterSection}>
-        <FlatList
-          data={curriculumTypes}
-          renderItem={renderTypeChip}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContainer}
-        />
       </ThemedView>
 
       {/* Scrollable Content */}
@@ -213,26 +166,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
   },
-  filterSection: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  filterContainer: {
-    paddingLeft: 20,
-    paddingBottom: 16,
-  },
-  typeChip: {
-    backgroundColor: '#F0F0F0',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  typeChipText: {
-    fontSize: 14,
-    fontFamily: 'Prompt-Medium',
-    color: '#666',
-  },
+
   content: {
     flex: 1,
     paddingHorizontal: 20,

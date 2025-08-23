@@ -22,6 +22,20 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 
 // Removed Dimensions since we're using full-width layout
 
+// Category colors following Material-UI color palette
+const getCategoryColor = (categoryId: number) => {
+  const colors: { [key: number]: string } = {
+    1: '#9C27B0', // purple[500] - การพัฒนาองค์ความรู้
+    2: '#3F51B5', // indigo[500] - การพัฒนากรอบความคิด
+    3: '#E91E63', // pink[500] - ทักษะเชิงยุทธศาสตร์และภาวะผู้นำ
+    4: '#FF9800', // orange[500] - ทักษะดิจิทัล
+    5: '#4CAF50', // green[500] - ทักษะด้านภาษา
+    6: '#2196F3', // blue[500]
+    7: '#795548', // brown[500]
+  }
+  return colors[categoryId] || '#9E9E9E' // grey[500] as default
+}
+
 // Utility function to convert real course data to display format
 const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
   const category = courseCategories.find(
@@ -74,26 +88,39 @@ export default function CoursesScreen() {
     </View>
   )
 
-  const renderCategoryChip = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={[
-        styles.categoryChip,
-        selectedCategory === item.id && { backgroundColor: tintColor },
-      ]}
-      onPress={() =>
-        setSelectedCategory(selectedCategory === item.id ? null : item.id)
-      }
-    >
-      <ThemedText
+  const renderCategoryChip = ({ item }: { item: any }) => {
+    const isSelected = selectedCategory === item.id
+
+    return (
+      <TouchableOpacity
         style={[
-          styles.categoryChipText,
-          selectedCategory === item.id && { color: '#FFFFFF' },
+          styles.categoryChip,
+          isSelected && { backgroundColor: tintColor },
         ]}
+        onPress={() =>
+          setSelectedCategory(selectedCategory === item.id ? null : item.id)
+        }
       >
-        {item.courseCategory}
-      </ThemedText>
-    </TouchableOpacity>
-  )
+        {item.id && (
+          <View
+            style={[
+              styles.categoryDot,
+              {
+                backgroundColor: isSelected
+                  ? '#FFFFFF'
+                  : getCategoryColor(item.id),
+              },
+            ]}
+          />
+        )}
+        <ThemedText
+          style={[styles.categoryChipText, isSelected && { color: '#FFFFFF' }]}
+        >
+          {item.courseCategory}
+        </ThemedText>
+      </TouchableOpacity>
+    )
+  }
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
@@ -217,11 +244,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   categoryChipText: {
     fontSize: 14,
     fontFamily: 'Prompt-Medium',
     color: '#666',
+  },
+  categoryDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
   },
   content: {
     flex: 1,
