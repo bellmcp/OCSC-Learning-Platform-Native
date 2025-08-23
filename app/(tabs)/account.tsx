@@ -155,6 +155,24 @@ export default function AccountScreen() {
           <ThemedText style={styles.actionButtonText}>เข้าสู่ระบบ</ThemedText>
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            styles.secondaryButton,
+            { marginTop: 16, marginBottom: 32 },
+          ]}
+          onPress={handleLogin}
+        >
+          <Image
+            source={require('@/assets/images/thaid_logo.jpg')}
+            style={styles.thaidLogo}
+            contentFit='contain'
+          />
+          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+            เข้าสู่ระบบด้วยแอปพลิเคชัน ThaiD
+          </ThemedText>
+        </TouchableOpacity>
+
         {/* Divider */}
         <ThemedView style={styles.divider} />
 
@@ -353,7 +371,6 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   loginHeader: {
-    paddingTop: 80,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
@@ -640,5 +657,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
     color: 'white',
+  },
+  thaidLogo: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
+    borderRadius: 4,
   },
 })

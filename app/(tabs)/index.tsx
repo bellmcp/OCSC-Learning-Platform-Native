@@ -398,6 +398,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 24,
     marginBottom: 0,
+    color: '#183A7C',
   },
   headerSubtitle: {
     fontSize: 16,
