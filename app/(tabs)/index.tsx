@@ -214,16 +214,16 @@ export default function HomeScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             pagingEnabled={true}
-            snapToInterval={screenWidth - 24}
-            snapToAlignment='center'
+            snapToInterval={screenWidth - 40 + 16}
+            snapToAlignment='start'
             decelerationRate='fast'
             bounces={false}
             onMomentumScrollEnd={handleBannerScroll}
             onScrollEndDrag={handleBannerScroll}
             contentContainerStyle={styles.carouselContainer}
             getItemLayout={(data, index) => ({
-              length: screenWidth - 24,
-              offset: (screenWidth - 24) * index,
+              length: screenWidth - 40 + 16,
+              offset: (screenWidth - 40 + 16) * index,
               index,
             })}
           />
