@@ -74,7 +74,7 @@ const StarRating = ({
           <IconSymbol
             name={star <= currentRating ? 'star.fill' : 'star'}
             size={20}
-            color={star <= currentRating ? '#FFD700' : '#E5E7EB'}
+            color={star <= currentRating ? '#ffb400' : '#E5E7EB'}
           />
         </TouchableOpacity>
       ))}

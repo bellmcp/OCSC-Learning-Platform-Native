@@ -1,5 +1,12 @@
 import { Image } from 'expo-image'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
+import {
+  Alert,
+  Animated,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -80,8 +87,79 @@ export default function MyCourseItem({
   registeredCourse,
   onPress,
 }: MyCourseItemProps) {
+  const [showMenu, setShowMenu] = useState(false)
+  const overlayOpacity = useState(new Animated.Value(0))[0]
+  const slideAnim = useState(new Animated.Value(300))[0]
+
   const handlePress = () => {
     onPress?.(registeredCourse)
+  }
+
+  const showBottomSheet = () => {
+    setShowMenu(true)
+    Animated.parallel([
+      Animated.timing(overlayOpacity, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }
+
+  const hideBottomSheet = () => {
+    Animated.parallel([
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 300,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowMenu(false)
+    })
+  }
+
+  const handleRequestCompletion = () => {
+    hideBottomSheet()
+    Alert.alert(
+      'ขอสำเร็จการศึกษา',
+      `คุณต้องการขอสำเร็จการศึกษารายวิชา "${registeredCourse.name}" หรือไม่?`,
+      [
+        {
+          text: 'ยกเลิก',
+          style: 'cancel',
+        },
+        {
+          text: 'ยืนยัน',
+          style: 'default',
+          onPress: () => {
+            // Mock action for requesting course completion
+            Alert.alert('สำเร็จ', 'ได้ส่งคำขอสำเร็จการศึกษาเรียบร้อยแล้ว', [
+              { text: 'ตกลง', style: 'default' },
+            ])
+          },
+        },
+      ]
+    )
+  }
+
+  const handleShowDetails = () => {
+    hideBottomSheet()
+    // Mock action for showing course details
+    Alert.alert(
+      'ข้อมูลรายวิชา',
+      `ชื่อรายวิชา: ${registeredCourse.name}\nรหัสวิชา: ${registeredCourse.code}\nรอบการเรียน: ${registeredCourse.courseRoundName}`,
+      [{ text: 'ตกลง', style: 'default' }]
+    )
   }
 
   return (
@@ -95,37 +173,57 @@ export default function MyCourseItem({
           transition={200}
         />
         <ThemedView style={styles.courseContent}>
-          <ThemedText
-            type='defaultSemiBold'
-            style={styles.courseTitle}
-            numberOfLines={1}
-          >
-            {registeredCourse.name}
-          </ThemedText>
-          <ThemedText style={styles.courseCode} numberOfLines={1}>
-            {registeredCourse.code}
-          </ThemedText>
-          <ThemedText style={styles.courseRound} numberOfLines={1}>
-            {registeredCourse.courseRoundName}
-          </ThemedText>
-
-          <ThemedView style={styles.dateInfo}>
-            <ThemedText
-              style={[styles.dateLabel, { marginBottom: 4 }]}
-              numberOfLines={1}
-            >
-              <ThemedText style={styles.dateLabelBold}>ลงทะเบียน </ThemedText>
-              {formatThaiDate(registeredCourse.registrationDate)}
-            </ThemedText>
-            <ThemedText style={styles.dateLabel} numberOfLines={1}>
-              <ThemedText style={styles.dateLabelBold}>
-                เข้าเรียนได้{' '}
+          <ThemedView style={styles.contentHeader}>
+            <ThemedView style={styles.titleSection}>
+              <ThemedText
+                type='defaultSemiBold'
+                style={styles.courseTitle}
+                numberOfLines={1}
+              >
+                {registeredCourse.name}
               </ThemedText>
-              {formatThaiDate(registeredCourse.courseStart)} ถึง{' '}
-              {registeredCourse.courseEnd.includes('3000')
-                ? 'ไม่มีกำหนด'
-                : formatThaiDate(registeredCourse.courseEnd)}
-            </ThemedText>
+              <ThemedText style={styles.courseCode} numberOfLines={1}>
+                {registeredCourse.code}
+              </ThemedText>
+              <ThemedText style={styles.courseRound} numberOfLines={1}>
+                {registeredCourse.courseRoundName}
+              </ThemedText>
+
+              <ThemedView style={styles.dateInfo}>
+                <ThemedText
+                  style={[styles.dateLabel, { marginBottom: 4 }]}
+                  numberOfLines={1}
+                >
+                  <ThemedText style={styles.dateLabelBold}>
+                    ลงทะเบียน{' '}
+                  </ThemedText>
+                  {formatThaiDate(registeredCourse.registrationDate)}
+                </ThemedText>
+                <ThemedText style={styles.dateLabel} numberOfLines={1}>
+                  <ThemedText style={styles.dateLabelBold}>
+                    เข้าเรียนได้{' '}
+                  </ThemedText>
+                  {formatThaiDate(registeredCourse.courseStart)} ถึง{' '}
+                  {registeredCourse.courseEnd.includes('3000')
+                    ? 'ไม่มีกำหนด'
+                    : formatThaiDate(registeredCourse.courseEnd)}
+                </ThemedText>
+              </ThemedView>
+            </ThemedView>
+
+            <ThemedView style={styles.actionSection}>
+              <TouchableOpacity
+                style={styles.menuButton}
+                onPress={showBottomSheet}
+              >
+                <IconSymbol
+                  name='ellipsis'
+                  size={20}
+                  color='#6B7280'
+                  style={{ transform: [{ rotate: '90deg' }] }}
+                />
+              </TouchableOpacity>
+            </ThemedView>
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -140,6 +238,63 @@ export default function MyCourseItem({
           <ThemedText style={styles.studyButtonText}>เข้าเรียน</ThemedText>
         </TouchableOpacity>
       </ThemedView>
+
+      {/* Bottom Sheet */}
+      <Modal
+        visible={showMenu}
+        transparent={true}
+        animationType='none'
+        onRequestClose={hideBottomSheet}
+      >
+        <Animated.View
+          style={[
+            styles.bottomSheetOverlay,
+            {
+              opacity: overlayOpacity,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.bottomSheetBackdrop}
+            activeOpacity={1}
+            onPress={hideBottomSheet}
+          />
+          <Animated.View
+            style={[
+              styles.bottomSheetContainer,
+              {
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            {/* Handle Bar */}
+            <ThemedView style={styles.bottomSheetHandle} />
+
+            {/* Menu Items */}
+            <ThemedView style={styles.bottomSheetContent}>
+              <TouchableOpacity
+                style={styles.bottomSheetItem}
+                onPress={handleShowDetails}
+              >
+                <IconSymbol name='info.circle' size={20} color='#6B7280' />
+                <ThemedText style={styles.bottomSheetItemText}>
+                  ข้อมูลรายวิชา
+                </ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.bottomSheetItem}
+                onPress={handleRequestCompletion}
+              >
+                <IconSymbol name='graduationcap' size={20} color='#6B7280' />
+                <ThemedText style={styles.bottomSheetItemText}>
+                  ขอสำเร็จการศึกษา
+                </ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
+          </Animated.View>
+        </Animated.View>
+      </Modal>
     </ThemedView>
   )
 }
@@ -166,6 +321,24 @@ const styles = StyleSheet.create({
     padding: 16,
     flex: 1,
     justifyContent: 'center',
+  },
+  contentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  titleSection: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  actionSection: {
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 8,
+  },
+  menuButton: {
+    padding: 8,
+    borderRadius: 8,
   },
   courseTitle: {
     fontSize: 16,
@@ -217,5 +390,51 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Medium',
     color: '#183A7C',
     marginLeft: 8,
+  },
+  bottomSheetOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  bottomSheetBackdrop: {
+    flex: 1,
+  },
+  bottomSheetContainer: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 34, // Safe area for iOS
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 10,
+  },
+  bottomSheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  bottomSheetContent: {
+    paddingTop: 8,
+  },
+  bottomSheetItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  bottomSheetItemText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#374151',
+    marginLeft: 12,
   },
 })

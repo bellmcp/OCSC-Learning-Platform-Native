@@ -9,7 +9,6 @@ import {
 } from 'react-native'
 
 import MyCourseItem, { RegisteredCourse } from '@/components/MyCourseItem'
-import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
@@ -78,7 +77,6 @@ export default function CurriculumCoursesScreen() {
             ไม่พบข้อมูลหลักสูตรที่ต้องการ
           </ThemedText>
         </ThemedView>
-        <StatusBarGradient />
       </ThemedView>
     )
   }
@@ -87,12 +85,15 @@ export default function CurriculumCoursesScreen() {
     <ThemedView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
       <ThemedView style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-          <IconSymbol name='chevron.left' size={24} color={iconColor} />
-        </TouchableOpacity>
-        <ThemedText type='title' style={styles.headerTitle} numberOfLines={1}>
-          รายวิชาในหลักสูตร
-        </ThemedText>
+        <View style={styles.headerTop}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+            <IconSymbol name='chevron.left' size={24} color={iconColor} />
+          </TouchableOpacity>
+          <ThemedText type='title' style={styles.headerTitle}>
+            รายวิชาในหลักสูตร
+          </ThemedText>
+          <View style={styles.backButton} />
+        </View>
       </ThemedView>
 
       {/* Curriculum Info */}
@@ -136,7 +137,6 @@ export default function CurriculumCoursesScreen() {
           />
         )}
       </ThemedView>
-      <StatusBarGradient />
     </ThemedView>
   )
 }
@@ -146,36 +146,39 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingHorizontal: 20,
     paddingBottom: 16,
   },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
   backButton: {
-    padding: 8,
-    marginRight: 8,
-    marginLeft: -8,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
-    flex: 1,
     textAlign: 'center',
-    marginRight: 40, // Compensate for back button
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   curriculumInfo: {
     paddingHorizontal: 20,
     paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
   curriculumLabel: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: 'Prompt-SemiBold',
     color: '#F59E0B',
     marginBottom: 4,
   },
   curriculumName: {
-    fontSize: 18,
+    fontSize: 20,
     lineHeight: 24,
     marginBottom: 4,
   },
@@ -191,7 +194,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
   },
   emptyContainer: {
     flex: 1,
