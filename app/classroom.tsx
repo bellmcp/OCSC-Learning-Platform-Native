@@ -137,6 +137,7 @@ export default function ClassroomScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const textColor = useThemeColor({}, 'text')
   const iconColor = useThemeColor({}, 'icon')
+  const tintColor = useThemeColor({}, 'tint')
 
   const [selectedContentId, setSelectedContentId] = useState<number | null>(
     null
@@ -339,10 +340,108 @@ export default function ClassroomScreen() {
         </ThemedView>
       )
 
+    // Render test welcome screen for test content type
+    if (selectedContent.type === 't') {
+      return (
+        <ThemedView style={styles.testWelcomeContainer}>
+          {/* Test Details */}
+          <ThemedView style={styles.testDetailsSection}>
+            <ThemedText style={styles.testSubject}>
+              {selectedContent.name} รายวิชา {courseData.name}
+            </ThemedText>
+            <ThemedText style={styles.testInfo}>
+              <ThemedText style={styles.testInfoBold}>คำชี้แจง </ThemedText>
+              จงเลือกคำตอบที่ถูกที่สุดเพียงข้อเดียว
+            </ThemedText>
+            <ThemedText style={styles.testInfo}>
+              <ThemedText style={styles.testInfoBold}>เกณฑ์ผ่าน </ThemedText>0
+              คะแนน
+            </ThemedText>
+            <ThemedText style={styles.testInfo}>
+              <ThemedText style={styles.testInfoBold}>
+                เวลาที่ใช้ทำแบบทดสอบ{' '}
+              </ThemedText>
+              {selectedContent.minutes || 45} นาที
+            </ThemedText>
+            <ThemedText style={styles.testInfo}>
+              <ThemedText style={styles.testInfoBold}>
+                ทำแบบทดสอบได้ไม่เกิน{' '}
+              </ThemedText>
+              10 ครั้ง
+            </ThemedText>
+          </ThemedView>
+
+          {/* Current Status */}
+          <ThemedView style={styles.testStatusSection}>
+            <ThemedText style={styles.testStatusText}>
+              ทำแบบทดสอบแล้ว {selectedContent.testTries || 0} จาก 10 ครั้ง
+            </ThemedText>
+            <ThemedText style={styles.testStatusText}>
+              คะแนนสูงสุดที่ทำได้ {selectedContent.testScore || 0} เต็ม 20 คะแนน
+            </ThemedText>
+          </ThemedView>
+
+          {/* Important Notes */}
+          <ThemedText style={styles.testWarningText}>
+            โปรดส่งแบบทดสอบก่อนออกจากห้องสอบ
+          </ThemedText>
+          <ThemedText style={styles.testWarningText}>
+            คำตอบของคุณจะถูกบันทึกโดยอัตโนมัติเมื่อหมดเวลา
+          </ThemedText>
+
+          {/* Action Button */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              { backgroundColor: tintColor, marginTop: 16 },
+            ]}
+            onPress={() => {
+              // Handle test start logic here
+              Alert.alert(
+                'เริ่มทำแบบทดสอบ',
+                'คุณต้องการเริ่มทำแบบทดสอบหรือไม่?\n\nเมื่อเริ่มแล้ว เวลาจะเริ่มนับทันที',
+                [
+                  { text: 'ยกเลิก', style: 'cancel' },
+                  {
+                    text: 'เริ่มทำ',
+                    onPress: () => {
+                      // Here you would typically navigate to the actual test
+                      // For demo purposes, we'll show a completion message
+                      Alert.alert(
+                        'เริ่มทำแบบทดสอบ',
+                        'แบบทดสอบได้เริ่มต้นแล้ว\n\nเวลาที่เหลือ: 45 นาที',
+                        [
+                          {
+                            text: 'เข้าใจแล้ว',
+                            onPress: () => {
+                              // Mock test completion for demo
+                              setCompletedContents(
+                                (prev) => new Set([...prev, selectedContent.id])
+                              )
+                              Alert.alert(
+                                'สำเร็จ',
+                                'คุณได้คะแนน 85% ผ่านแบบทดสอบแล้ว'
+                              )
+                            },
+                          },
+                        ]
+                      )
+                    },
+                  },
+                ]
+              )
+            }}
+          >
+            <IconSymbol name='play.circle.fill' size={20} color='white' />
+            <ThemedText style={styles.actionButtonText}>
+              เริ่มทำแบบทดสอบ
+            </ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+      )
+    }
+
     const getContentUrl = () => {
-      if (selectedContent.type === 't') {
-        return 'https://docs.google.com/forms/d/e/1FAIpQLSdMockTest/viewform' // Mock test URL
-      }
       if (selectedContent.type === 'e') {
         return 'https://docs.google.com/forms/d/e/1FAIpQLSdMockEval/viewform' // Mock evaluation URL
       }
@@ -448,14 +547,18 @@ export default function ClassroomScreen() {
     return (
       <TouchableOpacity
         key={item.id}
-        style={[styles.contentItem, isSelected && styles.selectedContentItem]}
+        style={[
+          styles.contentItem,
+          isCompleted && styles.completedContentItem,
+          isSelected && styles.selectedContentItem,
+        ]}
         onPress={() => handleContentSelect(item.id)}
       >
         <View style={styles.contentItemContainer}>
           <ThemedView style={styles.iconContainer}>
             <IconSymbol
               name={item.type === 't' ? 'doc.text.fill' : 'play.circle.fill'}
-              size={40}
+              size={32}
               color='#6B7280'
             />
             {isCompleted && (
@@ -778,11 +881,14 @@ const styles = StyleSheet.create({
   },
   contentItem: {
     backgroundColor: 'transparent', // Make background transparent
-    marginBottom: 1,
+    marginBottom: 0,
     paddingVertical: 16,
     borderLeftWidth: 4,
     borderLeftColor: 'transparent',
     width: '100%', // Ensure full width
+  },
+  completedContentItem: {
+    borderLeftColor: '#2e7d32', // Green left border for completed items
   },
   selectedContentItem: {
     backgroundColor: '#F0F7FF', // Transparent blue background
@@ -790,7 +896,7 @@ const styles = StyleSheet.create({
   },
   contentItemContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: 20, // Move padding here for proper full-width effect
     backgroundColor: 'transparent', // Ensure no background color
   },
@@ -799,10 +905,10 @@ const styles = StyleSheet.create({
     marginRight: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     backgroundColor: 'transparent', // Make icon background transparent
-    borderRadius: 10,
+    borderRadius: 8,
   },
   completedBadge: {
     position: 'absolute',
@@ -902,5 +1008,146 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-SemiBold',
     color: '#1F2937',
     textAlign: 'center',
+  },
+  // Test Welcome Screen Styles
+  testWelcomeContainer: {
+    flex: 1,
+    padding: 24,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'space-between',
+  },
+  testHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  testTitle: {
+    fontSize: 24,
+    fontFamily: 'Prompt-Bold',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  testHeaderDivider: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  testDetailsSection: {
+    marginBottom: 20,
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 8,
+  },
+  testSubject: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+    marginBottom: 12,
+  },
+  testInstructions: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#4B5563',
+    marginBottom: 6,
+  },
+  testInfo: {
+    fontSize: 15,
+    fontFamily: 'Prompt-Regular',
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  testInfoBold: {
+    fontSize: 15,
+    fontFamily: 'Prompt-Medium',
+    color: '#6B7280',
+    paddingRight: 4,
+  },
+  testSectionDivider: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
+    marginTop: 15,
+    marginBottom: 15,
+  },
+  testStatusSection: {
+    marginBottom: 20,
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 8,
+  },
+  testStatusText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Medium',
+    color: '#1F2937',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  testNotesSection: {
+    marginBottom: 30,
+    backgroundColor: '#FEF2F2',
+    padding: 16,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#D14343',
+  },
+  testWarningText: {
+    fontSize: 15,
+    fontFamily: 'Prompt-Regular',
+    color: '#D14343',
+    textAlign: 'center',
+  },
+  testStartButton: {
+    backgroundColor: '#183A7C',
+    borderRadius: 12,
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  testButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  testButtonIcon: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 24,
+    padding: 10,
+    marginRight: 12,
+  },
+  testButtonText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Medium',
+    color: '#FFFFFF',
+    marginLeft: 4,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+    color: 'white',
   },
 })
