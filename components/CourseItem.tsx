@@ -61,6 +61,7 @@ export default function CourseItem({ item, onPress }: CourseItemProps) {
         source={{ uri: item.image }}
         style={styles.courseImage}
         contentFit='cover'
+        transition={200}
       />
       <ThemedView style={styles.courseContent}>
         <ThemedText

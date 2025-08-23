@@ -43,6 +43,7 @@ export default function CurriculumItem({ item, onPress }: CurriculumItemProps) {
           source={{ uri: item.image }}
           style={styles.curriculumImage}
           contentFit='cover'
+          transition={200}
         />
       </View>
       <ThemedView style={styles.curriculumContent}>

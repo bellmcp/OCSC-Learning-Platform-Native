@@ -27,6 +27,7 @@ import { courseCategories } from '@/constants/CourseCategories'
 import { courses } from '@/constants/Courses'
 import { curriculums } from '@/constants/Curriculums'
 import { pressReleases } from '@/constants/PressReleases'
+import { recommendedCourses } from '@/constants/RecommendedCourses'
 import { useThemeColor } from '@/hooks/useThemeColor'
 
 const { width: screenWidth } = Dimensions.get('window')
@@ -52,6 +53,29 @@ const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
     courseCategoryId: realCourse.courseCategoryId,
     level: 'ทักษะขั้นพื้นฐาน',
     badge: category?.courseCategory || 'ทั่วไป',
+  }
+}
+
+// Utility function to convert recommended course data to display format
+const convertRecommendedCourseToDisplayFormat = (
+  recommendedCourse: any
+): Course => {
+  const cleanDescription =
+    recommendedCourse.learningObjective
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/\n/g, ' ') // Replace newlines with spaces
+      .trim()
+      .substring(0, 100) + '...' // Limit length
+
+  return {
+    id: recommendedCourse.code,
+    title: recommendedCourse.name,
+    description: cleanDescription,
+    image: recommendedCourse.thumbnail,
+    category: recommendedCourse.courseCategory || 'ทั่วไป',
+    courseCategoryId: recommendedCourse.courseCategoryId,
+    level: 'ทักษะขั้นพื้นฐาน',
+    badge: recommendedCourse.courseCategory || 'ทั่วไป',
   }
 }
 
@@ -109,9 +133,9 @@ const coursesData: Course[] = courses
   .map(convertCourseToDisplayFormat)
 
 // Convert real course data to recommended format
-const recommendedData: Course[] = courses
-  .slice(6, 10)
-  .map(convertCourseToDisplayFormat)
+const recommendedData: Course[] = recommendedCourses.map(
+  convertRecommendedCourseToDisplayFormat
+)
 
 // Convert real curriculum data to display format
 const curriculumData: Curriculum[] = curriculums.map(
@@ -259,7 +283,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </ThemedView>
           <FlatList
-            data={coursesData}
+            data={recommendedData}
             renderItem={renderCourseItem}
             keyExtractor={(item) => item.id}
             horizontal
@@ -287,7 +311,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </ThemedView>
           <FlatList
-            data={recommendedData}
+            data={coursesData}
             renderItem={renderRecommendedItem}
             keyExtractor={(item) => item.id}
             horizontal
