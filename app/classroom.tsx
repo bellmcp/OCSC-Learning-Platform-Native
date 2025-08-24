@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   ClassroomContent,
   ClassroomHeader,
+  CoinAnimation,
   ContentHeader,
   ContentList,
   ContentView,
@@ -103,6 +104,7 @@ export default function ClassroomScreen() {
     new Map()
   )
   const [courseRating, setCourseRating] = useState<number>(0)
+  const [showCoinAnimation, setShowCoinAnimation] = useState(false)
 
   const contentStartTime = useRef<number | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
@@ -278,10 +280,21 @@ export default function ClassroomScreen() {
     setCourseRating(rating)
   }
 
+  const handleMinuteComplete = () => {
+    setShowCoinAnimation(true)
+  }
+
+  const handleCoinAnimationComplete = () => {
+    setShowCoinAnimation(false)
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
-      <ClassroomHeader courseName={courseData.name} />
+      <ClassroomHeader
+        courseName={courseData.name}
+        showCelebration={showCoinAnimation}
+      />
 
       {/* Main Content Container */}
       <ScrollView
@@ -337,6 +350,13 @@ export default function ClassroomScreen() {
         completedContents={completedContents}
         contentProgress={contentProgress}
         backgroundColor={backgroundColor}
+        onMinuteComplete={handleMinuteComplete}
+      />
+
+      {/* Coin Animation Overlay */}
+      <CoinAnimation
+        isVisible={showCoinAnimation}
+        onAnimationComplete={handleCoinAnimationComplete}
       />
     </SafeAreaView>
   )

@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
-import React from 'react'
-import { Platform, StyleSheet, TouchableOpacity } from 'react-native'
+import React, { useEffect, useRef } from 'react'
+import { Animated, Platform, StyleSheet, TouchableOpacity } from 'react-native'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -9,10 +9,53 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 
 interface ClassroomHeaderProps {
   courseName: string
+  showCelebration?: boolean
 }
 
-export function ClassroomHeader({ courseName }: ClassroomHeaderProps) {
+export function ClassroomHeader({
+  courseName,
+  showCelebration,
+}: ClassroomHeaderProps) {
   const textColor = useThemeColor({}, 'text')
+  const scaleAnim = useRef(new Animated.Value(1)).current
+  const rotateAnim = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    if (showCelebration) {
+      // Celebration animation sequence
+      Animated.sequence([
+        // Scale up and rotate
+        Animated.parallel([
+          Animated.spring(scaleAnim, {
+            toValue: 1.3,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }),
+          Animated.timing(rotateAnim, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Scale back to normal
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 100,
+          friction: 8,
+        }),
+      ]).start()
+
+      // Reset rotation
+      rotateAnim.setValue(0)
+    }
+  }, [showCelebration])
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  })
 
   return (
     <ThemedView style={styles.header}>
@@ -25,7 +68,13 @@ export function ClassroomHeader({ courseName }: ClassroomHeaderProps) {
         </ThemedText>
       </ThemedView>
       <TouchableOpacity style={styles.menuButton}>
-        {/* <IconSymbol name='ellipsis' size={20} color={textColor} /> */}
+        <Animated.View
+          style={{
+            transform: [{ scale: scaleAnim }, { rotate: spin }],
+          }}
+        >
+          <IconSymbol name='star.circle' size={26} color={textColor} />
+        </Animated.View>
       </TouchableOpacity>
     </ThemedView>
   )

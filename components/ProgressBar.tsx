@@ -16,6 +16,7 @@ interface ProgressBarProps {
   completedContents: Set<number>
   contentProgress: Map<number, number>
   backgroundColor: string
+  onMinuteComplete?: () => void
 }
 
 export function ProgressBar({
@@ -24,6 +25,7 @@ export function ProgressBar({
   completedContents,
   contentProgress,
   backgroundColor,
+  onMinuteComplete,
 }: ProgressBarProps) {
   const theme = useTheme()
   const [seconds, setSeconds] = useState(0) // Count seconds
@@ -57,6 +59,10 @@ export function ProgressBar({
               if (newMinutes >= totalRequiredMinutes) {
                 setIsActive(false)
                 return totalRequiredMinutes
+              }
+              // Call the callback when a minute is completed
+              if (onMinuteComplete) {
+                onMinuteComplete()
               }
               return newMinutes
             })
