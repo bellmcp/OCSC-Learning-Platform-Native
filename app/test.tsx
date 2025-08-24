@@ -222,7 +222,7 @@ const createStyles = (tintColor: string) =>
       flex: 1,
     },
     header: {
-      paddingTop: Platform.OS === 'ios' ? 60 : 40,
+      paddingTop: Platform.OS === 'ios' ? 70 : 40,
       paddingHorizontal: 20,
       paddingBottom: 16,
       borderBottomWidth: 1,

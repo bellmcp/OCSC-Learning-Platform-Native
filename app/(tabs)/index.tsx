@@ -474,7 +474,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingVertical: 4,
-    paddingHorizontal: 8,
     borderRadius: 8,
   },
   seeAllIcon: {

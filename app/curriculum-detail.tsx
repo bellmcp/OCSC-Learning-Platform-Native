@@ -71,7 +71,7 @@ export default function CurriculumDetailScreen() {
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
-            หลักสูตร
+            รายละเอียดหลักสูตร
           </ThemedText>
           <View style={styles.backButton} />
         </View>
@@ -90,7 +90,6 @@ export default function CurriculumDetailScreen() {
             style={styles.heroImage}
             contentFit='cover'
             transition={200}
-            blurRadius={2}
           />
           <View style={styles.imageOverlay} />
           <View style={styles.gradientOverlay} />
@@ -104,7 +103,7 @@ export default function CurriculumDetailScreen() {
         </View>
 
         {/* Course Stats */}
-        <View style={styles.statsContainer}>
+        {/* <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <IconSymbol name='clock' size={18} color={tintColor} />
             <ThemedText style={styles.statLabel}>ระยะเวลา</ThemedText>
@@ -120,7 +119,7 @@ export default function CurriculumDetailScreen() {
             <ThemedText style={styles.statLabel}>ผู้เรียน</ThemedText>
             <ThemedText style={styles.statValue}>156 คน</ThemedText>
           </View>
-        </View>
+        </View> */}
 
         {/* Main Content */}
         <View style={styles.mainContent}>
@@ -129,7 +128,7 @@ export default function CurriculumDetailScreen() {
             <View style={styles.sectionHeader}>
               <IconSymbol name='target' size={20} color={tintColor} />
               <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                วัตถุประสงค์การเรียนรู้
+                เป้าหมายการเรียนรู้
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
@@ -142,11 +141,24 @@ export default function CurriculumDetailScreen() {
             <View style={styles.sectionHeader}>
               <IconSymbol name='book.closed' size={20} color={tintColor} />
               <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                หัวข้อการเรียนรู้
+                ประเด็นการเรียนรู้
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
               {cleanHtmlText(curriculum.learningTopic)}
+            </ThemedText>
+          </ThemedView>
+
+          {/* Assessment Section */}
+          <ThemedView style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <IconSymbol name='checkmark.circle' size={20} color={tintColor} />
+              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                วิธีการประเมินผล
+              </ThemedText>
+            </View>
+            <ThemedText style={styles.sectionContent}>
+              {cleanHtmlText(curriculum.assessment)}
             </ThemedText>
           </ThemedView>
 
@@ -162,19 +174,6 @@ export default function CurriculumDetailScreen() {
               {cleanHtmlText(curriculum.targetGroup)}
             </ThemedText>
           </ThemedView>
-
-          {/* Assessment Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='checkmark.circle' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                การประเมินผล
-              </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.assessment)}
-            </ThemedText>
-          </ThemedView>
         </View>
       </ScrollView>
 
@@ -182,10 +181,11 @@ export default function CurriculumDetailScreen() {
       <View style={[styles.fixedButtonContainer, { backgroundColor }]}>
         <TouchableOpacity
           style={[styles.registerButton, { backgroundColor: tintColor }]}
+          onPress={() => router.push('/learn')}
         >
           <IconSymbol name='arrow.right.square' size={20} color='white' />
           <ThemedText style={styles.registerButtonText}>
-            ลงทะเบียนเรียน
+            ลงทะเบียนหลักสูตร
           </ThemedText>
         </TouchableOpacity>
       </View>
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: Platform.OS === 'ios' ? 70 : 40,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
