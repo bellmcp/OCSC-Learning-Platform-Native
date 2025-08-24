@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
   contentListContainer: {
     paddingHorizontal: 0,
     marginVertical: -24,
-    marginBottom: -48,
+    marginBottom: -24,
     marginHorizontal: -24, // Compensate for the section padding
   },
 })

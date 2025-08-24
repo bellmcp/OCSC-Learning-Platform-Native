@@ -1,5 +1,5 @@
 import { Image } from 'expo-image'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Alert,
   Animated,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
+import { StarRating } from '@/components/StarRating'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { RegisteredCourse } from './MyCourseItem'
@@ -38,48 +39,6 @@ interface MyCurriculumItemProps {
   onCoursePress?: (registeredCourse: RegisteredCourse) => void
   onUpdateSatisfactionScore?: (curriculumId: number, score: number) => void
   onUnregister?: (curriculumId: number, curriculumName: string) => void
-}
-
-// Star Rating Component
-const StarRating = ({
-  rating,
-  onRatingChange,
-  editable = true,
-}: {
-  rating: number
-  onRatingChange?: (rating: number) => void
-  editable?: boolean
-}) => {
-  const [currentRating, setCurrentRating] = useState(rating)
-
-  useEffect(() => {
-    setCurrentRating(rating)
-  }, [rating])
-
-  const handleStarPress = (starRating: number) => {
-    if (!editable) return
-    setCurrentRating(starRating)
-    onRatingChange?.(starRating)
-  }
-
-  return (
-    <ThemedView style={styles.ratingContainer}>
-      {[1, 2, 3, 4, 5].map((star) => (
-        <TouchableOpacity
-          key={star}
-          onPress={() => handleStarPress(star)}
-          disabled={!editable}
-          style={styles.starButton}
-        >
-          <IconSymbol
-            name={star <= currentRating ? 'star.fill' : 'star'}
-            size={20}
-            color={star <= currentRating ? '#ffb400' : '#E5E7EB'}
-          />
-        </TouchableOpacity>
-      ))}
-    </ThemedView>
-  )
 }
 
 // Helper function to format Thai dates

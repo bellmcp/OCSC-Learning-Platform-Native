@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   bottomSection: {
     backgroundColor: 'transparent',
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   sectionHeader: {
     paddingHorizontal: 20,

@@ -11,7 +11,9 @@ import {
   ContentView,
   CourseData,
   ProgressBar,
+  StarRating,
 } from '@/components'
+import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { contentViews } from '@/constants/ContentViews'
 import { courseContents } from '@/constants/CourseContents'
@@ -100,6 +102,7 @@ export default function ClassroomScreen() {
   const [contentProgress, setContentProgress] = useState<Map<number, number>>(
     new Map()
   )
+  const [courseRating, setCourseRating] = useState<number>(0)
 
   const contentStartTime = useRef<number | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
@@ -271,6 +274,10 @@ export default function ClassroomScreen() {
     scrollViewRef.current?.scrollTo({ y: 0, animated: true })
   }
 
+  const handleCourseRatingChange = (rating: number) => {
+    setCourseRating(rating)
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
@@ -310,6 +317,17 @@ export default function ClassroomScreen() {
           onContentSelect={handleContentSelect}
           onScrollToTop={scrollToTop}
         />
+
+        {/* Star Rating Section */}
+        <ThemedView style={styles.ratingSection}>
+          <ThemedText style={styles.ratingLabel}>
+            โปรดให้คะแนนหลักสูตร
+          </ThemedText>
+          <StarRating
+            rating={courseRating}
+            onRatingChange={handleCourseRatingChange}
+          />
+        </ThemedView>
       </ScrollView>
 
       {/* Fixed Bottom Progress Bar */}
@@ -340,5 +358,20 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     justifyContent: 'flex-start',
+  },
+  ratingSection: {
+    paddingTop: 36,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  ratingLabel: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 4,
   },
 })
