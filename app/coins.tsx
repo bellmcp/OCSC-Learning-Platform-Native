@@ -1,7 +1,13 @@
 import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React from 'react'
-import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -81,11 +87,11 @@ export default function CoinsScreen() {
   }
 
   const getCoinIcon = (type: string) => {
-    return type === 'earned' ? '🪙' : '💸'
+    return type === 'earned' ? 'star.circle.fill' : 'minus.circle.fill'
   }
 
   const getCoinColor = (type: string) => {
-    return type === 'earned' ? '#FFD700' : '#FF6B6B'
+    return type === 'earned' ? tintColor : '#FF6B6B'
   }
 
   const getCoinPrefix = (type: string) => {
@@ -94,18 +100,25 @@ export default function CoinsScreen() {
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      <ScrollView style={styles.scrollContainer}>
-        {/* Header */}
-        <ThemedView style={styles.header}>
+      {/* Fixed Header */}
+      <ThemedView style={styles.header}>
+        <View style={styles.headerTop}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
             เหรียญสะสม
           </ThemedText>
-          <ThemedView style={styles.placeholder} />
-        </ThemedView>
+          <View style={styles.backButton} />
+        </View>
+      </ThemedView>
 
+      {/* Scrollable Content */}
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* User Info Card */}
         <ThemedView style={styles.userCard}>
           <Image
@@ -129,16 +142,21 @@ export default function CoinsScreen() {
             <ThemedText style={styles.balanceLabel}>
               เหรียญสะสมทั้งหมด
             </ThemedText>
-            <IconSymbol name='star.circle.fill' size={32} color='#FFD700' />
+            <IconSymbol name='star.circle.fill' size={32} color={tintColor} />
           </ThemedView>
           <ThemedView style={styles.balanceAmount}>
-            <ThemedText style={styles.coinIcon}>🪙</ThemedText>
+            <IconSymbol
+              name='star.circle.fill'
+              size={48}
+              color={tintColor}
+              style={styles.coinIcon}
+            />
             <ThemedText type='title' style={styles.coinNumber}>
               {mockCoinData.totalCoins}
             </ThemedText>
-            <ThemedText style={styles.coinUnit}>เหรียญ</ThemedText>
+            {/* <ThemedText style={styles.coinUnit}>เหรียญ</ThemedText> */}
           </ThemedView>
-          <ThemedView style={styles.balanceStats}>
+          {/* <ThemedView style={styles.balanceStats}>
             <ThemedView style={styles.statItem}>
               <ThemedText style={styles.statNumber}>
                 {mockCoinData.coinHistory.length}
@@ -154,7 +172,7 @@ export default function CoinsScreen() {
               </ThemedText>
               <ThemedText style={styles.statLabel}>เฉลี่ยต่อครั้ง</ThemedText>
             </ThemedView>
-          </ThemedView>
+          </ThemedView> */}
         </ThemedView>
 
         {/* Coin History Section */}
@@ -171,9 +189,11 @@ export default function CoinsScreen() {
           {mockCoinData.coinHistory.map((item) => (
             <ThemedView key={item.id} style={styles.historyItem}>
               <ThemedView style={styles.historyIcon}>
-                <ThemedText style={styles.historyCoinIcon}>
-                  {getCoinIcon(item.type)}
-                </ThemedText>
+                <IconSymbol
+                  name={getCoinIcon(item.type)}
+                  size={24}
+                  color={item.type === 'earned' ? tintColor : '#FF6B6B'}
+                />
               </ThemedView>
 
               <ThemedView style={styles.historyContent}>
@@ -253,31 +273,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContainer: {
+  content: {
     flex: 1,
   },
+  scrollContent: {
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
   header: {
+    paddingTop: Platform.OS === 'ios' ? 70 : 40,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     textAlign: 'center',
-    flex: 1,
-  },
-  placeholder: {
-    width: 40,
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   userCard: {
     flexDirection: 'row',
@@ -316,7 +340,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 24,
     borderRadius: 20,
-    backgroundColor: 'linear-gradient(135deg, #FFD700, #FFA500)',
+    backgroundColor: 'white',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -334,28 +358,29 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 16,
-    color: '#8B4513',
+    color: '#333',
+    lineHeight: 24,
     fontFamily: 'Prompt-SemiBold',
   },
   balanceAmount: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 6,
   },
   coinIcon: {
-    fontSize: 48,
     marginRight: 12,
   },
   coinNumber: {
     fontSize: 48,
-    color: '#8B4513',
+    color: '#333',
     fontFamily: 'Prompt-Bold',
     marginRight: 8,
+    lineHeight: 72,
   },
   coinUnit: {
     fontSize: 20,
-    color: '#8B4513',
+    color: '#333',
     fontFamily: 'Prompt-Medium',
   },
   balanceStats: {
@@ -369,19 +394,19 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 20,
     fontFamily: 'Prompt-Bold',
-    color: '#8B4513',
+    color: '#333',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#8B4513',
+    color: '#666',
     opacity: 0.8,
     textAlign: 'center',
   },
   statDivider: {
     width: 1,
     height: 40,
-    backgroundColor: 'rgba(139, 69, 19, 0.3)',
+    backgroundColor: '#E5E5E5',
   },
   historySection: {
     marginHorizontal: 20,
@@ -391,7 +416,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    marginBottom: 8,
+    marginTop: 12,
+    marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: 14,
@@ -403,6 +429,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderRadius: 12,
+    backgroundColor: 'white',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -416,13 +443,10 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    backgroundColor: 'rgba(24, 58, 124, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
-  },
-  historyCoinIcon: {
-    fontSize: 24,
   },
   historyContent: {
     flex: 1,
@@ -463,6 +487,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     padding: 20,
     borderRadius: 16,
+    backgroundColor: 'white',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
