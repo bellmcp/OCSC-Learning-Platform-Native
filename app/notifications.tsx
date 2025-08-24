@@ -117,7 +117,7 @@ export default function NotificationsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {mockNotifications.map((notification) => (
-          <TouchableOpacity
+          <ThemedView
             key={notification.id}
             style={[
               styles.notificationItem,
@@ -125,18 +125,17 @@ export default function NotificationsScreen() {
             ]}
           >
             {/* Notification Icon */}
-            <View style={styles.iconContainer}>
+            <ThemedView style={styles.iconContainer}>
               <IconSymbol
                 name={notification.icon as any}
                 size={24}
                 color={iconColor}
               />
-            </View>
+            </ThemedView>
 
             {/* Notification Content */}
             <View style={styles.notificationContent}>
               <ThemedText
-                type='defaultSemiBold'
                 style={[
                   styles.notificationTitle,
                   !notification.isRead && styles.unreadTitle,
@@ -147,16 +146,18 @@ export default function NotificationsScreen() {
               <ThemedText style={styles.notificationMessage}>
                 {notification.message}
               </ThemedText>
-              <ThemedText style={styles.notificationTimestamp}>
-                {notification.timestamp}
-              </ThemedText>
+              <View style={styles.notificationMeta}>
+                <ThemedText style={styles.notificationTimestamp}>
+                  {notification.timestamp}
+                </ThemedText>
+              </View>
             </View>
 
             {/* Unread Indicator */}
             {!notification.isRead && (
               <ThemedView style={styles.unreadIndicator} />
             )}
-          </TouchableOpacity>
+          </ThemedView>
         ))}
       </ScrollView>
 
@@ -213,16 +214,15 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingTop: 20,
   },
   notificationItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginVertical: 8,
-    backgroundColor: 'white',
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 12,
     borderRadius: 12,
+    backgroundColor: 'white',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -241,16 +241,18 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: 'rgba(24, 58, 124, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
   },
   notificationContent: {
     flex: 1,
+    marginRight: 16,
   },
   notificationTitle: {
     fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
     marginBottom: 4,
     lineHeight: 22,
   },
@@ -259,13 +261,17 @@ const styles = StyleSheet.create({
   },
   notificationMessage: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    opacity: 0.7,
+    marginBottom: 4,
     lineHeight: 20,
+  },
+  notificationMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   notificationTimestamp: {
     fontSize: 12,
-    color: '#999',
+    opacity: 0.6,
   },
   unreadIndicator: {
     width: 8,
@@ -273,7 +279,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#FF4444',
     marginLeft: 12,
-    marginTop: 8,
   },
   fixedButtonContainer: {
     position: 'absolute',
