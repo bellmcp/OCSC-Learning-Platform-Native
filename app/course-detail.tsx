@@ -13,6 +13,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { courseCategories } from '@/constants/CourseCategories'
+import { CourseRounds } from '@/constants/CourseRounds'
 import { courses } from '@/constants/Courses'
 import { useThemeColor } from '@/hooks/useThemeColor'
 
@@ -45,6 +46,10 @@ export default function CourseDetailScreen() {
     (cat: { id: number; courseCategory: string }) =>
       cat.id === course?.courseCategoryId
   )
+
+  // Find course round for this course (using courseId for demo)
+  const courseRound =
+    CourseRounds.find((round) => round.courseId === 1089) || CourseRounds[0]
 
   if (!course) {
     return (
@@ -92,7 +97,7 @@ export default function CourseDetailScreen() {
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
-            รายวิชา
+            รายละเอียดรายวิชา
           </ThemedText>
           <View style={styles.backButton} />
         </View>
@@ -111,7 +116,6 @@ export default function CourseDetailScreen() {
             style={styles.heroImage}
             contentFit='cover'
             transition={200}
-            blurRadius={2}
           />
           <View style={styles.imageOverlay} />
           <View style={styles.gradientOverlay} />
@@ -137,25 +141,100 @@ export default function CourseDetailScreen() {
         {/* Course Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <IconSymbol name='chart.bar' size={18} color={tintColor} />
-            <ThemedText style={styles.statLabel}>วิธีการประเมินผล</ThemedText>
-            <ThemedText style={styles.statValue}>
-              ทำแบบทดสอบหลังเรียนได้ตั้งแต่ 60 % ขึ้นไป
-            </ThemedText>
+            <IconSymbol name='person.circle' size={20} color={tintColor} />
+            <ThemedText style={styles.statLabel}>วิทยากร</ThemedText>
+            <ThemedText style={styles.statValue}>Microsoft Thailand</ThemedText>
           </View>
           <View style={styles.statCard}>
-            <IconSymbol name='target' size={18} color={tintColor} />
+            <IconSymbol name='target' size={20} color={tintColor} />
             <ThemedText style={styles.statLabel}>กลุ่มเป้าหมาย</ThemedText>
-            <ThemedText style={styles.statValue}>
-              บุคลากรภาครัฐ{'\n'}บุคคลทั่วไป
-            </ThemedText>
+            <ThemedText style={styles.statValue}>บุคคลทั่วไป</ThemedText>
           </View>
           <View style={styles.statCard}>
-            <IconSymbol name='info.circle' size={18} color={tintColor} />
-            <ThemedText style={styles.statLabel}>หมายเหตุ</ThemedText>
-            <ThemedText style={styles.statValue}>
-              ไม่มีข้อกำหนดข้อมูลสำเนีอื่นนอกจาก
+            <IconSymbol name='clock' size={20} color={tintColor} />
+            <ThemedText style={styles.statLabel}>จำนวนชั่วโมง</ThemedText>
+            <ThemedText style={styles.statValue}>3 ชั่วโมง</ThemedText>
+          </View>
+        </View>
+
+        {/* Course Round Section */}
+        <View style={styles.roundContainer}>
+          <View style={styles.roundHeader}>
+            <ThemedText style={styles.roundTitle}>
+              {courseRound.name}
             </ThemedText>
+            <View style={styles.registrationCount}>
+              <ThemedText style={styles.registrationNumber}>
+                {courseRound.numStudents.toLocaleString()} คน
+              </ThemedText>
+              <ThemedText style={styles.registrationText}>
+                ลงทะเบียนเรียนรอบนี้แล้ว
+              </ThemedText>
+            </View>
+          </View>
+
+          <View style={styles.roundInfo}>
+            <View style={styles.infoRow}>
+              <ThemedText style={styles.infoLabel}>เปิดให้ลงทะเบียน</ThemedText>
+              <ThemedText style={styles.infoValue}>
+                {new Date(courseRound.registrationStart).toLocaleDateString(
+                  'th-TH',
+                  {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  }
+                )}{' '}
+                ถึง{' '}
+                {new Date(courseRound.registrationEnd).toLocaleDateString(
+                  'th-TH',
+                  {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  }
+                )}
+              </ThemedText>
+            </View>
+            <View style={styles.infoRow}>
+              <ThemedText style={styles.infoLabel}>
+                เงื่อนไขการลงทะเบียน
+              </ThemedText>
+              <ThemedText style={styles.infoValue}>
+                {courseRound.registrationCondition || 'ไม่มีเงื่อนไข'}
+              </ThemedText>
+            </View>
+            <View style={styles.infoRow}>
+              <ThemedText style={styles.infoLabel}>เข้าเรียนได้</ThemedText>
+              <ThemedText style={styles.infoValue}>
+                {new Date(courseRound.courseStart).toLocaleDateString('th-TH', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}{' '}
+                ถึง{' '}
+                {courseRound.courseEnd === '3000-01-01T00:00:00'
+                  ? 'ไม่มีกำหนด'
+                  : new Date(courseRound.courseEnd).toLocaleDateString(
+                      'th-TH',
+                      {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      }
+                    )}
+              </ThemedText>
+            </View>
+
+            {/* Registration Button */}
+            <TouchableOpacity
+              style={[styles.registerButton, { backgroundColor: tintColor }]}
+            >
+              <IconSymbol name='arrow.right.square' size={20} color='white' />
+              <ThemedText style={styles.registerButtonText}>
+                ลงทะเบียนเรียน
+              </ThemedText>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -177,13 +256,13 @@ export default function CourseDetailScreen() {
           {/* Instructor Section */}
           <ThemedView style={styles.section}>
             <View style={styles.sectionHeader}>
-              <IconSymbol name='person.circle' size={20} color={tintColor} />
+              <IconSymbol name='chart.bar' size={20} color={tintColor} />
               <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                วิทยากร
+                วิธีการประเมินผล
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(course.instructor)}
+              ทำแบบทดสอบหลังเรียนได้ตั้งแต่ 60 % ขึ้นไป
             </ThemedText>
           </ThemedView>
 
@@ -196,27 +275,52 @@ export default function CourseDetailScreen() {
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(course.learningTopic)}
-            </ThemedText>
-          </ThemedView>
-
-          {/* Target Group Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='person.2' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                กลุ่มเป้าหมาย
+              <ThemedText style={styles.listItem}>
+                1. ประวัติโดยย่อของ AI
               </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(course.targetGroup)}
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                2. ปัญญาประดิษฐ์คืออะไร
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                3. เปรียบความฉลาดกับความรู้
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                4. ข้อมูลอยู่ทุกที่
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                5. การค้นหารูปแบบในข้อมูล
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                6. Machine Learning
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                7. ประเภทของ Machine Learning
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                8. การเรียนรู้เชิงลึก
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                9. การประมวลผลภาษาธรรมชาติ (NLP)
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.listItem}>
+                10. อัลกอริทึมของ AI
+              </ThemedText>
             </ThemedText>
           </ThemedView>
 
           {/* Assessment Section */}
           <ThemedView style={styles.section}>
             <View style={styles.sectionHeader}>
-              <IconSymbol name='chart.bar' size={20} color={tintColor} />
+              <IconSymbol name='info.circle' size={20} color={tintColor} />
               <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
                 หมายเหตุ
               </ThemedText>
@@ -226,7 +330,7 @@ export default function CourseDetailScreen() {
             </ThemedText>
           </ThemedView>
 
-          {/* Learning Hours Section */}
+          {/* Learning Hours Section
           <ThemedView style={styles.section}>
             <View style={styles.sectionHeader}>
               <IconSymbol name='clock' size={20} color={tintColor} />
@@ -235,21 +339,9 @@ export default function CourseDetailScreen() {
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>4 ชั่วโมง</ThemedText>
-          </ThemedView>
+          </ThemedView> */}
         </View>
       </ScrollView>
-
-      {/* Fixed Registration Button */}
-      <View style={[styles.fixedButtonContainer, { backgroundColor }]}>
-        <TouchableOpacity
-          style={[styles.registerButton, { backgroundColor: tintColor }]}
-        >
-          <IconSymbol name='arrow.right.square' size={20} color='white' />
-          <ThemedText style={styles.registerButtonText}>
-            ลงทะเบียนเรียน
-          </ThemedText>
-        </TouchableOpacity>
-      </View>
     </ThemedView>
   )
 }
@@ -285,7 +377,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100, // Add space for fixed button
+    paddingBottom: 20, // Reduced from 100 since no fixed button
   },
   imageContainer: {
     height: 300,
@@ -342,15 +434,15 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   courseType: {
-    fontSize: 14,
+    fontSize: 16,
     color: 'white',
-    fontFamily: 'Prompt-SemiBold',
+    fontFamily: 'Prompt-Medium',
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   heroTitle: {
-    fontSize: 28,
+    fontSize: 32,
     color: 'white',
     fontFamily: 'Prompt-SemiBold',
     lineHeight: 36,
@@ -360,7 +452,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   courseCode: {
-    fontSize: 16,
+    fontSize: 20,
     color: 'white',
     fontFamily: 'Prompt-Medium',
     opacity: 0.9,
@@ -394,19 +486,20 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#6B7280',
-    marginTop: 8,
-    marginBottom: 4,
+    marginTop: 10,
+    marginBottom: 10,
     fontFamily: 'Prompt-Regular',
     textAlign: 'center',
+    lineHeight: 18,
   },
   statValue: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#374151',
     fontFamily: 'Prompt-SemiBold',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   mainContent: {
     padding: 20,
@@ -447,24 +540,89 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
   },
-  fixedButtonContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
-    borderTopWidth: 0.5,
-    borderTopColor: '#F0F0F0',
+  listItem: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#6B7280',
+    fontFamily: 'Prompt-Regular',
+    marginBottom: 6,
+    paddingHorizontal: 8,
+  },
+  roundContainer: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  roundHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  roundTitle: {
+    fontSize: 20,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#374151',
+  },
+  registrationCount: {
+    alignItems: 'flex-end',
+  },
+  registrationNumber: {
+    fontSize: 24,
+    lineHeight: 32,
+    fontFamily: 'Prompt-Bold',
+    color: '#183A7C',
+  },
+  registrationText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 0,
+    fontFamily: 'Prompt-Regular',
+  },
+  roundInfo: {
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 16,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontFamily: 'Prompt-Regular',
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#374151',
+    fontFamily: 'Prompt-Medium',
+    textAlign: 'right',
+    flex: 1,
+    marginLeft: 16,
   },
   registerButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 16,
+    marginTop: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

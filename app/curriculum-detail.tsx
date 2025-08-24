@@ -171,7 +171,25 @@ export default function CurriculumDetailScreen() {
               </ThemedText>
             </View>
             <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.targetGroup)}
+              <ThemedText style={styles.bulletItem}>
+                • เป็นข้าราชการพลเรือน หรือข้าราชการประเภทอื่น ๆ
+                ที่ได้รับอนุญาตให้เรียนได้
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.bulletItem}>
+                • เป็นผู้มีวินัยต่อการพัฒนาตนเอง
+                มีความตั้งใจจริงในการเข้ารับการอบรมแบบออนไลน์
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.bulletItem}>
+                • พร้อมจะปฏิบัติตามหลักเกณฑ์
+              </ThemedText>
+              {'\n'}
+              <ThemedText style={styles.bulletItem}>
+                •
+                เป็นผู้สามารถใช้เครื่องคอมพิวเตอร์ที่เชื่อมต่อระบบเครือข่ายอินเทอร์เน็ต
+                เพื่อการอบรมออนไลน์ได้ตามกำหนด
+              </ThemedText>
             </ThemedText>
           </ThemedView>
         </View>
@@ -290,7 +308,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   curriculumCode: {
-    fontSize: 16,
+    fontSize: 20,
     color: 'white',
     fontFamily: 'Prompt-Medium',
     opacity: 0.9,
@@ -371,6 +389,14 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
+  },
+  bulletItem: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#6B7280',
+    fontFamily: 'Prompt-Regular',
+    marginBottom: 12,
+    paddingLeft: 8,
   },
   fixedButtonContainer: {
     position: 'absolute',
