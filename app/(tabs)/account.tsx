@@ -82,6 +82,18 @@ export default function AccountScreen() {
         <ThemedText type='title' style={styles.loginHeaderTitle}>
           เข้าสู่ระบบ
         </ThemedText>
+
+        {/* Notification Bell Icon for Login */}
+        <TouchableOpacity
+          style={styles.loginNotificationBell}
+          onPress={() => router.push('/notifications' as any)}
+        >
+          <IconSymbol name='bell' size={24} color={iconColor} />
+          {/* Notification Badge */}
+          <ThemedView style={styles.notificationBadge}>
+            <ThemedText style={styles.notificationBadgeText}>3</ThemedText>
+          </ThemedView>
+        </TouchableOpacity>
       </ThemedView>
 
       <ThemedView style={styles.loginCard}>
@@ -227,6 +239,18 @@ export default function AccountScreen() {
               contentFit='cover'
             />
           </ThemedView>
+
+          {/* Notification Bell Icon */}
+          <TouchableOpacity
+            style={styles.notificationBell}
+            onPress={() => router.push('/notifications' as any)}
+          >
+            <IconSymbol name='bell' size={24} color={iconColor} />
+            {/* Notification Badge */}
+            <ThemedView style={styles.notificationBadge}>
+              <ThemedText style={styles.notificationBadgeText}>3</ThemedText>
+            </ThemedView>
+          </TouchableOpacity>
 
           <ThemedView style={styles.userInfo}>
             <ThemedText type='title' style={styles.userName}>
@@ -379,6 +403,7 @@ const styles = StyleSheet.create({
   loginHeader: {
     paddingHorizontal: 20,
     paddingBottom: 20,
+    position: 'relative',
   },
   loginHeaderTitle: {
     textAlign: 'center',
@@ -669,5 +694,43 @@ const styles = StyleSheet.create({
     height: 24,
     marginRight: 8,
     borderRadius: 4,
+  },
+  notificationBell: {
+    position: 'absolute',
+    top: 100,
+    right: 30,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#FF4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  notificationBadgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontFamily: 'Prompt-SemiBold',
+    lineHeight: 18,
+  },
+  loginNotificationBell: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
 })
