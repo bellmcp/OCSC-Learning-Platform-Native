@@ -114,6 +114,7 @@ export default function NotificationsScreen() {
       {/* Notifications List */}
       <ScrollView
         style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {mockNotifications.map((notification) => (
@@ -213,8 +214,11 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
   },
   notificationItem: {
     flexDirection: 'row',

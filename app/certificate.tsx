@@ -98,7 +98,7 @@ export default function CertificateScreen() {
         <ThemedView style={styles.certificateContainer}>
           <ThemedView style={styles.certificateHeader}>
             <Image
-              source={require('@/assets/images/thaid_logo.jpg')}
+              source={require('@/assets/images/logo192.png')}
               style={styles.logo}
               contentFit='contain'
             />
