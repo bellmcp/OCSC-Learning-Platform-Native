@@ -238,6 +238,7 @@ export default function RootLayout() {
               name='notifications'
               options={{ headerShown: false }}
             />
+            <Stack.Screen name='coins' options={{ headerShown: false }} />
           </Stack>
           <StatusBar style='dark' backgroundColor='transparent' translucent />
         </ThemeProvider>

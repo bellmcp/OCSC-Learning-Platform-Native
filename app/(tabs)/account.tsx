@@ -279,7 +279,10 @@ export default function AccountScreen() {
 
           <ThemedView style={styles.statDivider} />
 
-          <ThemedView style={styles.statItem}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => router.push('/coins' as any)}
+          >
             <IconSymbol name='star.circle' size={32} color={tintColor} />
             <ThemedText
               type='title'
@@ -288,7 +291,7 @@ export default function AccountScreen() {
               {mockUser.totalHours}
             </ThemedText>
             <ThemedText style={styles.statLabel}>จำนวนเหรียญสะสม</ThemedText>
-          </ThemedView>
+          </TouchableOpacity>
         </ThemedView>
 
         {/* Profile Details */}
@@ -317,7 +320,7 @@ export default function AccountScreen() {
             </ThemedView>
           </ThemedView>
 
-          <ThemedView style={styles.detailItem}>
+          {/* <ThemedView style={styles.detailItem}>
             <IconSymbol name='building.2' size={20} color={iconColor} />
             <ThemedView style={styles.detailContent}>
               <ThemedText style={styles.detailLabel}>หน่วยงาน</ThemedText>
@@ -325,7 +328,7 @@ export default function AccountScreen() {
                 {mockUser.department}
               </ThemedText>
             </ThemedView>
-          </ThemedView>
+          </ThemedView> */}
         </ThemedView>
 
         {/* Action Buttons */}
