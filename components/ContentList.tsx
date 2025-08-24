@@ -13,6 +13,7 @@ interface ContentListProps {
   completedContents: Set<number>
   onContentSelect: (contentId: number) => void
   onScrollToTop?: () => void
+  hideHeader?: boolean
 }
 
 const formatDuration = (minutes?: number | null): string => {
@@ -44,6 +45,7 @@ export function ContentList({
   completedContents,
   onContentSelect,
   onScrollToTop,
+  hideHeader,
 }: ContentListProps) {
   const renderContentItem = ({
     item,
@@ -114,12 +116,14 @@ export function ContentList({
 
   return (
     <ThemedView style={styles.bottomSection}>
-      <ThemedView style={styles.sectionHeader}>
-        <ThemedText style={styles.sectionTitle}>สารบัญ</ThemedText>
-        <ThemedText style={styles.progressSummary}>
-          สำเร็จแล้ว {completedContents.size}/{contents.length} รายการ
-        </ThemedText>
-      </ThemedView>
+      {!hideHeader && (
+        <ThemedView style={styles.sectionHeader}>
+          <ThemedText style={styles.sectionTitle}>สารบัญ</ThemedText>
+          <ThemedText style={styles.progressSummary}>
+            สำเร็จแล้ว {completedContents.size}/{contents.length} รายการ
+          </ThemedText>
+        </ThemedView>
+      )}
       <ThemedView style={styles.contentListWrapper}>
         {contents.map((item, index) => (
           <ThemedView key={item.id.toString()}>
@@ -134,8 +138,6 @@ export function ContentList({
 const styles = StyleSheet.create({
   bottomSection: {
     backgroundColor: 'transparent',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
     paddingTop: 20,
     paddingBottom: 40,
   },

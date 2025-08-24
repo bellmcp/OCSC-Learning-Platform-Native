@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native'
 
+import { ContentList } from '@/components/ContentList'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
@@ -328,6 +329,98 @@ export default function CourseDetailScreen() {
             <ThemedText style={styles.sectionContent}>
               ไม่มีข้อกำหนดเอกสารใดนอกจากไฟล์
             </ThemedText>
+          </ThemedView>
+
+          {/* Course Content Section */}
+          <ThemedView style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <IconSymbol name='book.closed' size={20} color={tintColor} />
+              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                ประมวลรายวิชา
+              </ThemedText>
+            </View>
+            <View style={styles.contentListContainer}>
+              <ContentList
+                contents={[
+                  {
+                    id: 1,
+                    courseId: 1089,
+                    no: 1,
+                    name: 'บทที่ 1: ความรู้เบื้องต้นเกี่ยวกับ AI',
+                    type: 'c',
+                    minutes: 45,
+                    completed: false,
+                  },
+                  {
+                    id: 2,
+                    courseId: 1089,
+                    no: 2,
+                    name: 'บทที่ 2: ประวัติและวิวัฒนาการของ AI',
+                    type: 'c',
+                    minutes: 60,
+                    completed: false,
+                  },
+                  {
+                    id: 3,
+                    courseId: 1089,
+                    no: 3,
+                    name: 'บทที่ 3: Machine Learning Fundamentals',
+                    type: 'c',
+                    minutes: 75,
+                    completed: false,
+                  },
+                  {
+                    id: 4,
+                    courseId: 1089,
+                    no: 4,
+                    name: 'แบบทดสอบบทที่ 1-3',
+                    type: 't',
+                    minutes: 30,
+                    completed: false,
+                  },
+                  {
+                    id: 5,
+                    courseId: 1089,
+                    no: 5,
+                    name: 'บทที่ 4: Deep Learning และ Neural Networks',
+                    type: 'c',
+                    minutes: 90,
+                    completed: false,
+                  },
+                  {
+                    id: 6,
+                    courseId: 1089,
+                    no: 6,
+                    name: 'บทที่ 5: Natural Language Processing',
+                    type: 'c',
+                    minutes: 60,
+                    completed: false,
+                  },
+                  {
+                    id: 7,
+                    courseId: 1089,
+                    no: 7,
+                    name: 'แบบทดสอบบทที่ 4-5',
+                    type: 't',
+                    minutes: 30,
+                    completed: false,
+                  },
+                  {
+                    id: 8,
+                    courseId: 1089,
+                    no: 8,
+                    name: 'แบบประเมินผลการเรียนรู้',
+                    type: 'e',
+                    minutes: 45,
+                    completed: false,
+                  },
+                ]}
+                selectedContentId={null}
+                completedContents={new Set()}
+                onContentSelect={() => {}} // No-op function since this is static
+                hideHeader={true}
+              />
+            </View>
           </ThemedView>
 
           {/* Learning Hours Section
@@ -661,5 +754,11 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     lineHeight: 20,
     marginBottom: 4,
+  },
+  contentListContainer: {
+    paddingHorizontal: 0,
+    marginVertical: -24,
+    marginBottom: -48,
+    marginHorizontal: -24, // Compensate for the section padding
   },
 })
