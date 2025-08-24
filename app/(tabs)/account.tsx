@@ -82,18 +82,6 @@ export default function AccountScreen() {
         <ThemedText type='title' style={styles.loginHeaderTitle}>
           เข้าสู่ระบบ
         </ThemedText>
-
-        {/* Notification Bell Icon for Login */}
-        <TouchableOpacity
-          style={styles.loginNotificationBell}
-          onPress={() => router.push('/notifications' as any)}
-        >
-          <IconSymbol name='bell' size={24} color={iconColor} />
-          {/* Notification Badge */}
-          <ThemedView style={styles.notificationBadge}>
-            <ThemedText style={styles.notificationBadgeText}>3</ThemedText>
-          </ThemedView>
-        </TouchableOpacity>
       </ThemedView>
 
       <ThemedView style={styles.loginCard}>
