@@ -3,10 +3,12 @@ import { router } from 'expo-router'
 import React, { useContext, useRef, useState } from 'react'
 import {
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  View,
 } from 'react-native'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
@@ -39,8 +41,10 @@ export default function AccountScreen() {
   const { isLoggedIn, setIsLoggedIn } = useContext(LoginContext)
 
   // Local form state
+  const [activeTab, setActiveTab] = useState(0) // 0 = ThaiD, 1 = Traditional
   const [citizenId, setCitizenId] = useState('')
   const [password, setPassword] = useState('')
+  const [otp, setOtp] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
   // Reset scroll position when component mounts or becomes visible
@@ -57,6 +61,7 @@ export default function AccountScreen() {
     setIsLoggedIn(true)
     setCitizenId('')
     setPassword('')
+    setOtp('')
   }
 
   const handleLogout = () => {
@@ -74,112 +79,232 @@ export default function AccountScreen() {
     router.push('/certificate')
   }
 
-  // Login Form Component
+  // Login Form Component with Tabs
   const LoginForm = () => (
     <ThemedView style={styles.loginContainer}>
       {/* Header */}
-      <ThemedView style={styles.loginHeader}>
-        <ThemedText type='title' style={styles.loginHeaderTitle}>
+      <ThemedView style={styles.header}>
+        <ThemedText type='title' style={styles.headerTitle}>
           เข้าสู่ระบบ
         </ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.loginCard}>
-        {/* Citizen ID Input */}
-        <ThemedView style={styles.inputContainer}>
-          <ThemedText style={styles.inputLabel}>
-            เลขประจำตัวประชาชน{' '}
-            <ThemedText style={styles.required}>*</ThemedText>
-          </ThemedText>
-          <ThemedView style={styles.inputWrapper}>
-            <IconSymbol
-              name='person'
-              size={20}
-              color={iconColor}
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.textInput}
-              value={citizenId}
-              onChangeText={setCitizenId}
-              placeholder='กรอกเลขประจำตัวประชาชน'
-              placeholderTextColor='#999'
-              keyboardType='numeric'
-              maxLength={13}
-            />
-          </ThemedView>
-        </ThemedView>
+      {/* Tab Navigation */}
+      <ThemedView style={styles.tabSection}>
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
 
-        {/* Password Input */}
-        <ThemedView style={styles.inputContainer}>
-          <ThemedText style={styles.inputLabel}>
-            รหัสผ่าน <ThemedText style={styles.required}>*</ThemedText>
-          </ThemedText>
-          <ThemedView style={styles.inputWrapper}>
-            <IconSymbol
-              name='lock'
-              size={20}
-              color={iconColor}
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.textInput}
-              value={password}
-              onChangeText={setPassword}
-              placeholder='กรอกรหัสผ่าน'
-              placeholderTextColor='#999'
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.passwordToggle}
-            >
-              <IconSymbol
-                name={showPassword ? 'eye.slash' : 'eye'}
-                size={20}
-                color={iconColor}
+              activeTab === 0 && {
+                backgroundColor: tintColor,
+                borderColor: tintColor,
+                shadowColor: tintColor,
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 3,
+              },
+              { borderTopRightRadius: 0, borderBottomRightRadius: 0 },
+            ]}
+            onPress={() => setActiveTab(0)}
+            activeOpacity={0.9}
+          >
+            <View style={styles.tabContent}>
+              <Image
+                source={require('@/assets/images/thaid_logo.jpg')}
+                style={[styles.tabIcon, activeTab !== 0 && { opacity: 0.5 }]}
+                contentFit='contain'
               />
+              <ThemedText
+                style={[
+                  styles.tabButtonText,
+                  activeTab === 0 && {
+                    color: '#FFFFFF',
+                    fontWeight: '700',
+                  },
+                ]}
+              >
+                แอปพลิเคชัน ThaiD
+              </ThemedText>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === 1 && {
+                backgroundColor: tintColor,
+                borderColor: tintColor,
+                shadowColor: tintColor,
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 3,
+              },
+              { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 },
+            ]}
+            onPress={() => setActiveTab(1)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.tabContent}>
+              <IconSymbol
+                name='creditcard'
+                size={16}
+                color={activeTab === 1 ? '#FFFFFF' : '#666666'}
+                style={styles.tabIcon}
+              />
+              <ThemedText
+                style={[
+                  styles.tabButtonText,
+                  activeTab === 1 && {
+                    color: '#FFFFFF',
+                    fontWeight: '700',
+                  },
+                ]}
+              >
+                เลขประชาชน {'\n'}รหัสผ่าน และ OTP
+              </ThemedText>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+
+      <ThemedView style={styles.loginCard}>
+        {/* ThaiD Login Tab */}
+        {activeTab === 0 && (
+          <ThemedView style={styles.tabContent}>
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                { backgroundColor: tintColor, marginTop: 16 },
+              ]}
+              onPress={handleLogin}
+            >
+              <Image
+                source={require('@/assets/images/thaid_logo.jpg')}
+                style={styles.thaidLogo}
+                contentFit='contain'
+              />
+              <ThemedText style={styles.actionButtonText}>
+                เข้าสู่ระบบด้วยแอปพลิเคชัน ThaiD
+              </ThemedText>
             </TouchableOpacity>
           </ThemedView>
-        </ThemedView>
+        )}
 
-        {/* Forgot Password */}
-        <TouchableOpacity style={styles.forgotPassword}>
-          <ThemedText style={styles.forgotPasswordText}>ลืมรหัสผ่าน</ThemedText>
-        </TouchableOpacity>
+        {/* Traditional Login Tab */}
+        {activeTab === 1 && (
+          <ThemedView style={styles.tabContent}>
+            {/* Citizen ID Input */}
+            <ThemedView style={styles.inputContainer}>
+              <ThemedText style={styles.inputLabel}>
+                เลขประจำตัวประชาชน{' '}
+                <ThemedText style={styles.required}>*</ThemedText>
+              </ThemedText>
+              <ThemedView style={styles.inputWrapper}>
+                <IconSymbol
+                  name='person'
+                  size={20}
+                  color={iconColor}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  value={citizenId}
+                  onChangeText={setCitizenId}
+                  placeholder='1-2345-67890-12-3'
+                  placeholderTextColor='#999'
+                  keyboardType='numeric'
+                  maxLength={13}
+                />
+              </ThemedView>
+            </ThemedView>
 
-        {/* Login Button */}
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: tintColor, marginTop: 16 },
-          ]}
-          onPress={handleLogin}
-        >
-          <IconSymbol name='arrow.right.square' size={20} color='white' />
-          <ThemedText style={styles.actionButtonText}>เข้าสู่ระบบ</ThemedText>
-        </TouchableOpacity>
+            {/* Password Input */}
+            <ThemedView style={styles.inputContainer}>
+              <ThemedText style={styles.inputLabel}>
+                รหัสผ่าน <ThemedText style={styles.required}>*</ThemedText>
+              </ThemedText>
+              <ThemedView style={styles.inputWrapper}>
+                <IconSymbol
+                  name='lock'
+                  size={20}
+                  color={iconColor}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder='........'
+                  placeholderTextColor='#999'
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.passwordToggle}
+                >
+                  <IconSymbol
+                    name={showPassword ? 'eye.slash' : 'eye'}
+                    size={20}
+                    color={iconColor}
+                  />
+                </TouchableOpacity>
+              </ThemedView>
+            </ThemedView>
 
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            styles.secondaryButton,
-            { marginTop: 16, marginBottom: 32 },
-          ]}
-          onPress={handleLogin}
-        >
-          <Image
-            source={require('@/assets/images/thaid_logo.jpg')}
-            style={styles.thaidLogo}
-            contentFit='contain'
-          />
-          <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
-            เข้าสู่ระบบด้วยแอปพลิเคชัน ThaiD
-          </ThemedText>
-        </TouchableOpacity>
+            {/* OTP Input */}
+            <ThemedView style={styles.inputContainer}>
+              <ThemedText style={styles.inputLabel}>
+                OTP จากโมบายแอป JOB OCSC (6 หลัก){' '}
+                <ThemedText style={styles.required}>*</ThemedText>
+              </ThemedText>
+              <ThemedView style={styles.inputWrapper}>
+                <IconSymbol
+                  name='ellipsis'
+                  size={20}
+                  color={iconColor}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  value={otp}
+                  onChangeText={setOtp}
+                  placeholder='0 0 0 0 0 0'
+                  placeholderTextColor='#999'
+                  keyboardType='numeric'
+                  maxLength={6}
+                />
+              </ThemedView>
+            </ThemedView>
 
-        {/* Divider */}
-        <ThemedView style={styles.divider} />
+            {/* Forgot Password */}
+            <TouchableOpacity style={styles.forgotPassword}>
+              <ThemedText
+                style={[styles.forgotPasswordText, { color: tintColor }]}
+              >
+                ลืมรหัสผ่าน
+              </ThemedText>
+              <IconSymbol
+                name='chevron.right'
+                size={16}
+                color={tintColor}
+                style={styles.arrowIcon}
+              />
+            </TouchableOpacity>
+
+            {/* Login Button */}
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                { backgroundColor: '#ccc', marginTop: 16 },
+              ]}
+              onPress={handleLogin}
+            >
+              <ThemedText style={styles.actionButtonText}>
+                เข้าสู่ระบบ
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        )}
 
         {/* Registration Link */}
         <ThemedView style={styles.registrationContainer}>
@@ -219,7 +344,7 @@ export default function AccountScreen() {
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <ScrollView ref={scrollViewRef} style={styles.scrollContainer}>
         {/* Header Section */}
-        <ThemedView style={styles.header}>
+        <ThemedView style={styles.profileHeader}>
           <ThemedView style={styles.avatarContainer}>
             {/* <Image
               source={{ uri: mockUser.avatar }}
@@ -410,28 +535,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 100,
   },
-  loginHeader: {
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 80 : 40,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    position: 'relative',
   },
-  loginHeaderTitle: {
+  headerTitle: {
     textAlign: 'center',
     marginTop: 24,
     marginBottom: 0,
   },
   loginCard: {
     width: '100%',
-    padding: 20,
+    padding: 24,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    marginTop: 0,
+    backgroundColor: 'white',
   },
 
   inputContainer: {
@@ -448,11 +575,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderWidth: 1.5,
+    borderColor: '#E0E0E0',
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   inputIcon: {
     marginRight: 12,
@@ -467,13 +602,15 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   forgotPassword: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
     marginBottom: 24,
   },
   forgotPasswordText: {
     fontSize: 14,
-    color: '#666',
-    textDecorationLine: 'underline',
+    fontFamily: 'Prompt-Regular',
+    marginRight: 4,
   },
 
   divider: {
@@ -483,6 +620,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   registrationContainer: {
+    marginTop: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -504,8 +642,56 @@ const styles = StyleSheet.create({
   arrowIcon: {
     marginLeft: 2,
   },
+  // Tab styles
+  tabSection: {},
+  tabContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  tabButton: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+    transform: [{ scale: 1 }],
+  },
+
+  tabIcon: {
+    width: 24,
+    height: 24,
+    marginBottom: 6,
+  },
+
+  tabContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 100,
+  },
+  tabButtonText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontFamily: 'Prompt-Medium',
+    color: '#666666',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+
   // Existing account styles
-  header: {
+  profileHeader: {
     alignItems: 'center',
     paddingTop: 100,
     paddingBottom: 30,
@@ -519,15 +705,13 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    borderWidth: 4,
-    borderColor: '#fff',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 4,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: 16,
     elevation: 8,
   },
   editButton: {
@@ -676,17 +860,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: 11,
     paddingHorizontal: 24,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 3,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
   },
   secondaryButton: {
     backgroundColor: 'transparent',
