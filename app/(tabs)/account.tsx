@@ -76,7 +76,7 @@ export default function AccountScreen() {
   }
 
   const handlePrintCertificate = () => {
-    router.push('/certificate')
+    router.push('/certificate-list')
   }
 
   // Login Form Component with Tabs
