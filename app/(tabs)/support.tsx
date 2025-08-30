@@ -109,18 +109,23 @@ export default function SupportScreen() {
               <ThemedText style={styles.inputLabel}>
                 ปัญหาที่พบ <ThemedText style={styles.required}>*</ThemedText>
               </ThemedText>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  { color: textColor, borderColor: '#F0F0F0' },
-                ]}
-                value={formData.name}
-                onChangeText={(value: string) =>
-                  handleInputChange('name', value)
-                }
-                placeholder='กรุณากรอกปัญหาที่พบ'
-                placeholderTextColor={iconColor}
-              />
+              <ThemedView style={styles.inputWrapper}>
+                <IconSymbol
+                  name='exclamationmark.triangle'
+                  size={20}
+                  color={iconColor}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  value={formData.name}
+                  onChangeText={(value: string) =>
+                    handleInputChange('name', value)
+                  }
+                  placeholder='กรุณากรอกปัญหาที่พบ'
+                  placeholderTextColor='#999'
+                />
+              </ThemedView>
             </ThemedView>
 
             {/* Message Input */}
@@ -128,21 +133,26 @@ export default function SupportScreen() {
               <ThemedText style={styles.inputLabel}>
                 รายละเอียด (ถ้ามี)
               </ThemedText>
-              <TextInput
-                style={[
-                  styles.textAreaInput,
-                  { color: textColor, borderColor: '#F0F0F0' },
-                ]}
-                value={formData.message}
-                onChangeText={(value: string) =>
-                  handleInputChange('message', value)
-                }
-                placeholder='กรุณาระบุรายละเอียดปัญหา'
-                placeholderTextColor={iconColor}
-                multiline
-                numberOfLines={4}
-                textAlignVertical='top'
-              />
+              <ThemedView style={[styles.inputWrapper, styles.textAreaWrapper]}>
+                <IconSymbol
+                  name='doc.text'
+                  size={20}
+                  color={iconColor}
+                  style={[styles.inputIcon, { paddingTop: 32 }]}
+                />
+                <TextInput
+                  style={styles.textAreaInput}
+                  value={formData.message}
+                  onChangeText={(value: string) =>
+                    handleInputChange('message', value)
+                  }
+                  placeholder='กรุณาระบุรายละเอียดปัญหา'
+                  placeholderTextColor='#999'
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical='top'
+                />
+              </ThemedView>
             </ThemedView>
 
             {/* Phone Input */}
@@ -154,19 +164,24 @@ export default function SupportScreen() {
               <ThemedText style={styles.fileHint}>
                 เบอร์โทรศัพท์ หรือ อีเมล และเวลาที่สะดวกติดต่อกลับ (ถ้ามี)
               </ThemedText>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  { color: textColor, borderColor: '#F0F0F0' },
-                ]}
-                value={formData.phone}
-                onChangeText={(value: string) =>
-                  handleInputChange('phone', value)
-                }
-                placeholder='กรุณากรอกช่องทางติดต่อกลับ'
-                placeholderTextColor={iconColor}
-                keyboardType='phone-pad'
-              />
+              <ThemedView style={styles.inputWrapper}>
+                <IconSymbol
+                  name='phone'
+                  size={20}
+                  color={iconColor}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  value={formData.phone}
+                  onChangeText={(value: string) =>
+                    handleInputChange('phone', value)
+                  }
+                  placeholder='กรุณากรอกช่องทางติดต่อกลับ'
+                  placeholderTextColor='#999'
+                  keyboardType='phone-pad'
+                />
+              </ThemedView>
             </ThemedView>
 
             {/* File Upload */}
@@ -177,7 +192,7 @@ export default function SupportScreen() {
               </ThemedText>
 
               <TouchableOpacity
-                style={[styles.fileUploadButton, { borderColor: '#F0F0F0' }]}
+                style={[styles.fileUploadButton]}
                 onPress={handleFileUpload}
               >
                 <IconSymbol name='paperclip' size={20} color={iconColor} />
@@ -271,24 +286,49 @@ const styles = StyleSheet.create({
   required: {
     color: '#ff4444',
   },
-  textInput: {
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
     borderWidth: 1,
-    borderRadius: 8,
+    borderColor: '#E0E0E0',
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  textAreaWrapper: {
+    alignItems: 'flex-start',
+    paddingTop: 12,
+  },
+  textInput: {
+    flex: 1,
     fontSize: 16,
-    backgroundColor: 'transparent',
+    color: '#333',
     fontFamily: 'Prompt-Regular',
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
   },
   textAreaInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    flex: 1,
     fontSize: 16,
-    backgroundColor: 'transparent',
-    minHeight: 100,
+    color: '#333',
     fontFamily: 'Prompt-Regular',
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    minHeight: 100,
   },
   fileHint: {
     fontSize: 12,
@@ -298,12 +338,13 @@ const styles = StyleSheet.create({
   fileUploadButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 1.25,
     borderStyle: 'dashed',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: 'transparent',
+    borderColor: '#E0E0E0',
   },
   fileUploadText: {
     marginLeft: 8,
