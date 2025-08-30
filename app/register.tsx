@@ -4,6 +4,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native'
@@ -49,6 +50,20 @@ export default function RegisterScreen() {
   const [selectedUserType, setSelectedUserType] = useState<string | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
 
+  // Form state variables
+  const [nationalId, setNationalId] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [title, setTitle] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [birthYear, setBirthYear] = useState('')
+  const [gender, setGender] = useState('')
+  const [educationLevel, setEducationLevel] = useState('')
+  const [email, setEmail] = useState('')
+
   const handleUserTypeSelect = (userTypeId: string) => {
     setSelectedUserType(userTypeId)
   }
@@ -62,6 +77,11 @@ export default function RegisterScreen() {
   const handleBackToStep1 = () => {
     setCurrentStep(1)
     setSelectedUserType(null)
+  }
+
+  const handleCheckNationalId = () => {
+    // TODO: Implement national ID validation
+    console.log('Checking national ID:', nationalId)
   }
 
   return (
@@ -201,6 +221,280 @@ export default function RegisterScreen() {
             <ThemedText type='default' style={styles.stepDescription}>
               กรุณากรอกข้อมูลส่วนตัวเพื่อสมัครสมาชิก
             </ThemedText>
+
+            {/* Registration Form */}
+            <ThemedView style={styles.formContainer}>
+              {/* Account Creation Section */}
+              <ThemedText type='subtitle' style={styles.sectionTitle}>
+                สร้างบัญชี
+              </ThemedText>
+
+              {/* National ID Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  เลขประจำตัวประชาชน{' '}
+                  <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='person'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={nationalId}
+                    onChangeText={setNationalId}
+                    placeholder='0-0000-00000-00-0'
+                    placeholderTextColor='#999'
+                    keyboardType='numeric'
+                    maxLength={13}
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              {/* Password Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  รหัสผ่าน <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='lock'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder='กรอกรหัสผ่าน'
+                    placeholderTextColor='#999'
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.passwordToggle}
+                  >
+                    <IconSymbol
+                      name={showPassword ? 'eye.slash' : 'eye'}
+                      size={20}
+                      color={iconColor}
+                    />
+                  </TouchableOpacity>
+                </ThemedView>
+              </ThemedView>
+
+              {/* Confirm Password Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  ยืนยันรหัสผ่าน{' '}
+                  <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='lock'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    placeholder='ยืนยันรหัสผ่าน'
+                    placeholderTextColor='#999'
+                    secureTextEntry={!showConfirmPassword}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={styles.passwordToggle}
+                  >
+                    <IconSymbol
+                      name={showConfirmPassword ? 'eye.slash' : 'eye'}
+                      size={20}
+                      color={iconColor}
+                    />
+                  </TouchableOpacity>
+                </ThemedView>
+              </ThemedView>
+
+              {/* Check National ID Button */}
+              <TouchableOpacity
+                style={[styles.checkButton, { backgroundColor: tintColor }]}
+                onPress={handleCheckNationalId}
+              >
+                <ThemedText style={styles.checkButtonText}>
+                  ตรวจสอบว่ามีเลขประจำตัวประชาชนหรือไม่
+                </ThemedText>
+              </TouchableOpacity>
+
+              {/* Personal Information Section */}
+              <ThemedText type='subtitle' style={styles.sectionTitle}>
+                ข้อมูลส่วนบุคคล
+              </ThemedText>
+
+              {/* Title/Prefix Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  คำนำหน้าชื่อ{' '}
+                  <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='person.crop.circle'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={title}
+                    onChangeText={setTitle}
+                    placeholder='เช่น นาย, นาง, นางสาว'
+                    placeholderTextColor='#999'
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              {/* First Name Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  ชื่อ <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='person'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={firstName}
+                    onChangeText={setFirstName}
+                    placeholder='ชื่อจริง'
+                    placeholderTextColor='#999'
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              {/* Last Name Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  นามสกุล <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='person'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={lastName}
+                    onChangeText={setLastName}
+                    placeholder='นามสกุล'
+                    placeholderTextColor='#999'
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              {/* Year of Birth Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  ปีเกิด <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='calendar'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={birthYear}
+                    onChangeText={setBirthYear}
+                    placeholder='ปี พ.ศ. เช่น 2530'
+                    placeholderTextColor='#999'
+                    keyboardType='numeric'
+                    maxLength={4}
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              {/* Gender Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  เพศ <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='person.2'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={gender}
+                    onChangeText={setGender}
+                    placeholder='ชาย, หญิง'
+                    placeholderTextColor='#999'
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              {/* Education Level Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  ระดับการศึกษา{' '}
+                  <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='graduationcap'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={educationLevel}
+                    onChangeText={setEducationLevel}
+                    placeholder='เช่น ปริญญาตรี, มัธยมศึกษา'
+                    placeholderTextColor='#999'
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              {/* Email Input */}
+              <ThemedView style={styles.inputContainer}>
+                <ThemedText style={styles.inputLabel}>
+                  อีเมล <ThemedText style={styles.required}>*</ThemedText>
+                </ThemedText>
+                <ThemedView style={styles.inputWrapper}>
+                  <IconSymbol
+                    name='envelope'
+                    size={20}
+                    color={iconColor}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder='example@email.com'
+                    placeholderTextColor='#999'
+                    keyboardType='email-address'
+                  />
+                </ThemedView>
+              </ThemedView>
+            </ThemedView>
           </ThemedView>
         )}
       </ScrollView>
@@ -303,7 +597,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    paddingHorizontal: 32,
+    paddingHorizontal: 42,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: {
@@ -403,6 +697,84 @@ const styles = StyleSheet.create({
   selectedUserTypeItem: {
     backgroundColor: '#183A7C',
   },
+  // Form styles
+  formContainer: {
+    marginTop: 0,
+    marginHorizontal: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: 'Prompt-SemiBold',
+    marginBottom: 16,
+    marginTop: 24,
+    color: '#333',
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'Prompt-SemiBold',
+    marginBottom: 8,
+    color: '#333',
+  },
+  required: {
+    color: '#ff4444',
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    fontFamily: 'Prompt-Regular',
+  },
+  passwordToggle: {
+    padding: 4,
+  },
+  checkButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  checkButtonText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: 'white',
+  },
   iconContainer: {
     width: 60,
     height: 60,
@@ -429,7 +801,7 @@ const styles = StyleSheet.create({
   step2Buttons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: 0,
   },
   secondaryButton: {
     flexDirection: 'row',
