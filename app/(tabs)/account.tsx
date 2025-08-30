@@ -85,7 +85,22 @@ export default function AccountScreen() {
       {/* Header */}
       <ThemedView style={styles.header}>
         <ThemedText type='title' style={styles.headerTitle}>
-          เข้าสู่ระบบ
+          OCSC Learning Space
+        </ThemedText>
+        <ThemedText type='subtitle' style={styles.subtitleText}>
+          คุณสามารถเข้าสู่ระบบได้ 2 วิธี
+        </ThemedText>
+        <ThemedText type='subtitle' style={styles.subtitleText}>
+          <ThemedText type='default' style={styles.regularText}>
+            โปรด{' '}
+          </ThemedText>
+          <ThemedText type='link' style={styles.highlightedText}>
+            สมัครสมาชิก
+          </ThemedText>
+          <ThemedText type='default' style={styles.regularText}>
+            {' '}
+            ก่อนเข้าสู่ระบบ
+          </ThemedText>
         </ThemedText>
       </ThemedView>
 
@@ -543,7 +558,7 @@ const styles = StyleSheet.create({
   loginContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingVertical: 32,
+    paddingVertical: 24,
   },
   loginScrollContent: {
     flexGrow: 1,
@@ -554,9 +569,10 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerTitle: {
+    fontSize: 28,
     textAlign: 'center',
-    marginTop: 24,
-    marginBottom: 0,
+    marginBottom: 12,
+    color: '#183A7C',
   },
   loginCard: {
     width: '100%',
@@ -955,5 +971,19 @@ const styles = StyleSheet.create({
   footerHighlight: {
     color: '#183A7C',
     fontWeight: 'bold',
+  },
+  subtitleText: {
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  regularText: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+  },
+  highlightedText: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Medium',
+    color: '#183A7C',
   },
 })
