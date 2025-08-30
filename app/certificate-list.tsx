@@ -15,8 +15,8 @@ const mockCourseCertificates = [
     name: 'ผู้นำทีมที่มีประสิทธิภาพ',
     type: 'หลักสูตร',
     status: 'ผ่านเกณฑ์แล้ว',
-    completionDate: '13 ร.ค. 2566',
-    enrollmentPeriod: '1 ม.ค. 2564 ถึง 13 ร.ค. 2566',
+    completionDate: '13 ธ.ค. 2566',
+    enrollmentPeriod: '1 ม.ค. 2564 ถึง 13 ธ.ค. 2566',
   },
 ]
 
@@ -283,10 +283,9 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontFamily: 'Prompt-SemiBold',
     marginBottom: 16,
-    color: '#183A7C',
   },
   certificateCard: {
     width: '100%',
