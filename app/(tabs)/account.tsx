@@ -112,7 +112,11 @@ export default function AccountScreen() {
             <View style={styles.tabContent}>
               <Image
                 source={require('@/assets/images/thaid_logo.jpg')}
-                style={[styles.tabIcon, activeTab !== 0 && { opacity: 0.5 }]}
+                style={[
+                  styles.tabIcon,
+                  activeTab !== 0 && { opacity: 0.5 },
+                  { borderRadius: 4 },
+                ]}
                 contentFit='contain'
               />
               <ThemedText
@@ -174,7 +178,7 @@ export default function AccountScreen() {
             <TouchableOpacity
               style={[
                 styles.actionButton,
-                { backgroundColor: tintColor, marginTop: 16 },
+                { backgroundColor: tintColor, marginVertical: 48 },
               ]}
               onPress={handleLogin}
             >
@@ -210,7 +214,7 @@ export default function AccountScreen() {
                   style={styles.textInput}
                   value={citizenId}
                   onChangeText={setCitizenId}
-                  placeholder='1-2345-67890-12-3'
+                  placeholder='0-0000-00000-00-0'
                   placeholderTextColor='#999'
                   keyboardType='numeric'
                   maxLength={13}
@@ -234,7 +238,7 @@ export default function AccountScreen() {
                   style={styles.textInput}
                   value={password}
                   onChangeText={setPassword}
-                  placeholder='........'
+                  placeholder='กรอกรหัสผ่าน'
                   placeholderTextColor='#999'
                   secureTextEntry={!showPassword}
                 />
@@ -259,7 +263,7 @@ export default function AccountScreen() {
               </ThemedText>
               <ThemedView style={styles.inputWrapper}>
                 <IconSymbol
-                  name='ellipsis'
+                  name='key'
                   size={20}
                   color={iconColor}
                   style={styles.inputIcon}
@@ -295,11 +299,11 @@ export default function AccountScreen() {
             <TouchableOpacity
               style={[
                 styles.actionButton,
-                { backgroundColor: '#ccc', marginTop: 16 },
+                { backgroundColor: '#ccc', width: '100%' },
               ]}
               onPress={handleLogin}
             >
-              <ThemedText style={styles.actionButtonText}>
+              <ThemedText style={[styles.actionButtonText, { marginLeft: 0 }]}>
                 เข้าสู่ระบบ
               </ThemedText>
             </TouchableOpacity>
@@ -333,7 +337,13 @@ export default function AccountScreen() {
   if (!isLoggedIn) {
     return (
       <ThemedView style={[styles.container, { backgroundColor }]}>
-        <LoginForm />
+        <ScrollView
+          style={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.loginScrollContent}
+        >
+          <LoginForm />
+        </ScrollView>
         <StatusBarGradient />
       </ThemedView>
     )
@@ -533,7 +543,10 @@ const styles = StyleSheet.create({
   loginContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 100,
+    paddingVertical: 32,
+  },
+  loginScrollContent: {
+    flexGrow: 1,
   },
   header: {
     paddingTop: Platform.OS === 'ios' ? 80 : 40,
@@ -575,11 +588,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: '#E0E0E0',
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -647,7 +660,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingBottom: 32,
   },
   tabButton: {
     flex: 1,
@@ -679,7 +692,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 100,
   },
   tabButtonText: {
     fontSize: 14,
@@ -880,14 +892,14 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 15,
     fontFamily: 'Prompt-Medium',
-    marginLeft: 8,
     color: 'white',
+    marginLeft: 8,
   },
   thaidLogo: {
     width: 24,
     height: 24,
-    marginRight: 8,
     borderRadius: 4,
+    marginRight: 6,
   },
   notificationBell: {
     position: 'absolute',

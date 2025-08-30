@@ -76,6 +76,9 @@ export default function TabLayout() {
     }
   }, [isLoggedIn])
 
+  // Ensure index is always valid for current routes
+  const validIndex = Math.min(index, routes.length - 1)
+
   const renderScene = ({ route, jumpTo }: any) => {
     switch (route.key) {
       case 'home':
@@ -108,9 +111,6 @@ export default function TabLayout() {
       setIndex(0) // Reset to home tab when logged out
     }
   }, [isLoggedIn, index])
-
-  // Ensure index is always valid for current routes
-  const validIndex = Math.min(index, routes.length - 1)
 
   return (
     <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
