@@ -289,7 +289,7 @@ export default function AccountScreen() {
         </ThemedView>
 
         {/* Profile Details */}
-        <ThemedView style={styles.detailsContainer}>
+        {/* <ThemedView style={styles.detailsContainer}>
           <ThemedText type='subtitle' style={styles.sectionTitle}>
             ข้อมูลส่วนตัว
           </ThemedText>
@@ -313,17 +313,7 @@ export default function AccountScreen() {
               <ThemedText type='defaultSemiBold'>{mockUser.email}</ThemedText>
             </ThemedView>
           </ThemedView>
-
-          {/* <ThemedView style={styles.detailItem}>
-            <IconSymbol name='building.2' size={20} color={iconColor} />
-            <ThemedView style={styles.detailContent}>
-              <ThemedText style={styles.detailLabel}>หน่วยงาน</ThemedText>
-              <ThemedText type='defaultSemiBold'>
-                {mockUser.department}
-              </ThemedText>
-            </ThemedView>
-          </ThemedView> */}
-        </ThemedView>
+        </ThemedView> */}
 
         {/* Action Buttons */}
         <ThemedView style={styles.actionsContainer}>
@@ -374,6 +364,23 @@ export default function AccountScreen() {
             <IconSymbol name='arrow.right.square' size={20} color='white' />
             <ThemedText style={styles.actionButtonText}>ออกจากระบบ</ThemedText>
           </TouchableOpacity>
+        </ThemedView>
+
+        {/* Footer */}
+        <ThemedView style={styles.footer}>
+          <ThemedText style={styles.footerText}>
+            สำนักงานคณะกรรมการข้าราชการพลเรือน (สำนักงาน ก.พ.)
+          </ThemedText>
+          <ThemedText style={styles.footerText}>
+            47/111 หมู่ 4 ถนนติวานนท์ ตำบลตลาดขวัญ{'\n'}อำเภอเมือง
+            จังหวัดนนทบุรี 11000
+          </ThemedText>
+          <ThemedText style={[styles.footerText, styles.footerHighlight]}>
+            นโยบายและแนวปฏิบัติในการคุ้มครองข้อมูลส่วนบุคคล
+          </ThemedText>
+          <ThemedText style={styles.footerText}>
+            Copyright © 2568 Office of the Civil Service Commission
+          </ThemedText>
         </ThemedView>
       </ScrollView>
       <StatusBarGradient />
@@ -663,7 +670,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 24,
     borderRadius: 12,
     shadowColor: '#000',
@@ -681,8 +688,8 @@ const styles = StyleSheet.create({
     borderColor: '#183A7C',
   },
   actionButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontFamily: 'Prompt-Medium',
     marginLeft: 8,
     color: 'white',
   },
@@ -729,5 +736,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    backgroundColor: 'transparent',
+  },
+  footerText: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  footerHighlight: {
+    color: '#183A7C',
+    fontWeight: 'bold',
   },
 })
