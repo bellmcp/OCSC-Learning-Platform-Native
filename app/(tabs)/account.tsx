@@ -242,7 +242,7 @@ export default function AccountScreen() {
             <IconSymbol name='bell' size={24} color={iconColor} />
             {/* Notification Badge */}
             <ThemedView style={styles.notificationBadge}>
-              <ThemedText style={styles.notificationBadgeText}>3</ThemedText>
+              <ThemedText style={styles.notificationBadgeText}>2</ThemedText>
             </ThemedView>
           </TouchableOpacity>
 
