@@ -347,6 +347,7 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
+            onPress={() => router.push('/change-password' as any)}
           >
             <IconSymbol name='lock' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>

@@ -235,6 +235,10 @@ export default function RootLayout() {
             <Stack.Screen name='evaluation' options={{ headerShown: false }} />
             <Stack.Screen name='certificate' options={{ headerShown: false }} />
             <Stack.Screen
+              name='change-password'
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
               name='notifications'
               options={{ headerShown: false }}
             />
