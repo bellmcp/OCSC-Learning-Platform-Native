@@ -368,7 +368,12 @@ export default function AccountScreen() {
 
         {/* Footer */}
         <ThemedView style={styles.footer}>
-          <ThemedText style={styles.footerText}>
+          <ThemedText
+            style={
+              (styles.footerText,
+              { fontFamily: 'Prompt-SemiBold', fontSize: 13, marginBottom: 10 })
+            }
+          >
             สำนักงานคณะกรรมการข้าราชการพลเรือน (สำนักงาน ก.พ.)
           </ThemedText>
           <ThemedText style={styles.footerText}>
@@ -748,7 +753,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: '#666',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 14,
   },
   footerHighlight: {
     color: '#183A7C',

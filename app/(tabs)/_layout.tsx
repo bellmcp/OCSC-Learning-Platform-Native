@@ -126,6 +126,7 @@ export default function TabLayout() {
           borderTopWidth: 0.5,
           borderTopColor: '#F0F0F0',
           height: 100,
+          paddingHorizontal: 14,
         }}
         theme={{
           ...theme,
