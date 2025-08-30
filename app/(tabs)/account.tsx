@@ -330,7 +330,10 @@ export default function AccountScreen() {
           <ThemedText style={styles.registrationText}>
             ยังไม่มีบัญชีใช่ไหม?
           </ThemedText>
-          <TouchableOpacity style={styles.registrationLink}>
+          <TouchableOpacity
+            style={styles.registrationLink}
+            onPress={() => router.push('/register' as any)}
+          >
             <ThemedText
               style={[styles.registrationLinkText, { color: tintColor }]}
             >

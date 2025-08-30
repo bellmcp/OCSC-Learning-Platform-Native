@@ -234,6 +234,7 @@ export default function RootLayout() {
             <Stack.Screen name='test' options={{ headerShown: false }} />
             <Stack.Screen name='evaluation' options={{ headerShown: false }} />
             <Stack.Screen name='certificate' options={{ headerShown: false }} />
+            <Stack.Screen name='register' options={{ headerShown: false }} />
             <Stack.Screen
               name='change-password'
               options={{ headerShown: false }}
