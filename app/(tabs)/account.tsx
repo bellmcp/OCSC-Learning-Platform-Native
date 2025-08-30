@@ -491,6 +491,7 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
+            onPress={() => router.push('/edit-profile' as any)}
           >
             <IconSymbol name='pencil' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
