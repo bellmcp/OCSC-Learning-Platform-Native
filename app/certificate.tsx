@@ -18,7 +18,7 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 // Mock certificate data
 const mockCertificate = {
   id: 'CERT-2024-001',
-  name: 'วุฒิภัทร คำนวนสินธุ์',
+  name: 'สมชาย รักเรียน',
   citizenId: '1909802321001',
   position: 'นักพัฒนาซอฟต์แวร์',
   department: 'สำนักงานคณะกรรมการข้าราชการพลเรือน',

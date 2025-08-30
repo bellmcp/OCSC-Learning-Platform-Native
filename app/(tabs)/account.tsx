@@ -19,7 +19,7 @@ import { LoginContext } from './_layout'
 // Mock user data
 const mockUser = {
   id: 'USR-2024-001',
-  name: 'วุฒิภัทร คำนวนสินธุ์',
+  name: 'สมชาย รักเรียน',
   email: 'wutipat.k@ocsc.go.th',
   avatar: 'https://bellmcp.work/img/Profile.jpg',
   role: 'Senior Developer',
@@ -221,10 +221,16 @@ export default function AccountScreen() {
         {/* Header Section */}
         <ThemedView style={styles.header}>
           <ThemedView style={styles.avatarContainer}>
-            <Image
+            {/* <Image
               source={{ uri: mockUser.avatar }}
               style={styles.avatar}
               contentFit='cover'
+            /> */}
+            <IconSymbol
+              name='person.circle.fill'
+              size={64}
+              color={tintColor}
+              style={styles.avatar}
             />
           </ThemedView>
 
@@ -245,7 +251,7 @@ export default function AccountScreen() {
               {mockUser.name}
             </ThemedText>
             <ThemedText style={[styles.userRole, { color: tintColor }]}>
-              1909802321001
+              1 2345 67890 12 3
             </ThemedText>
           </ThemedView>
         </ThemedView>
@@ -278,7 +284,7 @@ export default function AccountScreen() {
             >
               {mockUser.totalHours}
             </ThemedText>
-            <ThemedText style={styles.statLabel}>จำนวนเหรียญสะสม</ThemedText>
+            <ThemedText style={styles.statLabel}>คะแนนการเรียนรู้</ThemedText>
           </TouchableOpacity>
         </ThemedView>
 

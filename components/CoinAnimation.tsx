@@ -187,7 +187,7 @@ export function CoinAnimation({
       >
         <ThemedText style={styles.successText}>เยี่ยมเลย!</ThemedText>
         <ThemedText style={styles.successSubtext}>
-          คุณได้รับเหรียญแล้ว
+          คุณได้รับคะแนนการเรียนรู้แล้ว
         </ThemedText>
       </Animated.View>
     </View>

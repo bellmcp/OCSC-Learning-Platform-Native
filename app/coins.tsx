@@ -1,4 +1,3 @@
-import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React from 'react'
 import {
@@ -17,7 +16,7 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 // Mock coin data
 const mockCoinData = {
   totalCoins: 48,
-  username: 'วุฒิภัทร คำนวนสินธุ์',
+  username: 'สมชาย รักเรียน',
   avatar: 'https://bellmcp.work/img/Profile.jpg',
   coinHistory: [
     {
@@ -69,7 +68,7 @@ const mockCoinData = {
       id: '6',
       type: 'earned',
       amount: 2,
-      description: 'เรียนจบบทเรียน "การทำงานเป็นทีม"',
+      description: 'เรียนจบบทเรียน "การทำงานเป็นทีมอย่างมีประสิทธิภาพ"',
       courseName: 'การทำงานเป็นทีม',
       date: '3 ธันวาคม 2024',
       time: '15:30',
@@ -107,7 +106,7 @@ export default function CoinsScreen() {
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
-            เหรียญสะสม
+            คะแนนการเรียนรู้
           </ThemedText>
           <View style={styles.backButton} />
         </View>
@@ -121,17 +120,18 @@ export default function CoinsScreen() {
       >
         {/* User Info Card */}
         <ThemedView style={styles.userCard}>
-          <Image
-            source={{ uri: mockCoinData.avatar }}
+          <IconSymbol
+            name='person.circle.fill'
+            size={64}
+            color={tintColor}
             style={styles.userAvatar}
-            contentFit='cover'
           />
           <ThemedView style={styles.userInfo}>
             <ThemedText type='subtitle' style={styles.userName}>
               {mockCoinData.username}
             </ThemedText>
             <ThemedText style={styles.userSubtitle}>
-              สมาชิก OCSC Learning Platform
+              1 2345 67890 12 3
             </ThemedText>
           </ThemedView>
         </ThemedView>
@@ -140,7 +140,7 @@ export default function CoinsScreen() {
         <ThemedView style={styles.balanceCard}>
           <ThemedView style={styles.balanceHeader}>
             <ThemedText style={styles.balanceLabel}>
-              เหรียญสะสมทั้งหมด
+              คะแนนการเรียนรู้ของคุณ
             </ThemedText>
             <IconSymbol name='star.circle.fill' size={32} color={tintColor} />
           </ThemedView>
@@ -179,10 +179,10 @@ export default function CoinsScreen() {
         <ThemedView style={styles.historySection}>
           <ThemedView style={styles.sectionHeader}>
             <ThemedText type='subtitle' style={styles.sectionTitle}>
-              ประวัติการได้รับเหรียญ
+              ประวัติการได้รับคะแนน
             </ThemedText>
             <ThemedText style={styles.sectionSubtitle}>
-              ดูประวัติการได้รับเหรียญจากการเรียน
+              ดูประวัติการได้รับคะแนน
             </ThemedText>
           </ThemedView>
 
@@ -220,7 +220,7 @@ export default function CoinsScreen() {
                   {getCoinPrefix(item.type)}
                   {item.amount}
                 </ThemedText>
-                <ThemedText style={styles.amountUnit}>เหรียญ</ThemedText>
+                <ThemedText style={styles.amountUnit}>คะแนน</ThemedText>
               </ThemedView>
             </ThemedView>
           ))}
@@ -229,7 +229,7 @@ export default function CoinsScreen() {
         {/* Info Section */}
         <ThemedView style={styles.infoSection}>
           <ThemedText type='subtitle' style={styles.infoTitle}>
-            วิธีรับเหรียญ
+            วิธีรับคะแนน
           </ThemedText>
           <ThemedView style={styles.infoItems}>
             <ThemedView style={styles.infoItem}>

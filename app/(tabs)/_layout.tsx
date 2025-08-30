@@ -120,10 +120,22 @@ export default function TabLayout() {
         renderScene={renderScene}
         activeColor={theme.colors.primary}
         inactiveColor={theme.colors.onSurfaceVariant}
+        labelMaxFontSizeMultiplier={1}
         barStyle={{
           backgroundColor: theme.colors.surface,
           borderTopWidth: 0.5,
           borderTopColor: '#F0F0F0',
+          height: 100,
+        }}
+        theme={{
+          ...theme,
+          fonts: {
+            ...theme.fonts,
+            labelMedium: {
+              ...theme.fonts.labelMedium,
+              letterSpacing: 0,
+            },
+          },
         }}
       />
     </LoginContext.Provider>
