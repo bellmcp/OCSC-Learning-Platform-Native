@@ -53,6 +53,53 @@ const convertToEmbedUrl = (url: string): string => {
   return url
 }
 
+const extractYouTubeId = (url: string | null | undefined): string | null => {
+  if (!url) return null
+  if (url.includes('youtu.be/')) {
+    return url.split('youtu.be/')[1].split('?')[0]
+  }
+  if (url.includes('youtube.com/watch?v=')) {
+    return url.split('v=')[1].split('&')[0]
+  }
+  if (url.includes('youtube.com/embed/')) {
+    const parts = url.split('youtube.com/embed/')
+    const idAndParams = parts[1] || ''
+    return idAndParams.split('?')[0]
+  }
+  return null
+}
+
+const buildYouTubeIframeHtml = (videoId: string): string => {
+  // Full-bleed responsive iframe using youtube-nocookie and proper origin/jsapi
+  const origin = 'https://www.youtube-nocookie.com'
+  const src = `https://www.youtube-nocookie.com/embed/${videoId}?playsinline=1&rel=0&modestbranding=1&controls=1&fs=1&enablejsapi=1&autoplay=1&mute=0&origin=${encodeURIComponent(
+    origin
+  )}`
+  return `<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
+    <style>
+      html, body { margin: 0; padding: 0; background-color: transparent; }
+      .container { position: absolute; inset: 0; }
+      iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <iframe
+        src="${src}"
+        title="YouTube video"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="origin-when-cross-origin"
+        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock allow-popups"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </body>
+  </html>`
+}
+
 export function ContentView({
   selectedContent,
   courseName,
@@ -134,18 +181,43 @@ export function ContentView({
     selectedContent.content2?.includes('youtu.be')
 
   if (isVideoContent) {
+    const possibleUrl =
+      selectedContent.content1 || selectedContent.content2 || null
+    const youtubeId = extractYouTubeId(possibleUrl)
+    if (!youtubeId) {
+      return (
+        <ThemedView style={styles.defaultContent}>
+          <IconSymbol
+            name='exclamationmark.triangle'
+            size={60}
+            color={iconColor}
+          />
+          <ThemedText style={styles.defaultContentText}>
+            เนื้อหาวิดีโอไม่ถูกต้อง
+          </ThemedText>
+        </ThemedView>
+      )
+    }
+    const html = buildYouTubeIframeHtml(youtubeId)
     return (
       <ThemedView style={styles.videoContainer}>
         <WebView
           ref={webViewRef}
-          source={{ uri: contentUrl }}
+          originWhitelist={['*']}
+          source={{ html, baseUrl: 'https://www.youtube-nocookie.com' }}
           style={styles.videoWebView}
           allowsFullscreenVideo={true}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           startInLoadingState={true}
-          mediaPlaybackRequiresUserAction={Platform.OS === 'ios'}
+          mediaPlaybackRequiresUserAction={false}
           allowsInlineMediaPlayback={true}
+          mixedContentMode='always'
+          userAgent={
+            Platform.OS === 'ios'
+              ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+              : 'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36'
+          }
           scalesPageToFit={false}
           bounces={false}
           scrollEnabled={false}
