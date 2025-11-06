@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { Alert, StyleSheet } from 'react-native'
+import { Alert, Platform, StyleSheet } from 'react-native'
 import WebView from 'react-native-webview'
 
 import { ThemedText } from '@/components/ThemedText'
@@ -28,15 +28,26 @@ const convertToEmbedUrl = (url: string): string => {
   } else if (url.includes('youtube.com/watch?v=')) {
     videoId = url.split('v=')[1].split('&')[0]
   } else if (url.includes('youtube.com/embed/')) {
-    if (url.includes('autoplay=1')) {
-      return url
-    }
-    const separator = url.includes('?') ? '&' : '?'
-    return `${url}${separator}autoplay=1&playsinline=1&rel=0&modestbranding=1`
+    // Normalize any existing embed URL by stripping params and rebuilding
+    const parts = url.split('youtube.com/embed/')
+    const idAndParams = parts[1] || ''
+    videoId = idAndParams.split('?')[0]
   }
 
   if (videoId) {
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&controls=1&showinfo=0&fs=1&iv_load_policy=3`
+    // Avoid autoplay to prevent iOS WKWebView configuration error 153
+    const params = [
+      'playsinline=1',
+      'rel=0',
+      'modestbranding=1',
+      'controls=1',
+      'fs=1',
+      'iv_load_policy=3',
+      'enablejsapi=1',
+      // Provide a stable origin to satisfy YouTube iframe security checks
+      'origin=https://www.youtube.com',
+    ]
+    return `https://www.youtube.com/embed/${videoId}?${params.join('&')}`
   }
 
   return url
@@ -133,7 +144,7 @@ export function ContentView({
           javaScriptEnabled={true}
           domStorageEnabled={true}
           startInLoadingState={true}
-          mediaPlaybackRequiresUserAction={false}
+          mediaPlaybackRequiresUserAction={Platform.OS === 'ios'}
           allowsInlineMediaPlayback={true}
           scalesPageToFit={false}
           bounces={false}
@@ -156,7 +167,7 @@ export function ContentView({
       javaScriptEnabled={true}
       domStorageEnabled={true}
       startInLoadingState={true}
-      mediaPlaybackRequiresUserAction={false}
+      mediaPlaybackRequiresUserAction={Platform.OS === 'ios'}
       allowsInlineMediaPlayback={true}
       onLoadStart={onContentLoadStart}
       onError={() => {
