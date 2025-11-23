@@ -2,7 +2,7 @@
   "expo": {
     "name": "OCSC-Learning-Platform-Native",
     "slug": "OCSC-Learning-Platform-Native",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "ocsclearningplatformnative",
