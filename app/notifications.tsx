@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   },
   unreadNotification: {
     backgroundColor: '#F8F9FF',
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: '#D6E3FF',
   },
   iconContainer: {

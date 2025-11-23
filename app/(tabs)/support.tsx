@@ -138,7 +138,11 @@ export default function SupportScreen() {
                   name='doc.text'
                   size={20}
                   color={iconColor}
-                  style={[styles.inputIcon, , { paddingTop: Platform.OS === 'ios' ? 32 : 12 }]}
+                  style={[
+                    styles.inputIcon,
+                    ,
+                    { paddingTop: Platform.OS === 'ios' ? 32 : 12 },
+                  ]}
                 />
                 <TextInput
                   style={styles.textAreaInput}
@@ -262,7 +266,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 1,
   },
   header: {
     paddingTop: Platform.OS === 'ios' ? 80 : 40,
@@ -301,7 +305,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 0,
   },
   inputIcon: {
     marginRight: 12,
@@ -387,7 +391,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 0,
   },
   sidebarContent: {
     marginBottom: 24,
