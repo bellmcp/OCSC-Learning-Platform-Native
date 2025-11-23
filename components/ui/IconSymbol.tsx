@@ -17,12 +17,48 @@ type IconSymbolName = keyof typeof MAPPING
  * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
  */
 const MAPPING = {
+  // See MaterialIcons here: https://icons.expo.fyi
+  // See SF Symbols in the SF Symbols app on Mac.
   'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'chevron.left': 'chevron-left',
   play: 'play-arrow',
   'play.fill': 'play-circle-filled',
+  creditcard: 'credit-card',
+  person: 'person',
+  lock: 'lock',
+  'eye.slash': 'visibility-off',
+  eye: 'visibility',
+  key: 'vpn-key',
+  'person.circle.fill': 'account-circle',
+  bell: 'notifications',
+  'book.closed': 'book',
+  'star.circle': 'stars',
+  printer: 'print',
+  'doc.text': 'description',
+  pencil: 'edit',
+  'arrow.right.square': 'exit-to-app',
+  trash: 'delete',
+  'checkmark.circle': 'check-circle',
+  'star.circle.fill': 'stars',
+  'person.circle': 'account-circle',
+  target: 'track-changes',
+  clock: 'access-time',
+  'chart.bar': 'bar-chart',
+  'info.circle': 'info',
+  'arrow.right': 'arrow-forward',
+  'arrow.left': 'arrow-back',
+  paperclip: 'attach-file',
+  paperplane: 'send',
+  star: 'star',
+  'person.3': 'groups',
+  'person.2': 'group',
+  photo: 'image',
+  trophy: 'emoji-events',
+  gear: 'settings',
+  'play.circle': 'play-circle-filled',
 } as IconMapping
 
 /**

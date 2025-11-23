@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useState } from 'react'
 import {
-  Alert,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    Alert,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native'
 import { RadioButton } from 'react-native-paper'
 
@@ -242,7 +242,7 @@ const createStyles = (tintColor: string) =>
     headerTitle: {
       textAlign: 'center',
       fontSize: 20,
-      fontWeight: 'bold',
+      fontFamily: 'Prompt-Bold',
     },
     content: {
       flex: 1,

@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   markAllRead: {
     paddingHorizontal: 12,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   markAllReadText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
   },
   scrollContainer: {
     flex: 1,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   unreadTitle: {
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   notificationMessage: {
     fontSize: 14,

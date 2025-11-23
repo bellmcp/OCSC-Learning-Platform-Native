@@ -2,23 +2,23 @@ import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React, { useRef, useState } from 'react'
 import {
-  Dimensions,
-  FlatList,
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    FlatList,
+    Linking,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native'
 
 import CourseItem, {
-  type Course,
-  type RealCourse,
+    type Course,
+    type RealCourse,
 } from '@/components/CourseItem'
 import CurriculumItem, {
-  type Curriculum,
-  type RealCurriculum,
+    type Curriculum,
+    type RealCurriculum,
 } from '@/components/CurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     textAlign: 'center',
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   header: {
     paddingTop: Platform.OS === 'ios' ? 80 : 40,
@@ -431,7 +431,6 @@ const styles = StyleSheet.create({
   heroTitle: {
     color: 'white',
     fontSize: 36,
-    fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 8,
     fontFamily: 'Prompt-Bold',
@@ -461,13 +460,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: 'Prompt-Bold',
     letterSpacing: -0.3,
   },
   seeAllText: {
     fontSize: 15,
-    fontWeight: '600',
-    fontFamily: 'Prompt-Medium',
+    fontFamily: 'Prompt-SemiBold',
   },
   seeAllButton: {
     flexDirection: 'row',
@@ -525,9 +523,8 @@ const styles = StyleSheet.create({
   bannerPillText: {
     color: 'white',
     fontSize: 15,
-    fontWeight: '600',
     textAlign: 'center',
-    fontFamily: 'Prompt-Medium',
+    fontFamily: 'Prompt-SemiBold',
     letterSpacing: 0.2,
   },
   dotsContainer: {

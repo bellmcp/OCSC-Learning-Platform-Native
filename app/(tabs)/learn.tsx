@@ -1,18 +1,18 @@
 import React, { useRef, useState } from 'react'
 import {
-  FlatList,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    FlatList,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native'
 
 import { type Curriculum } from '@/components/CurriculumItem'
 import MyCourseItem, { type RegisteredCourse } from '@/components/MyCourseItem'
 import MyCurriculumItem, {
-  type RegisteredCurriculum,
+    type RegisteredCurriculum,
 } from '@/components/MyCurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
@@ -242,7 +242,7 @@ export default function LearnScreen() {
                   styles.tabButtonText,
                   activeTab === 'courses' && {
                     color: '#FFFFFF',
-                    fontWeight: '700',
+                    fontFamily: 'Prompt-Bold',
                   },
                 ]}
               >
@@ -277,7 +277,7 @@ export default function LearnScreen() {
                   styles.tabButtonText,
                   activeTab === 'curriculums' && {
                     color: '#FFFFFF',
-                    fontWeight: '700',
+                    fontFamily: 'Prompt-Bold',
                   },
                 ]}
               >
@@ -434,9 +434,8 @@ const styles = StyleSheet.create({
   },
   tabButtonText: {
     fontSize: 15,
-    fontFamily: 'Prompt-Medium',
+    fontFamily: 'Prompt-SemiBold',
     color: '#666666',
-    fontWeight: '600',
   },
   content: {
     flex: 1,

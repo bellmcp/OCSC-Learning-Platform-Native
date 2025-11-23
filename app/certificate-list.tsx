@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   infoCard: {
     alignItems: 'center',
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
   certificateTitle: {
     fontSize: 16,
-    fontWeight: 'medium',
+    fontFamily: 'Prompt-Medium',
     marginBottom: 0,
   },
   certificateCode: {
@@ -330,7 +330,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 14,
-    fontWeight: '600',
     fontFamily: 'Prompt-SemiBold',
   },
   dateInfo: {
@@ -399,7 +398,7 @@ const styles = StyleSheet.create({
   },
   helpButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
     marginLeft: 8,
   },
 })

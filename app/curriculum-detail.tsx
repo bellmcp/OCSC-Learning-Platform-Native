@@ -2,11 +2,11 @@ import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import {
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native'
 
 import { ThemedText } from '@/components/ThemedText'
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   content: {
     flex: 1,

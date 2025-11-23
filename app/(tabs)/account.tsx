@@ -139,7 +139,7 @@ export default function AccountScreen() {
                   styles.tabButtonText,
                   activeTab === 0 && {
                     color: '#FFFFFF',
-                    fontWeight: '700',
+                    fontFamily: 'Prompt-Bold',
                   },
                 ]}
               >
@@ -175,7 +175,7 @@ export default function AccountScreen() {
                   styles.tabButtonText,
                   activeTab === 1 && {
                     color: '#FFFFFF',
-                    fontWeight: '700',
+                    fontFamily: 'Prompt-Bold',
                   },
                 ]}
               >
@@ -381,7 +381,7 @@ export default function AccountScreen() {
             /> */}
             <IconSymbol
               name='person.circle.fill'
-              size={64}
+              size={120}
               color={tintColor}
               style={styles.avatar}
             />
@@ -524,10 +524,10 @@ export default function AccountScreen() {
         {/* Footer */}
         <ThemedView style={styles.footer}>
           <ThemedText
-            style={
-              (styles.footerText,
-              { fontFamily: 'Prompt-SemiBold', fontSize: 13, marginBottom: 10 })
-            }
+            style={[
+              styles.footerText,
+              { fontFamily: 'Prompt-SemiBold', fontSize: 13, marginBottom: 10 },
+            ]}
           >
             สำนักงานคณะกรรมการข้าราชการพลเรือน (สำนักงาน ก.พ.)
           </ThemedText>
@@ -600,7 +600,6 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
     fontFamily: 'Prompt-SemiBold',
     marginBottom: 8,
   },
@@ -718,7 +717,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontFamily: 'Prompt-Medium',
     color: '#666666',
-    fontWeight: '600',
     textAlign: 'center',
   },
 
@@ -744,7 +742,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 16,
-    elevation: 8,
+    elevation: 0,
   },
   editButton: {
     position: 'absolute',
@@ -775,7 +773,7 @@ const styles = StyleSheet.create({
   },
   userRole: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
     marginBottom: 4,
   },
   userDepartment: {
@@ -807,7 +805,7 @@ const styles = StyleSheet.create({
   },
   userId: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
     marginBottom: 4,
     letterSpacing: 1,
   },
@@ -828,7 +826,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 1,
   },
   statItem: {
     flex: 1,
@@ -841,7 +839,7 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
     marginTop: 8,
     marginBottom: 4,
   },
@@ -908,6 +906,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#183A7C',
+    elevation: 0,
   },
   actionButtonText: {
     fontSize: 15,
@@ -974,7 +973,7 @@ const styles = StyleSheet.create({
   },
   footerHighlight: {
     color: '#183A7C',
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Medium',
   },
   subtitleText: {
     textAlign: 'center',

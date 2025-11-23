@@ -1,13 +1,13 @@
 import * as DocumentPicker from 'expo-document-picker'
 import React, { useRef, useState } from 'react'
 import {
-  Alert,
-  Dimensions,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
+    Alert,
+    Dimensions,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
 } from 'react-native'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
     fontFamily: 'Prompt-SemiBold',
     marginBottom: 8,
   },
@@ -371,7 +370,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
     marginLeft: 8,
     color: 'white',
   },
@@ -419,7 +418,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: 'white',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   ticketItem: {
     padding: 16,
@@ -435,7 +434,7 @@ const styles = StyleSheet.create({
   },
   ticketTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
     marginLeft: 8,
     flex: 1,
   },
@@ -457,7 +456,7 @@ const styles = StyleSheet.create({
   },
   ticketStatus: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
   },
   successButton: {
     flexDirection: 'row',
@@ -472,7 +471,7 @@ const styles = StyleSheet.create({
   successButtonText: {
     color: 'white',
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
     marginLeft: 8,
   },
 })

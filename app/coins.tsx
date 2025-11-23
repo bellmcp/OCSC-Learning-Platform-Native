@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   userCard: {
     flexDirection: 'row',

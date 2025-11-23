@@ -2,12 +2,12 @@ import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React from 'react'
 import {
-  Alert,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    Alert,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   curriculumContainer: {
     marginHorizontal: 20,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   curriculumTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
     marginBottom: 0,
     textAlign: 'left',
     color: '#183A7C',
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   },
   curriculumCode: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Prompt-SemiBold',
     color: '#666',
   },
   curriculumHours: {

@@ -1,12 +1,12 @@
 import { router } from 'expo-router'
 import React, { useState } from 'react'
 import {
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native'
 
 import { ThemedText } from '@/components/ThemedText'
@@ -715,7 +715,6 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
     fontFamily: 'Prompt-SemiBold',
     marginBottom: 8,
     color: '#333',

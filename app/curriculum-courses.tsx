@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import {
-  FlatList,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    FlatList,
+    Platform,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native'
 
 import MyCourseItem, { RegisteredCourse } from '@/components/MyCourseItem'
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Prompt-Bold',
   },
   curriculumInfo: {
     paddingHorizontal: 20,
