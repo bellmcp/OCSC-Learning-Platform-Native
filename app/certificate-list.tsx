@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
 import React from 'react'
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   header: {
-    paddingTop: 80,
+    paddingTop: Platform.OS === 'ios' ? 80 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 1,
   },
   infoIcon: {
     marginBottom: 16,

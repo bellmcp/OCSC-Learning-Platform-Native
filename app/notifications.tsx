@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: 70,
+    paddingTop: Platform.OS === 'ios' ? 70 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+    paddingBottom: 120,
   },
   notificationItem: {
     flexDirection: 'row',
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 1,
   },
   unreadNotification: {
     backgroundColor: '#F8F9FF',
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 20,
     paddingVertical: 20,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 40,
     borderTopWidth: 0.5,
     borderTopColor: '#F0F0F0',
   },

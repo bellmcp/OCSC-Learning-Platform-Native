@@ -2,12 +2,12 @@ import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React from 'react'
 import {
-    Alert,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
@@ -208,10 +208,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: 20,
-    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+    paddingBottom: 120,
   },
   header: {
-    paddingTop: 80,
+  paddingTop: Platform.OS === 'ios' ? 80 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderTopWidth: 1,
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 1,
   },
   curriculumTitle: {
     fontSize: 20,
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 1,
   },
   metadataItem: {
     flexDirection: 'row',
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 0,
   },
   actionButtonText: {
     fontSize: 16,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#183A7C',
   },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 20,
     paddingVertical: 20,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 40,
     borderTopWidth: 0.5,
     borderTopColor: '#F0F0F0',
   },
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 1,
   },
   primaryButtonText: {
     fontSize: 18,

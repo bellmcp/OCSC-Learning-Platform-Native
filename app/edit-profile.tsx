@@ -1,12 +1,12 @@
 import { router } from 'expo-router'
 import React, { useState } from 'react'
 import {
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
 import { ThemedText } from '@/components/ThemedText'
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: 70,
+    paddingTop: Platform.OS === 'ios' ? 70 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+    paddingBottom: 120,
   },
   fixedButtonContainer: {
     position: 'absolute',
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 20,
     paddingVertical: 20,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 40,
     borderTopWidth: 0.5,
     borderTopColor: '#F0F0F0',
   },
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 0,
   },
   inputIcon: {
     marginRight: 12,
@@ -367,5 +367,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     fontFamily: 'Prompt-Regular',
+    paddingVertical: 0,
   },
 })

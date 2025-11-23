@@ -1,13 +1,13 @@
 import * as DocumentPicker from 'expo-document-picker'
 import React, { useRef, useState } from 'react'
 import {
-    Alert,
-    Dimensions,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
+  Alert,
+  Dimensions,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
@@ -138,7 +138,7 @@ export default function SupportScreen() {
                   name='doc.text'
                   size={20}
                   color={iconColor}
-                  style={[styles.inputIcon, { paddingTop: 32 }]}
+                  style={[styles.inputIcon, , { paddingTop: Platform.OS === 'ios' ? 32 : 12 }]}
                 />
                 <TextInput
                   style={styles.textAreaInput}
@@ -318,6 +318,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     backgroundColor: 'transparent',
     paddingHorizontal: 0,
+    paddingVertical: 0, // Fix for Android text alignment
   },
   textAreaInput: {
     flex: 1,
