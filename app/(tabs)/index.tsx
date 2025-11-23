@@ -2,23 +2,23 @@ import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React, { useRef, useState } from 'react'
 import {
-    Dimensions,
-    FlatList,
-    Linking,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  FlatList,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
 import CourseItem, {
-    type Course,
-    type RealCourse,
+  type Course,
+  type RealCourse,
 } from '@/components/CourseItem'
 import CurriculumItem, {
-    type Curriculum,
-    type RealCurriculum,
+  type Curriculum,
+  type RealCurriculum,
 } from '@/components/CurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 22,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     letterSpacing: -0.3,
   },
   seeAllText: {
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 0,
   },
   bannerImage: {
     width: '100%',
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 15,
     textAlign: 'center',
-    fontFamily: 'Prompt-SemiBold',
+    fontFamily: 'Prompt-Medium',
     letterSpacing: 0.2,
   },
   dotsContainer: {

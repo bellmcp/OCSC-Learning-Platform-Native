@@ -2,11 +2,11 @@ import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import {
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
 import { ContentList } from '@/components/ContentList'
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 70 : 40,
+    paddingTop: Platform.OS === 'ios' ? 70 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 3,
   },
   statLabel: {
     fontSize: 14,
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.08,
     shadowRadius: 12,
-    elevation: 4,
+    elevation: 0,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.05)',
   },
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.08,
     shadowRadius: 12,
-    elevation: 4,
+    elevation: 0,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.05)',
   },
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 1,
   },
   contactTitle: {
     fontSize: 16,

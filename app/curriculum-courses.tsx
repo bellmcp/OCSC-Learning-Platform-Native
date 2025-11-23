@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import {
-    FlatList,
-    Platform,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
 import MyCourseItem, { RegisteredCourse } from '@/components/MyCourseItem'
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 70 : 40,
+    paddingTop: Platform.OS === 'ios' ? 70 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
   },

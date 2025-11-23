@@ -1,17 +1,17 @@
 import { router } from 'expo-router'
 import React, { useState } from 'react'
 import {
-    FlatList,
-    Platform,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
 import CurriculumItem, {
-    type Curriculum,
-    type RealCurriculum,
+  type Curriculum,
+  type RealCurriculum,
 } from '@/components/CurriculumItem'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 70 : 40,
+    paddingTop: Platform.OS === 'ios' ? 70 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
   },
@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
+    paddingVertical: 0,
   },
 
   content: {

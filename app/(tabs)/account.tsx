@@ -139,11 +139,11 @@ export default function AccountScreen() {
                   styles.tabButtonText,
                   activeTab === 0 && {
                     color: '#FFFFFF',
-                    fontFamily: 'Prompt-Bold',
+                    fontFamily: 'Prompt-SemiBold',
                   },
                 ]}
               >
-                แอปพลิเคชัน ThaiD
+                แอปพลิเคชัน{"\n"}ThaiD
               </ThemedText>
             </View>
           </TouchableOpacity>
@@ -166,7 +166,7 @@ export default function AccountScreen() {
             <View style={styles.tabContent}>
               <IconSymbol
                 name='creditcard'
-                size={16}
+                size={24}
                 color={activeTab === 1 ? '#FFFFFF' : '#666666'}
                 style={styles.tabIcon}
               />
@@ -175,7 +175,7 @@ export default function AccountScreen() {
                   styles.tabButtonText,
                   activeTab === 1 && {
                     color: '#FFFFFF',
-                    fontFamily: 'Prompt-Bold',
+                    fontFamily: 'Prompt-SemiBold',
                   },
                 ]}
               >
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.08,
     shadowRadius: 12,
-    elevation: 4,
+    elevation: 1,
     marginTop: 0,
     backgroundColor: 'white',
   },
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: Platform.OS === 'ios' ? 12 : 4,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 0,
   },
   inputIcon: {
     marginRight: 12,
@@ -697,7 +697,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.08,
     shadowRadius: 3,
-    elevation: 2,
+    elevation: 0,
     transform: [{ scale: 1 }],
   },
 
@@ -762,7 +762,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 0,
   },
   userInfo: {
     alignItems: 'center',
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 0,
   },
   idHeader: {
     flexDirection: 'row',
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
   },
   userId: {
     fontSize: 24,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     marginBottom: 4,
     letterSpacing: 1,
   },
@@ -826,7 +826,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 1,
+    elevation: 0,
   },
   statItem: {
     flex: 1,
@@ -839,7 +839,7 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 28,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     marginTop: 8,
     marginBottom: 4,
   },
@@ -860,7 +860,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 0,
   },
   sectionTitle: {
     marginBottom: 20,
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 4,
+    elevation: 0,
   },
   secondaryButton: {
     backgroundColor: 'transparent',

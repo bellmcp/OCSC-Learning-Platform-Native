@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useState } from 'react'
 import {
-    Alert,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 import { RadioButton } from 'react-native-paper'
 
@@ -222,7 +222,7 @@ const createStyles = (tintColor: string) =>
       flex: 1,
     },
     header: {
-      paddingTop: Platform.OS === 'ios' ? 70 : 40,
+      paddingTop: Platform.OS === 'ios' ? 70 : 50,
       paddingHorizontal: 20,
       paddingBottom: 16,
       borderBottomWidth: 1,
@@ -281,7 +281,7 @@ const createStyles = (tintColor: string) =>
       },
       shadowOpacity: 0.08,
       shadowRadius: 12,
-      elevation: 4,
+      elevation: 0,
       borderWidth: 1,
       borderColor: 'rgba(0, 0, 0, 0.05)',
       backgroundColor: '#FFFFFF',
@@ -309,7 +309,7 @@ const createStyles = (tintColor: string) =>
       },
       shadowOpacity: 0.08,
       shadowRadius: 12,
-      elevation: 4,
+      elevation: 0,
       borderWidth: 1,
       borderColor: 'rgba(0, 0, 0, 0.05)',
     },
@@ -362,7 +362,7 @@ const createStyles = (tintColor: string) =>
       right: 0,
       paddingHorizontal: 20,
       paddingVertical: 20,
-      paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+      paddingBottom: 40,
       borderTopWidth: 0.5,
       borderTopColor: '#F0F0F0',
     },

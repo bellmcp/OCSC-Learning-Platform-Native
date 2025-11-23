@@ -176,7 +176,7 @@ export function CoinAnimation({
       )}
 
       {/* Success Message */}
-      <Animated.View
+      {/* <Animated.View
         style={[
           styles.successMessage,
           {
@@ -189,7 +189,7 @@ export function CoinAnimation({
         <ThemedText style={styles.successSubtext}>
           คุณได้รับคะแนนการเรียนรู้แล้ว
         </ThemedText>
-      </Animated.View>
+      </Animated.View> */}
     </View>
   )
 }
