@@ -454,7 +454,7 @@ export default function CourseDetailScreen() {
                                   styles.registerButton,
                                   { backgroundColor: tintColor },
                                 ]}
-                                onPress={() => router.navigate('/(tabs)/account')}
+                                onPress={() => router.replace('/(tabs)?tab=account')}
                               >
                                 <IconSymbol
                                   name='person.fill'

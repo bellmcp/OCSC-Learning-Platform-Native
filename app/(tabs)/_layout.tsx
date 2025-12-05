@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from 'expo-router'
 import * as React from 'react'
 import { BottomNavigation, useTheme } from 'react-native-paper'
 import AccountScreen from './account'
@@ -6,16 +7,34 @@ import LearnScreen from './learn'
 import SearchScreen from './search'
 import SupportScreen from './support'
 
-// Create a context for sharing login state
+// Create a context for sharing login state and tab navigation
 export const LoginContext = React.createContext({
   isLoggedIn: false,
   setIsLoggedIn: (value: boolean) => {},
+  goToAccountTab: () => {},
 })
 
 export default function TabLayout() {
   const theme = useTheme()
   const [index, setIndex] = React.useState(0)
   const [isLoggedIn, setIsLoggedIn] = React.useState(false)
+  const params = useLocalSearchParams<{ tab?: string }>()
+
+  // Function to navigate to account tab
+  const goToAccountTab = React.useCallback(() => {
+    if (isLoggedIn) {
+      setIndex(4) // account is at index 4 when logged in
+    } else {
+      setIndex(2) // account is at index 2 when not logged in
+    }
+  }, [isLoggedIn])
+
+  // Handle tab parameter from URL
+  React.useEffect(() => {
+    if (params.tab === 'account') {
+      goToAccountTab()
+    }
+  }, [params.tab, goToAccountTab])
 
   // Define routes based on login state
   const routes = React.useMemo(() => {
@@ -113,7 +132,7 @@ export default function TabLayout() {
   }, [isLoggedIn, index])
 
   return (
-    <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+    <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn, goToAccountTab }}>
       <BottomNavigation
         navigationState={{ index: validIndex, routes }}
         onIndexChange={setIndex}
