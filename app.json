@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "OCSC-Learning-Platform-Native",
+    "name": "OCSC Learning Space",
     "slug": "OCSC-Learning-Platform-Native",
     "version": "1.0.1",
     "orientation": "portrait",
@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ocsc.learningplatformnative"
+      "bundleIdentifier": "com.ocsc.learningplatformnative",
+      "displayName": "Learning Space"
     },
     "android": {
       "package": "com.ocsc.learningplatformnative",
@@ -18,7 +19,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "displayName": "Learning Space"
     },
     "web": {
       "bundler": "metro",

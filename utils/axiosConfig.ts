@@ -1,4 +1,5 @@
 import axios from 'axios'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { API_URL } from '@env'
 
 // Set the base URL for all axios requests
@@ -7,14 +8,23 @@ axios.defaults.baseURL = API_URL || 'https://learningportal.ocsc.go.th/learnings
 
 console.log('[Axios Config] Base URL:', axios.defaults.baseURL)
 
-// Request interceptor for adding auth token if needed
+// Request interceptor for adding auth token
 axios.interceptors.request.use(
-  (config) => {
-    // You can add authentication token here in the future
-    // const token = await AsyncStorage.getItem('token')
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+  async (config) => {
+    try {
+      // Get token from AsyncStorage
+      const token = await AsyncStorage.getItem('token')
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+        console.log('[Axios] Added token to request:', token.substring(0, 50) + '...')
+        console.log('[Axios] Request URL:', config.url)
+        console.log('[Axios] Request headers:', JSON.stringify(config.headers, null, 2))
+      } else {
+        console.log('[Axios] No token found in AsyncStorage')
+      }
+    } catch (error) {
+      console.error('[Axios] Error getting token:', error)
+    }
     return config
   },
   (error) => {
@@ -24,10 +34,15 @@ axios.interceptors.request.use(
 
 // Response interceptor for handling errors globally
 axios.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('[Axios] Response success:', response.config.url, response.status)
+    return response
+  },
   (error) => {
     // Handle errors globally here
-    console.error('API Error:', error)
+    console.error('[Axios] API Error:', error.message)
+    console.error('[Axios] Error config:', error.config?.url)
+    console.error('[Axios] Error response:', error.response?.status, error.response?.data)
     return Promise.reject(error)
   }
 )

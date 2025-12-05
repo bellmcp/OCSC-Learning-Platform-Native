@@ -271,7 +271,7 @@ export default function CourseDetailScreen() {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size='large' color={tintColor} />
             <ThemedText style={styles.loadingText}>
-              กำลังโหลดข้อมูล...
+              กำลังโหลดรายละเอียดรายวิชา...
             </ThemedText>
           </View>
         ) : (

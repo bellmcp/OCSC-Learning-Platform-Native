@@ -63,3 +63,9 @@ export interface UIState {
   }
   isChatbotLoading: boolean
 }
+
+// AppDispatch type for Redux Thunk support
+import { ThunkDispatch } from 'redux-thunk'
+import { UnknownAction } from 'redux'
+
+export type AppDispatch = ThunkDispatch<RootState, unknown, UnknownAction>

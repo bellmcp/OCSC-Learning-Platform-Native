@@ -1,4 +1,6 @@
 import { Image } from 'expo-image'
+import { Linking as RNLinking } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
@@ -26,25 +28,21 @@ import {
   THAID_API_URL,
 } from '@env'
 import { LoginContext } from './_layout'
-
-// Mock user data
-const mockUser = {
-  id: 'USR-2024-001',
-  name: 'สมชาย รักเรียน',
-  email: 'wutipat.k@ocsc.go.th',
-  avatar: 'https://bellmcp.work/img/Profile.jpg',
-  role: 'Senior Developer',
-  department: 'Software Engineer',
-  joinDate: 'มกราคม 2023',
-  completedCourses: 12,
-  totalHours: 48,
-}
+import { useDispatch as useReduxDispatch, useSelector } from 'react-redux'
+import * as uiActions from '@/modules/ui/actions'
+import * as userActions from '@/modules/user/actions'
+import type { RootState, AppDispatch } from '@/store/types'
+import { PORTAL_URL } from '@env'
 
 export default function AccountScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const tintColor = useThemeColor({}, 'tint')
   const iconColor = useThemeColor({}, 'icon')
   const scrollViewRef = useRef<ScrollView>(null)
+  const dispatch = useReduxDispatch<AppDispatch>()
+
+  // Get user data from Redux
+  const { items: user } = useSelector((state: RootState) => state.user)
 
   // Use shared login context instead of local state
   const { isLoggedIn, setIsLoggedIn } = useContext(LoginContext)
@@ -70,7 +68,8 @@ export default function AccountScreen() {
     return state
   }
 
-  // Handle ThaiD OAuth login
+
+    // Handle ThaiD OAuth login
   const handleThaiDLogin = async () => {
     try {
       setIsThaiDLoading(true)
@@ -136,8 +135,21 @@ export default function AccountScreen() {
         
         if (data.token) {
           console.log('ThaiD login successful!')
+          
+          // Store token in AsyncStorage
+          await AsyncStorage.setItem('token', data.token)
+          console.log('[Auth] Token stored in AsyncStorage:', data.token.substring(0, 50) + '...')
+          
+          // Verify token was stored
+          const storedToken = await AsyncStorage.getItem('token')
+          console.log('[Auth] Verified token in storage:', storedToken ? 'YES' : 'NO')
+          
+          // Load user data (loadUser will get userId from token automatically)
+          dispatch(userActions.loadUser())
+          
           setIsLoggedIn(true)
           setThaiDState(null)
+          dispatch(uiActions.setFlashMessage('เข้าสู่ระบบเรียบร้อยแล้ว', 'success'))
         } else {
           throw new Error('No token received')
         }
@@ -148,11 +160,35 @@ export default function AccountScreen() {
       }
       
       setIsThaiDLoading(false)
-    } catch (error) {
+    } catch (error: any) {
       console.error('ThaiD login error:', error)
       setIsThaiDLoading(false)
-      Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง')
+      
+      // Handle different error types with appropriate messages
+      let errorMessage = 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง'
+      
+      if (error.response) {
+        const status = error.response.status
+        if (status === 401) {
+          errorMessage = 'รหัสผ่านไม่ถูกต้อง'
+        } else if (status === 404) {
+          errorMessage = 'ไม่พบบัญชีผู้ใช้งานนี้ โปรดลองใหม่อีกครั้ง'
+        } else if (status === 500) {
+          errorMessage = `เกิดข้อผิดพลาด ${status} โปรดลองใหม่อีกครั้ง`
+        } else {
+          errorMessage = `เกิดข้อผิดพลาด ${status} โปรดลองใหม่อีกครั้ง`
+        }
+      } else if (error.message) {
+        if (error.message.includes('State mismatch')) {
+          errorMessage = 'เกิดข้อผิดพลาดด้านความปลอดภัย กรุณาลองใหม่อีกครั้ง'
+        } else if (error.message.includes('No authorization code')) {
+          errorMessage = 'ไม่พบรหัสยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
+        }
+      }
+      
+      dispatch(uiActions.setFlashMessage(errorMessage, 'error'))
     }
+
   }
 
   // Handle deep link callback from ThaiD
@@ -195,22 +231,56 @@ export default function AccountScreen() {
           const data = await response.json()
           
           if (data.token) {
-            // Store token (you may want to use AsyncStorage)
-            console.log('ThaiD login successful, token:', data.token)
+            // Store token in AsyncStorage
+            await AsyncStorage.setItem('token', data.token)
+            console.log('[Auth] Token stored in AsyncStorage:', data.token.substring(0, 50) + '...')
+            
+            // Verify token was stored
+            const storedToken = await AsyncStorage.getItem('token')
+            console.log('[Auth] Verified token in storage:', storedToken ? 'YES' : 'NO')
+            console.log('ThaiD login successful')
+            
+            // Load user data (loadUser will get userId from token automatically)
+            dispatch(userActions.loadUser())
             
             // Set logged in state
             setIsLoggedIn(true)
             setThaiDState(null)
+            dispatch(uiActions.setFlashMessage('เข้าสู่ระบบเรียบร้อยแล้ว', 'success'))
           } else {
             throw new Error('No token received')
           }
           
           setIsThaiDLoading(false)
-        } catch (error) {
+        } catch (error: any) {
           console.error('ThaiD callback error:', error)
           setIsThaiDLoading(false)
-          Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง')
+          
+          // Handle different error types with appropriate messages
+          let errorMessage = 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง'
+          
+          if (error.response) {
+            const status = error.response.status
+            if (status === 401) {
+              errorMessage = 'รหัสผ่านไม่ถูกต้อง'
+            } else if (status === 404) {
+              errorMessage = 'ไม่พบบัญชีผู้ใช้งานนี้ โปรดลองใหม่อีกครั้ง'
+            } else if (status === 500) {
+              errorMessage = `เกิดข้อผิดพลาด ${status} โปรดลองใหม่อีกครั้ง`
+            } else {
+              errorMessage = `เกิดข้อผิดพลาด ${status} โปรดลองใหม่อีกครั้ง`
+            }
+          } else if (error.message) {
+            if (error.message.includes('State mismatch')) {
+              errorMessage = 'เกิดข้อผิดพลาดด้านความปลอดภัย กรุณาลองใหม่อีกครั้ง'
+            } else if (error.message.includes('No authorization code')) {
+              errorMessage = 'ไม่พบรหัสยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
+            }
+          }
+          
+          dispatch(uiActions.setFlashMessage(errorMessage, 'error'))
         }
+
       }
     }
 
@@ -230,6 +300,14 @@ export default function AccountScreen() {
       subscription.remove()
     }
   }, [thaiDState, setIsLoggedIn])
+
+  // Load user data when logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      // loadUser will automatically get token and userId from AsyncStorage
+      dispatch(userActions.loadUser())
+    }
+  }, [isLoggedIn, dispatch])
 
   // Reset scroll position when component mounts or becomes visible
   React.useEffect(() => {
@@ -254,7 +332,12 @@ export default function AccountScreen() {
       {
         text: 'ออกจากระบบ',
         style: 'destructive',
-        onPress: () => setIsLoggedIn(false),
+        onPress: async () => {
+          // Clear token from AsyncStorage
+          await AsyncStorage.removeItem('token')
+          console.log('[Auth] Token removed from AsyncStorage')
+          setIsLoggedIn(false)
+        },
       },
     ])
   }
@@ -591,10 +674,12 @@ export default function AccountScreen() {
 
           <ThemedView style={styles.userInfo}>
             <ThemedText type='title' style={styles.userName}>
-              {mockUser.name}
+              {user.firstname
+                ? `${user.title || ''}${user.firstname} ${user.lastname}`
+                : 'คุณยังไม่ได้เข้าสู่ระบบ'}
             </ThemedText>
             <ThemedText style={[styles.userRole, { color: tintColor }]}>
-              1 2345 67890 12 3
+              {user.id || ''}
             </ThemedText>
           </ThemedView>
         </ThemedView>
@@ -607,7 +692,7 @@ export default function AccountScreen() {
               type='title'
               style={[styles.statNumber, { color: tintColor }]}
             >
-              {mockUser.completedCourses}
+              {user.completedCourses || 0}
             </ThemedText>
             <ThemedText style={styles.statLabel}>
               เนื้อหาที่เรียนจบแล้ว
@@ -625,7 +710,7 @@ export default function AccountScreen() {
               type='title'
               style={[styles.statNumber, { color: tintColor }]}
             >
-              {mockUser.totalHours}
+              {user.totalHours || 0}
             </ThemedText>
             <ThemedText style={styles.statLabel}>คะแนนการเรียนรู้</ThemedText>
           </TouchableOpacity>
@@ -672,6 +757,7 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
+            onPress={() => RNLinking.openURL(`${PORTAL_URL}history`)}
           >
             <IconSymbol name='doc.text' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
@@ -681,7 +767,7 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => router.push('/edit-profile' as any)}
+            onPress={() => RNLinking.openURL(`${PORTAL_URL}edit`)}
           >
             <IconSymbol name='pencil' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
@@ -691,11 +777,21 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => router.push('/change-password' as any)}
+            onPress={() => RNLinking.openURL(`${PORTAL_URL}reset`)}
           >
             <IconSymbol name='lock' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
-              เปลี่ยนรหัสผ่าน
+              ตั้งรหัสผ่านใหม่ / ลืมรหัสผ่าน
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+            onPress={() => RNLinking.openURL(`${PORTAL_URL}otp`)}
+          >
+            <IconSymbol name='gear' size={20} color={tintColor} />
+            <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
+              ตั้งค่า OTP
             </ThemedText>
           </TouchableOpacity>
 

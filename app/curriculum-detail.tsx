@@ -316,7 +316,7 @@ export default function CurriculumDetailScreen() {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size='large' color={tintColor} />
             <ThemedText style={styles.loadingText}>
-              กำลังโหลดข้อมูล...
+              กำลังโหลดรายละเอียดหลักสูตร...
             </ThemedText>
           </View>
         ) : (
@@ -373,13 +373,18 @@ export default function CurriculumDetailScreen() {
                   <View style={styles.sectionIconContainer}>
                     <IconSymbol name='flag.fill' size={20} color='white' />
                   </View>
-                  <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                  <ThemedText
+                    type='defaultSemiBold'
+                    style={styles.sectionTitle}
+                  >
                     เป้าหมายการเรียนรู้
                   </ThemedText>
                 </View>
                 <RenderHtml
                   contentWidth={htmlContentWidth}
-                  source={{ html: prepareHtmlContent(curriculum?.learningObjective) }}
+                  source={{
+                    html: prepareHtmlContent(curriculum?.learningObjective),
+                  }}
                   systemFonts={systemFonts}
                   baseStyle={baseStyle}
                   enableExperimentalMarginCollapsing={true}
@@ -395,13 +400,18 @@ export default function CurriculumDetailScreen() {
                   <View style={styles.sectionIconContainer}>
                     <IconSymbol name='doc.text.fill' size={20} color='white' />
                   </View>
-                  <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                  <ThemedText
+                    type='defaultSemiBold'
+                    style={styles.sectionTitle}
+                  >
                     ประเด็นการเรียนรู้
                   </ThemedText>
                 </View>
                 <RenderHtml
                   contentWidth={htmlContentWidth}
-                  source={{ html: prepareHtmlContent(curriculum?.learningTopic) }}
+                  source={{
+                    html: prepareHtmlContent(curriculum?.learningTopic),
+                  }}
                   systemFonts={systemFonts}
                   baseStyle={baseStyle}
                   enableExperimentalMarginCollapsing={true}
@@ -417,7 +427,10 @@ export default function CurriculumDetailScreen() {
                   <View style={styles.sectionIconContainer}>
                     <IconSymbol name='chart.bar.fill' size={20} color='white' />
                   </View>
-                  <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                  <ThemedText
+                    type='defaultSemiBold'
+                    style={styles.sectionTitle}
+                  >
                     วิธีการประเมินผล
                   </ThemedText>
                 </View>
@@ -439,7 +452,10 @@ export default function CurriculumDetailScreen() {
                   <View style={styles.sectionIconContainer}>
                     <IconSymbol name='person.2.fill' size={20} color='white' />
                   </View>
-                  <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                  <ThemedText
+                    type='defaultSemiBold'
+                    style={styles.sectionTitle}
+                  >
                     กลุ่มเป้าหมาย
                   </ThemedText>
                 </View>
