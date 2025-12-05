@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { CategoryBottomSheet } from '@/components/CategoryBottomSheet'
 import CourseItem, { type Course } from '@/components/CourseItem'
 import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
@@ -26,6 +27,7 @@ import * as curriculumsActions from '@/modules/curriculums/actions'
 import * as pressesActions from '@/modules/press/actions'
 import * as uiActions from '@/modules/ui/actions'
 import type { RootState } from '@/store/types'
+import categoryColor from '@/utils/categoryColor'
 
 const { width: screenWidth } = Dimensions.get('window')
 
@@ -92,6 +94,8 @@ export default function HomeScreen() {
 
   const dispatch = useDispatch()
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0)
+  const [selectedCategoryId, setSelectedCategoryId] = useState(0)
+  const [showCategoryBottomSheet, setShowCategoryBottomSheet] = useState(false)
   const bannerFlatListRef = useRef<FlatList>(null)
   const scrollViewRef = useRef<ScrollView>(null)
 
@@ -137,16 +141,31 @@ export default function HomeScreen() {
     convertCurriculumToDisplayFormat
   )
 
-  // Load data on mount - consolidated into one useEffect
+  // Get selected category name for display
+  const selectedCategoryName =
+    selectedCategoryId === 0
+      ? 'ทั้งหมด'
+      : categories.find((cat) => cat.id === selectedCategoryId)
+          ?.courseCategory || 'ทั้งหมด'
+
+  // Load initial data on mount
   useEffect(() => {
     console.log('HomeScreen: Loading data from API...')
     dispatch(pressesActions.loadPresses() as any)
-    dispatch(coursesActions.loadCourses() as any)
     dispatch(coursesActions.loadRecommendedCourses() as any)
     dispatch(categoriesActions.loadCategories() as any)
     dispatch(curriculumsActions.loadCurriculums('') as any)
     dispatch(uiActions.loadChatbotInfo() as any)
   }, [dispatch])
+
+  // Reload courses when category changes
+  useEffect(() => {
+    if (selectedCategoryId === 0) {
+      dispatch(coursesActions.loadCourses() as any)
+    } else {
+      dispatch(coursesActions.loadCourses(selectedCategoryId.toString()) as any)
+    }
+  }, [dispatch, selectedCategoryId])
 
   // Debug: Log when data changes
   useEffect(() => {
@@ -182,6 +201,11 @@ export default function HomeScreen() {
         console.error('Failed to open URL:', err)
       )
     }
+  }
+
+  const handleSelectCategory = (categoryId: number) => {
+    console.log('Selected category:', categoryId)
+    setSelectedCategoryId(categoryId)
   }
 
   const renderBannerItem = ({ item }: { item: BannerItem }) => (
@@ -353,6 +377,48 @@ export default function HomeScreen() {
               />
             </TouchableOpacity>
           </ThemedView>
+
+          {/* Category Filter */}
+          <ThemedView style={styles.categoryFilterSection}>
+            <TouchableOpacity
+              style={styles.categoryFilterButton}
+              onPress={() => setShowCategoryBottomSheet(true)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.categoryFilterContent}>
+                {selectedCategoryId === 0 ? (
+                  <View style={styles.categoryDotsContainer}>
+                    {categories.slice(0, 5).map((cat) => (
+                      <View
+                        key={cat.id}
+                        style={[
+                          styles.categoryDot,
+                          { backgroundColor: categoryColor(cat.id) },
+                        ]}
+                      />
+                    ))}
+                  </View>
+                ) : (
+                  <View
+                    style={[
+                      styles.categoryIndicator,
+                      { backgroundColor: categoryColor(selectedCategoryId) },
+                    ]}
+                  />
+                )}
+                <ThemedText style={styles.categoryFilterText}>
+                  {selectedCategoryName}
+                </ThemedText>
+              </View>
+              <IconSymbol
+                name='chevron.down'
+                size={18}
+                color='#6B7280'
+                style={styles.categoryFilterIcon}
+              />
+            </TouchableOpacity>
+          </ThemedView>
+
           {isCoursesLoading ? (
             <ThemedView style={styles.loadingContainer}>
               <ThemedText style={styles.loadingText}>
@@ -422,6 +488,16 @@ export default function HomeScreen() {
           )}
         </ThemedView>
       </ScrollView>
+
+      {/* Category Bottom Sheet */}
+      <CategoryBottomSheet
+        visible={showCategoryBottomSheet}
+        onClose={() => setShowCategoryBottomSheet(false)}
+        categories={categories}
+        selectedCategoryId={selectedCategoryId}
+        onSelectCategory={handleSelectCategory}
+      />
+
       <StatusBarGradient />
     </ThemedView>
   )
@@ -627,5 +703,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Prompt-Regular',
     opacity: 0.6,
+  },
+  // Category Filter styles
+  categoryFilterSection: {
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  categoryFilterLabel: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Medium',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  categoryFilterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+  },
+  categoryFilterContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  categoryDotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  categoryDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 7,
+    marginRight: 4,
+  },
+  categoryIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 7,
+    marginRight: 10,
+  },
+  categoryFilterText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#374151',
+    flex: 1,
+  },
+  categoryFilterIcon: {
+    marginLeft: 8,
   },
 })

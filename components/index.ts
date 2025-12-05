@@ -1,3 +1,4 @@
+export { CategoryBottomSheet } from './CategoryBottomSheet'
 export { ClassroomHeader } from './ClassroomHeader'
 export { CoinAnimation } from './CoinAnimation'
 export { ContentHeader } from './ContentHeader'

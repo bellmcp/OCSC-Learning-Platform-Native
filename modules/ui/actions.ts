@@ -1,4 +1,5 @@
 import axios from '@/utils/axiosConfig'
+import { PORTAL_API_URL, PLATFORM_URL } from '@env'
 
 export const SET_FLASH_MESSAGE = 'learning-platform/ui/SET_FLASH_MESSAGE'
 export const CLEAR_FLASH_MESSAGE = 'learning-platform/ui/CLEAR_FLASH_MESSAGE'
@@ -71,9 +72,8 @@ export function loadFooterInfo() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_FOOTER_INFO_REQUEST })
     try {
-      // TODO: Update with correct API endpoint
       const { data } = await axios.get('constants/footnote', {
-        baseURL: 'https://learningportal.ocsc.go.th/portalapi',
+        baseURL: PORTAL_API_URL || 'https://learningportal.ocsc.go.th/learningportalapi/',
       })
       dispatch({
         type: LOAD_FOOTER_INFO_SUCCESS,
@@ -98,7 +98,7 @@ export function loadSupportInfo() {
     dispatch({ type: LOAD_SUPPORT_INFO_REQUEST })
     try {
       const { data } = await axios.get('constants/help', {
-        baseURL: 'https://learningportal.ocsc.go.th/portalapi',
+        baseURL: PORTAL_API_URL || 'https://learningportal.ocsc.go.th/learningportalapi/',
       })
       dispatch({
         type: LOAD_SUPPORT_INFO_SUCCESS,
@@ -123,7 +123,7 @@ export function loadChatbotInfo() {
     dispatch({ type: LOAD_CHATBOT_INFO_REQUEST })
     try {
       const { data } = await axios.get('chatbotapi/parameters', {
-        baseURL: 'https://learningportal.ocsc.go.th',
+        baseURL: PLATFORM_URL || 'https://learningportal.ocsc.go.th',
       })
       dispatch({
         type: LOAD_CHATBOT_INFO_SUCCESS,
