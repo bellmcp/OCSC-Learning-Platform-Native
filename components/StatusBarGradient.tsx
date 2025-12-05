@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 1000, // High z-index to ensure it's above scrollable content
+    zIndex: 10, // Low enough to not interfere with native RefreshControl
     // Add a subtle shadow for better visibility
     shadowColor: '#000',
     shadowOffset: {

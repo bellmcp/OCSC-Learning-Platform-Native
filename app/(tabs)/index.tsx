@@ -108,7 +108,7 @@ export default function HomeScreen() {
   const bannerFlatListRef = useRef<FlatList>(null)
   const scrollViewRef = useRef<ScrollView>(null)
   const autoScrollInterval = useRef<ReturnType<typeof setInterval> | null>(null)
-  
+
   // Cache flags to prevent unnecessary reloads
   const hasLoadedInitialData = useRef(false)
   const lastLoadedCategoryId = useRef<number | null>(null)
@@ -165,12 +165,12 @@ export default function HomeScreen() {
   // Load initial data on mount (only if not already loaded)
   useEffect(() => {
     // Check if we already have data in Redux OR in local snapshots - if yes, skip loading
-    const hasReduxData = presses.length > 0 && 
-                         categories.length > 0 && 
-                         curriculums.length > 0
-    const hasSnapshotData = homePageCurriculums.length > 0 && homePageCourses.length > 0
+    const hasReduxData =
+      presses.length > 0 && categories.length > 0 && curriculums.length > 0
+    const hasSnapshotData =
+      homePageCurriculums.length > 0 && homePageCourses.length > 0
     const hasData = hasReduxData || hasSnapshotData
-    
+
     if (!hasLoadedInitialData.current && !hasData) {
       console.log('HomeScreen: Loading initial data from API...')
       setIsLoadingCourses(true)
@@ -188,19 +188,35 @@ export default function HomeScreen() {
       // Don't set lastLoadedCategoryId - let it remain null if not set
       // This allows category changes to work properly
     }
-  }, [dispatch, presses.length, categories.length, curriculums.length, homePageCurriculums.length, homePageCourses.length, selectedCategoryId])
+  }, [
+    dispatch,
+    presses.length,
+    categories.length,
+    curriculums.length,
+    homePageCurriculums.length,
+    homePageCourses.length,
+    selectedCategoryId,
+  ])
 
   // Reload courses only when category actually changes
   useEffect(() => {
     // Load if: initialized AND (first time OR category changed)
-    if (hasLoadedInitialData.current && 
-        (lastLoadedCategoryId.current === null || lastLoadedCategoryId.current !== selectedCategoryId)) {
-      console.log('HomeScreen: Loading courses for category:', selectedCategoryId)
+    if (
+      hasLoadedInitialData.current &&
+      (lastLoadedCategoryId.current === null ||
+        lastLoadedCategoryId.current !== selectedCategoryId)
+    ) {
+      console.log(
+        'HomeScreen: Loading courses for category:',
+        selectedCategoryId
+      )
       setIsLoadingCourses(true)
       if (selectedCategoryId === 0) {
         dispatch(coursesActions.loadCourses() as any)
       } else {
-        dispatch(coursesActions.loadCourses(selectedCategoryId.toString()) as any)
+        dispatch(
+          coursesActions.loadCourses(selectedCategoryId.toString()) as any
+        )
       }
       lastLoadedCategoryId.current = selectedCategoryId
     }
@@ -211,7 +227,7 @@ export default function HomeScreen() {
     // Save snapshot of courses for home page (separate from "See All" page data)
     if (courses.length > 0) {
       if (isLoadingCourses) {
-        setHomePageCourses([...courses])  // Create snapshot
+        setHomePageCourses([...courses]) // Create snapshot
         setIsLoadingCourses(false)
       } else if (!refreshing && homePageCourses.length === 0) {
         // Initial load from cache
@@ -221,15 +237,23 @@ export default function HomeScreen() {
     // Save snapshot of curriculums for home page (separate from "See All" page data)
     if (curriculums.length > 0) {
       if (isLoadingCurriculums) {
-        setHomePageCurriculums([...curriculums])  // Create snapshot
+        setHomePageCurriculums([...curriculums]) // Create snapshot
         setIsLoadingCurriculums(false)
       } else if (!refreshing && homePageCurriculums.length === 0) {
         // Initial load from cache
         setHomePageCurriculums([...curriculums])
       }
     }
-  }, [courses, curriculums, isLoadingCourses, isLoadingCurriculums, refreshing, homePageCourses.length, homePageCurriculums.length])
-  
+  }, [
+    courses,
+    curriculums,
+    isLoadingCourses,
+    isLoadingCurriculums,
+    refreshing,
+    homePageCourses.length,
+    homePageCurriculums.length,
+  ])
+
   // Update snapshots after pull-to-refresh completes
   useEffect(() => {
     if (!refreshing && courses.length > 0 && curriculums.length > 0) {
@@ -329,11 +353,11 @@ export default function HomeScreen() {
   const onRefresh = async () => {
     console.log('HomeScreen: Pull-to-refresh triggered')
     setRefreshing(true)
-    
+
     // Reset carousel to first item
     setCurrentBannerIndex(0)
     bannerFlatListRef.current?.scrollToOffset({ offset: 0, animated: false })
-    
+
     try {
       // Force reload all data
       // Note: Don't set local loading states here since refreshing state handles the UI
@@ -420,9 +444,8 @@ export default function HomeScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={tintColor}
-            colors={[tintColor, '#2E9AB6', '#00A69C']}
-            progressBackgroundColor='#ffffff'
-            progressViewOffset={60}
+            colors={[tintColor]}
+            progressViewOffset={70}
           />
         }
       >
@@ -443,7 +466,7 @@ export default function HomeScreen() {
         {isPressesLoading ? (
           <ThemedView style={styles.section}>
             <ThemedView style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={tintColor} />
+              <ActivityIndicator size='large' color={tintColor} />
               <ThemedText style={styles.loadingText}>
                 กำลังโหลดข่าวสาร...
               </ThemedText>
@@ -494,7 +517,7 @@ export default function HomeScreen() {
           </ThemedView>
           {isRecommendedCoursesLoading ? (
             <ThemedView style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={tintColor} />
+              <ActivityIndicator size='large' color={tintColor} />
               <ThemedText style={styles.loadingText}>
                 กำลังโหลดรายวิชาแนะนำ...
               </ThemedText>
@@ -591,7 +614,7 @@ export default function HomeScreen() {
             />
           ) : isLoadingCourses ? (
             <ThemedView style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={tintColor} />
+              <ActivityIndicator size='large' color={tintColor} />
               <ThemedText style={styles.loadingText}>
                 กำลังโหลดรายวิชา...
               </ThemedText>
@@ -637,7 +660,7 @@ export default function HomeScreen() {
             />
           ) : isLoadingCurriculums ? (
             <ThemedView style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={tintColor} />
+              <ActivityIndicator size='large' color={tintColor} />
               <ThemedText style={styles.loadingText}>
                 กำลังโหลดหลักสูตร...
               </ThemedText>
@@ -692,6 +715,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 80 : 40,
     paddingHorizontal: 20,
     paddingBottom: 24,
+    backgroundColor: 'transparent', // Allow RefreshControl spinner to be visible
   },
   headerTitle: {
     fontSize: 28,
