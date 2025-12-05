@@ -1,6 +1,6 @@
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   Platform,
@@ -17,11 +17,15 @@ import { ContentList } from '@/components/ContentList'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
+import { courseRegistrations } from '@/constants/CourseRegistrations'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import * as categoriesActions from '@/modules/categories/actions'
 import * as coursesActions from '@/modules/courses/actions'
 import type { RootState } from '@/store/types'
 import categoryColor from '@/utils/categoryColor'
+import isBetween from '@/utils/isBetween'
+
+import { LoginContext } from './(tabs)/_layout'
 
 // Function to clean HTML tags from text
 const cleanHtmlText = (htmlText: string | undefined | null) => {
@@ -77,6 +81,13 @@ export default function CourseDetailScreen() {
   const iconColor = useThemeColor({}, 'icon')
   const tintColor = useThemeColor({}, 'tint')
 
+  // Login context
+  const { isLoggedIn } = useContext(LoginContext)
+
+  // Registration button state
+  const [isRegisterButtonDisabled, setIsRegisterButtonDisabled] = useState(false)
+  const [registerButtonLabel, setRegisterButtonLabel] = useState('ลงทะเบียนเรียน')
+
   const { width: contentWidth } = useWindowDimensions()
 
   const dispatch = useDispatch()
@@ -126,7 +137,7 @@ export default function CourseDetailScreen() {
         ? prepareHtmlContent(course.learningObjective)
         : '<p>ไม่มีข้อมูล</p>',
       isHtml: true,
-      icon: 'target',
+      icon: 'flag.fill',
     },
     {
       title: 'วิทยากร',
@@ -134,7 +145,7 @@ export default function CourseDetailScreen() {
         ? prepareHtmlContent(course.instructor)
         : '<p>ไม่มีข้อมูล</p>',
       isHtml: true,
-      icon: 'person.circle',
+      icon: 'person.fill',
     },
     {
       title: 'ประเด็นการเรียนรู้',
@@ -142,7 +153,7 @@ export default function CourseDetailScreen() {
         ? prepareHtmlContent(course.learningTopic)
         : '<p>ไม่มีข้อมูล</p>',
       isHtml: true,
-      icon: 'square.and.pencil',
+      icon: 'doc.text.fill',
     },
     {
       title: 'วิธีการประเมินผล',
@@ -150,7 +161,7 @@ export default function CourseDetailScreen() {
         ? prepareHtmlContent(course.assessment)
         : '<p>ไม่มีข้อมูล</p>',
       isHtml: true,
-      icon: 'chart.bar',
+      icon: 'chart.bar.fill',
     },
     {
       title: 'กลุ่มเป้าหมาย',
@@ -158,19 +169,19 @@ export default function CourseDetailScreen() {
         ? prepareHtmlContent(course.targetGroup)
         : '<p>ไม่มีข้อมูล</p>',
       isHtml: true,
-      icon: 'person.2',
+      icon: 'person.2.fill',
     },
     {
       title: 'หมายเหตุ',
       detail: course?.seqFlow
         ? 'บังคับเรียนตามลำดับเนื้อหา'
         : 'ไม่บังคับเรียนตามลำดับเนื้อหา',
-      icon: 'info.circle',
+      icon: 'bookmark.fill',
     },
     {
       title: 'จำนวนชั่วโมงการเรียนรู้',
       detail: `${hour ?? 0} ชั่วโมง`,
-      icon: 'clock',
+      icon: 'clock.fill',
     },
   ]
 
@@ -416,31 +427,140 @@ export default function CourseDetailScreen() {
                         </View>
                       )}
 
-                      {/* Registration Button */}
-                      <TouchableOpacity
-                        style={[
-                          styles.registerButton,
-                          { backgroundColor: tintColor },
-                        ]}
-                        onPress={() => {
-                          console.log(
-                            'Register for course:',
-                            id,
-                            'round:',
-                            round.id
+                      {/* Registration Button - Conditional Rendering */}
+                      {(() => {
+                        // Check if registration period is active
+                        const isEligibleForAccess = isBetween(
+                          round.registrationStart,
+                          round.registrationEnd
+                        )
+
+                        // Check if user already registered for this round
+                        const isAlreadyRegistered = courseRegistrations.some(
+                          (reg: any) =>
+                            reg.courseId === parseInt(id || '0') &&
+                            reg.courseRoundId === round.id
+                        )
+
+                        // Case 1: Not logged in
+                        if (!isLoggedIn) {
+                          return (
+                            <View style={styles.registerMessageContainer}>
+                              <ThemedText style={styles.registerMessage}>
+                                โปรดเข้าสู่ระบบเพื่อลงทะเบียนรายวิชา
+                              </ThemedText>
+                              <TouchableOpacity
+                                style={[
+                                  styles.registerButton,
+                                  { backgroundColor: tintColor },
+                                ]}
+                                onPress={() => router.navigate('/(tabs)/account')}
+                              >
+                                <IconSymbol
+                                  name='person.fill'
+                                  size={20}
+                                  color='white'
+                                />
+                                <ThemedText style={styles.registerButtonText}>
+                                  เข้าสู่ระบบ
+                                </ThemedText>
+                              </TouchableOpacity>
+                            </View>
                           )
-                          // TODO: Implement registration logic
-                        }}
-                      >
-                        <IconSymbol
-                          name='arrow.right.square'
-                          size={20}
-                          color='white'
-                        />
-                        <ThemedText style={styles.registerButtonText}>
-                          ลงทะเบียนเรียน
-                        </ThemedText>
-                      </TouchableOpacity>
+                        }
+
+                        // Case 2: Already registered for this round
+                        if (isAlreadyRegistered) {
+                          return (
+                            <View style={styles.registerMessageContainer}>
+                              <ThemedText style={styles.registerMessage}>
+                                คุณลงทะเบียนรอบนี้แล้ว เข้าเรียนได้เลย
+                              </ThemedText>
+                              <TouchableOpacity
+                                style={[
+                                  styles.registerButton,
+                                  { backgroundColor: tintColor },
+                                ]}
+                                onPress={() =>
+                                  router.push(`/classroom?courseId=${id}`)
+                                }
+                              >
+                                <IconSymbol
+                                  name='arrow.right.square'
+                                  size={20}
+                                  color='white'
+                                />
+                                <ThemedText style={styles.registerButtonText}>
+                                  เข้าเรียน
+                                </ThemedText>
+                              </TouchableOpacity>
+                            </View>
+                          )
+                        }
+
+                        // Case 3: Full capacity
+                        if (
+                          round.maxStudents &&
+                          round.numStudents >= round.maxStudents
+                        ) {
+                          return (
+                            <View style={styles.registerMessageContainer}>
+                              <ThemedText style={styles.registerMessageDisabled}>
+                                จำนวนผู้เรียนเต็มแล้ว
+                              </ThemedText>
+                            </View>
+                          )
+                        }
+
+                        // Case 4: Not in registration period
+                        if (!isEligibleForAccess) {
+                          return (
+                            <View style={styles.registerMessageContainer}>
+                              <ThemedText style={styles.registerMessageDisabled}>
+                                ไม่เปิดให้ลงทะเบียน
+                              </ThemedText>
+                            </View>
+                          )
+                        }
+
+                        // Case 5: Can register
+                        return (
+                          <TouchableOpacity
+                            style={[
+                              styles.registerButton,
+                              { backgroundColor: tintColor },
+                              isRegisterButtonDisabled && { opacity: 0.6 },
+                            ]}
+                            onPress={() => {
+                              if (isRegisterButtonDisabled) return
+                              console.log(
+                                'Register for course:',
+                                id,
+                                'round:',
+                                round.id
+                              )
+                              setIsRegisterButtonDisabled(true)
+                              setRegisterButtonLabel('กำลังลงทะเบียน...')
+                              // TODO: Implement actual registration API call
+                              // For now, just reset after 3 seconds
+                              setTimeout(() => {
+                                setIsRegisterButtonDisabled(false)
+                                setRegisterButtonLabel('ลงทะเบียนเรียน')
+                              }, 3000)
+                            }}
+                            disabled={isRegisterButtonDisabled}
+                          >
+                            <IconSymbol
+                              name='arrow.right.square'
+                              size={20}
+                              color='white'
+                            />
+                            <ThemedText style={styles.registerButtonText}>
+                              {registerButtonLabel}
+                            </ThemedText>
+                          </TouchableOpacity>
+                        )
+                      })()}
                     </View>
                   </View>
                 ))}
@@ -903,6 +1023,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-SemiBold',
     marginLeft: 8,
     color: 'white',
+  },
+  registerMessageContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  registerMessage: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+    color: '#6B7280',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  registerMessageDisabled: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Medium',
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginTop: 20,
   },
   contentListContainer: {
     paddingHorizontal: 0,
