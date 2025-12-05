@@ -39,7 +39,7 @@ const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
       .substring(0, 100) + '...' // Limit length
 
   return {
-    id: realCourse.code,
+    id: realCourse.id.toString(), // Use numeric ID for API calls
     title: realCourse.name,
     description: cleanDescription,
     image: realCourse.thumbnail,

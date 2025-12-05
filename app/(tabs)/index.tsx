@@ -49,7 +49,7 @@ const convertCourseToDisplayFormat = (
       .substring(0, 100) + '...' || '' // Limit length
 
   return {
-    id: realCourse.code,
+    id: realCourse.id.toString(), // Use numeric ID for API calls
     title: realCourse.name,
     description: cleanDescription,
     image: realCourse.thumbnail,
@@ -210,7 +210,10 @@ export default function HomeScreen() {
         'HomeScreen: Loading courses for category:',
         selectedCategoryId
       )
+      // Clear old snapshot and show loading
+      setHomePageCourses([])
       setIsLoadingCourses(true)
+
       if (selectedCategoryId === 0) {
         dispatch(coursesActions.loadCourses() as any)
       } else {
@@ -225,7 +228,8 @@ export default function HomeScreen() {
   // Turn off local loading states and save snapshots when data arrives
   useEffect(() => {
     // Save snapshot of courses for home page (separate from "See All" page data)
-    if (courses.length > 0) {
+    // Only update snapshot when Redux finishes loading (prevents showing old data during category filter)
+    if (courses.length > 0 && !isCoursesLoading) {
       if (isLoadingCourses) {
         setHomePageCourses([...courses]) // Create snapshot
         setIsLoadingCourses(false)
@@ -235,7 +239,7 @@ export default function HomeScreen() {
       }
     }
     // Save snapshot of curriculums for home page (separate from "See All" page data)
-    if (curriculums.length > 0) {
+    if (curriculums.length > 0 && !isCurriculumsLoading) {
       if (isLoadingCurriculums) {
         setHomePageCurriculums([...curriculums]) // Create snapshot
         setIsLoadingCurriculums(false)
@@ -245,6 +249,8 @@ export default function HomeScreen() {
       }
     }
   }, [
+    isCoursesLoading,
+    isCurriculumsLoading,
     courses,
     curriculums,
     isLoadingCourses,

@@ -38,7 +38,7 @@ const convertCourseToDisplayFormat = (
       .substring(0, 100) + '...' || '' // Limit length
 
   return {
-    id: realCourse.code,
+    id: realCourse.id.toString(), // Use numeric ID for API calls
     title: realCourse.name,
     description: cleanDescription,
     image: realCourse.thumbnail,
@@ -230,7 +230,7 @@ export default function CoursesScreen() {
 
       {/* Scrollable Content */}
       <ThemedView style={styles.content}>
-        {isLoading && !refreshing && courses.length === 0 ? (
+        {isLoading && !refreshing ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size='large' color={tintColor} />
             <ThemedText style={styles.loadingText}>

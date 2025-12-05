@@ -16,6 +16,7 @@ import { Provider } from 'react-redux'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import configureStore from '@/store/configureStore'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import ToastNotification from '@/components/ToastNotification'
 
 const store = configureStore()
 
@@ -268,6 +269,8 @@ export default function RootLayout() {
               <Stack.Screen name='coins' options={{ headerShown: false }} />
             </Stack>
             <StatusBar style='dark' backgroundColor='transparent' translucent />
+            {/* Toast Notification Component - Listens to Redux for flash messages */}
+            <ToastNotification />
           </ThemeProvider>
         </PaperProvider>
       </SafeAreaProvider>

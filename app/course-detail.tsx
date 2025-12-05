@@ -1,58 +1,166 @@
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
+  ActivityIndicator,
   Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { ContentList } from '@/components/ContentList'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { courseCategories } from '@/constants/CourseCategories'
-import { CourseRounds } from '@/constants/CourseRounds'
-import { courses } from '@/constants/Courses'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as categoriesActions from '@/modules/categories/actions'
+import * as coursesActions from '@/modules/courses/actions'
+import type { RootState } from '@/store/types'
+import categoryColor from '@/utils/categoryColor'
 
-// Category colors following Material-UI color palette
-const getCategoryColor = (categoryId: number) => {
-  const colors: { [key: number]: string } = {
-    1: '#9C27B0', // purple[500] - การพัฒนาองค์ความรู้
-    2: '#3F51B5', // indigo[500] - การพัฒนากรอบความคิด
-    3: '#E91E63', // pink[500] - ทักษะเชิงยุทธศาสตร์และภาวะผู้นำ
-    4: '#FF9800', // orange[500] - ทักษะดิจิทัล
-    5: '#4CAF50', // green[500] - ทักษะด้านภาษา
-    6: '#2196F3', // blue[500]
-    7: '#795548', // brown[500]
-  }
-  return colors[categoryId] || '#9E9E9E' // grey[500] as default
+// Function to clean HTML tags from text
+const cleanHtmlText = (htmlText: string | undefined | null) => {
+  if (!htmlText) return 'ไม่มีข้อมูล'
+  return htmlText
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .trim()
 }
 
 export default function CourseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const backgroundColor = useThemeColor({}, 'background')
   const iconColor = useThemeColor({}, 'icon')
-  const textColor = useThemeColor({}, 'text')
   const tintColor = useThemeColor({}, 'tint')
 
-  // Find the course by code (id)
-  const course = courses.find((course) => course.code === id)
+  const dispatch = useDispatch()
 
-  // Find the course category
-  const courseCategory = courseCategories.find(
-    (cat: { id: number; courseCategory: string }) =>
-      cat.id === course?.courseCategoryId
+  // Redux state selectors
+  const {
+    isLoading: isCourseLoading,
+    currentCourse,
+    rounds,
+    contents,
+    hour = 0,
+  } = useSelector((state: RootState) => state.courses)
+  const { items: categories } = useSelector(
+    (state: RootState) => state.categories
   )
 
-  // Find course round for this course (using courseId for demo)
-  const courseRound =
-    CourseRounds.find((round) => round.courseId === 1089) || CourseRounds[0]
+  const course = currentCourse // Use currentCourse from reducer
 
-  if (!course) {
+  // Load course data on mount
+  useEffect(() => {
+    if (id) {
+      console.log('CourseDetail: Loading course data for ID:', id)
+      dispatch(coursesActions.loadCourse(id) as any)
+      dispatch(coursesActions.loadCourseRounds(id) as any)
+      dispatch(coursesActions.loadCourseContents(id) as any)
+      dispatch(coursesActions.loadCourseHour(id) as any)
+    }
+  }, [dispatch, id])
+
+  // Load categories if not already loaded
+  useEffect(() => {
+    if (categories.length === 0) {
+      dispatch(categoriesActions.loadCategories() as any)
+    }
+  }, [dispatch, categories.length])
+
+  // Find the course category
+  const courseCategory = categories.find(
+    (cat) => cat.id === course?.courseCategoryId
+  )
+
+  // Course info sections
+  const courseInfoSections = [
+    {
+      title: 'เป้าหมายการเรียนรู้',
+      detail: course?.learningObjective
+        ? cleanHtmlText(course.learningObjective)
+        : 'ไม่มีข้อมูล',
+      icon: 'target',
+    },
+    {
+      title: 'วิทยากร',
+      detail: course?.instructor
+        ? cleanHtmlText(course.instructor)
+        : 'ไม่มีข้อมูล',
+      icon: 'person.circle',
+    },
+    {
+      title: 'ประเด็นการเรียนรู้',
+      detail: course?.learningTopic
+        ? cleanHtmlText(course.learningTopic)
+        : 'ไม่มีข้อมูล',
+      icon: 'square.and.pencil',
+    },
+    {
+      title: 'วิธีการประเมินผล',
+      detail: course?.assessment
+        ? cleanHtmlText(course.assessment)
+        : 'ไม่มีข้อมูล',
+      icon: 'chart.bar',
+    },
+    {
+      title: 'กลุ่มเป้าหมาย',
+      detail: course?.targetGroup
+        ? cleanHtmlText(course.targetGroup)
+        : 'ไม่มีข้อมูล',
+      icon: 'person.2',
+    },
+    {
+      title: 'หมายเหตุ',
+      detail: course?.seqFlow
+        ? 'บังคับเรียนตามลำดับเนื้อหา'
+        : 'ไม่บังคับเรียนตามลำดับเนื้อหา',
+      icon: 'info.circle',
+    },
+    {
+      title: 'จำนวนชั่วโมงการเรียนรู้',
+      detail: `${hour ?? 0} ชั่วโมง`,
+      icon: 'clock',
+    },
+  ]
+
+  // Loading state
+  if (isCourseLoading && !course) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <ThemedView style={styles.header}>
+          <View style={styles.headerTop}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <IconSymbol name='chevron.left' size={24} color={iconColor} />
+            </TouchableOpacity>
+            <ThemedText type='title' style={styles.headerTitle}>
+              รายละเอียดรายวิชา
+            </ThemedText>
+            <View style={styles.backButton} />
+          </View>
+        </ThemedView>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size='large' color={tintColor} />
+          <ThemedText style={styles.loadingText}>
+            กำลังโหลดรายละเอียดรายวิชา...
+          </ThemedText>
+        </View>
+      </ThemedView>
+    )
+  }
+
+  // Course not found
+  if (!course && !isCourseLoading) {
     return (
       <ThemedView style={[styles.container, { backgroundColor }]}>
         <ThemedView style={styles.header}>
@@ -69,21 +177,13 @@ export default function CourseDetailScreen() {
             <View style={styles.backButton} />
           </View>
         </ThemedView>
+        <View style={styles.emptyContainer}>
+          <ThemedText style={styles.emptyText}>
+            ไม่พบข้อมูลรายวิชาที่ต้องการ
+          </ThemedText>
+        </View>
       </ThemedView>
     )
-  }
-
-  // Function to clean HTML tags from text
-  const cleanHtmlText = (htmlText: string) => {
-    return htmlText
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      .trim()
   }
 
   return (
@@ -113,7 +213,7 @@ export default function CourseDetailScreen() {
         {/* Hero Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: course.thumbnail }}
+            source={{ uri: course?.thumbnail || '' }}
             style={styles.heroImage}
             contentFit='cover'
             transition={200}
@@ -121,318 +221,195 @@ export default function CourseDetailScreen() {
           <View style={styles.imageOverlay} />
           <View style={styles.gradientOverlay} />
           <View style={styles.heroContent}>
-            <ThemedText style={styles.heroTitle}>{course.name}</ThemedText>
-            <ThemedText style={styles.courseCode}>{course.code}</ThemedText>
-            <View style={styles.categoryContainer}>
-              <View
-                style={[
-                  styles.categoryDot,
-                  {
-                    backgroundColor: getCategoryColor(course.courseCategoryId),
-                  },
-                ]}
-              />
-              <ThemedText style={styles.courseType}>
-                {courseCategory?.courseCategory || 'ทั่วไป'}
-              </ThemedText>
-            </View>
-          </View>
-        </View>
-
-        {/* Course Stats */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <IconSymbol name='person.circle' size={20} color={tintColor} />
-            <ThemedText style={styles.statLabel}>วิทยากร</ThemedText>
-            <ThemedText style={styles.statValue}>Microsoft Thailand</ThemedText>
-          </View>
-          <View style={styles.statCard}>
-            <IconSymbol name='target' size={20} color={tintColor} />
-            <ThemedText style={styles.statLabel}>กลุ่มเป้าหมาย</ThemedText>
-            <ThemedText style={styles.statValue}>บุคคลทั่วไป</ThemedText>
-          </View>
-          <View style={styles.statCard}>
-            <IconSymbol name='clock' size={20} color={tintColor} />
-            <ThemedText style={styles.statLabel}>จำนวนชั่วโมง</ThemedText>
-            <ThemedText style={styles.statValue}>3 ชั่วโมง</ThemedText>
-          </View>
-        </View>
-
-        {/* Course Round Section */}
-        <View style={styles.roundContainer}>
-          <View style={styles.roundHeader}>
-            <ThemedText style={styles.roundTitle}>
-              {courseRound.name}
+            <ThemedText style={styles.heroTitle}>
+              {course?.name || 'รายวิชา'}
             </ThemedText>
-            <View style={styles.registrationCount}>
-              <ThemedText style={styles.registrationNumber}>
-                {courseRound.numStudents.toLocaleString()} คน
-              </ThemedText>
-              <ThemedText style={styles.registrationText}>
-                ลงทะเบียนเรียนรอบนี้แล้ว
-              </ThemedText>
-            </View>
-          </View>
-
-          <View style={styles.roundInfo}>
-            <View style={styles.infoRow}>
-              <ThemedText style={styles.infoLabel}>เปิดให้ลงทะเบียน</ThemedText>
-              <ThemedText style={styles.infoValue}>
-                {new Date(courseRound.registrationStart).toLocaleDateString(
-                  'th-TH',
-                  {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  }
-                )}{' '}
-                ถึง{' '}
-                {new Date(courseRound.registrationEnd).toLocaleDateString(
-                  'th-TH',
-                  {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  }
-                )}
-              </ThemedText>
-            </View>
-            <View style={styles.infoRow}>
-              <ThemedText style={styles.infoLabel}>
-                เงื่อนไขการลงทะเบียน
-              </ThemedText>
-              <ThemedText style={styles.infoValue}>
-                {courseRound.registrationCondition || 'ไม่มีเงื่อนไข'}
-              </ThemedText>
-            </View>
-            <View style={styles.infoRow}>
-              <ThemedText style={styles.infoLabel}>เข้าเรียนได้</ThemedText>
-              <ThemedText style={styles.infoValue}>
-                {new Date(courseRound.courseStart).toLocaleDateString('th-TH', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })}{' '}
-                ถึง{' '}
-                {courseRound.courseEnd === '3000-01-01T00:00:00'
-                  ? 'ไม่มีกำหนด'
-                  : new Date(courseRound.courseEnd).toLocaleDateString(
-                      'th-TH',
-                      {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      }
-                    )}
-              </ThemedText>
-            </View>
-
-            {/* Registration Button */}
-            <TouchableOpacity
-              style={[styles.registerButton, { backgroundColor: tintColor }]}
-            >
-              <IconSymbol name='arrow.right.square' size={20} color='white' />
-              <ThemedText style={styles.registerButtonText}>
-                ลงทะเบียนเรียน
-              </ThemedText>
-            </TouchableOpacity>
+            <ThemedText style={styles.courseCode}>
+              {course?.code || ''}
+            </ThemedText>
+            {courseCategory && (
+              <View style={styles.categoryContainer}>
+                <View
+                  style={[
+                    styles.categoryDot,
+                    {
+                      backgroundColor: categoryColor(
+                        course?.courseCategoryId || 0
+                      ),
+                    },
+                  ]}
+                />
+                <ThemedText style={styles.courseType}>
+                  {courseCategory.courseCategory}
+                </ThemedText>
+              </View>
+            )}
           </View>
         </View>
+
+        {/* Course Rounds Section */}
+        {rounds.length > 0 && (
+          <>
+            {rounds.map((round: any, index: number) => (
+              <View key={round.id || index} style={styles.roundContainer}>
+                <View style={styles.roundHeader}>
+                  <ThemedText style={styles.roundTitle}>
+                    {round.name || 'รอบการเรียน'}
+                  </ThemedText>
+                  <View style={styles.registrationCount}>
+                    <ThemedText style={styles.registrationNumber}>
+                      {round.numStudents?.toLocaleString() || 0} คน
+                    </ThemedText>
+                    <ThemedText style={styles.registrationText}>
+                      ลงทะเบียนเรียนรอบนี้แล้ว
+                    </ThemedText>
+                  </View>
+                </View>
+
+                <View style={styles.roundInfo}>
+                  {round.registrationStart && round.registrationEnd && (
+                    <View style={styles.infoRow}>
+                      <ThemedText style={styles.infoLabel}>
+                        เปิดให้ลงทะเบียน
+                      </ThemedText>
+                      <ThemedText style={styles.infoValue}>
+                        {new Date(round.registrationStart).toLocaleDateString(
+                          'th-TH',
+                          {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          }
+                        )}{' '}
+                        ถึง{' '}
+                        {new Date(round.registrationEnd).toLocaleDateString(
+                          'th-TH',
+                          {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          }
+                        )}
+                      </ThemedText>
+                    </View>
+                  )}
+
+                  {round.registrationCondition && (
+                    <View style={styles.infoRow}>
+                      <ThemedText style={styles.infoLabel}>
+                        เงื่อนไขการลงทะเบียน
+                      </ThemedText>
+                      <ThemedText style={styles.infoValue}>
+                        {cleanHtmlText(round.registrationCondition)}
+                      </ThemedText>
+                    </View>
+                  )}
+
+                  {round.courseStart && round.courseEnd && (
+                    <View style={styles.infoRow}>
+                      <ThemedText style={styles.infoLabel}>
+                        เข้าเรียนได้
+                      </ThemedText>
+                      <ThemedText style={styles.infoValue}>
+                        {new Date(round.courseStart).toLocaleDateString(
+                          'th-TH',
+                          {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          }
+                        )}{' '}
+                        ถึง{' '}
+                        {round.courseEnd === '3000-01-01T00:00:00' ||
+                        round.courseEnd === '3000-01-01T00:00:00.000Z'
+                          ? 'ไม่มีกำหนด'
+                          : new Date(round.courseEnd).toLocaleDateString(
+                              'th-TH',
+                              {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              }
+                            )}
+                      </ThemedText>
+                    </View>
+                  )}
+
+                  {/* Registration Button */}
+                  <TouchableOpacity
+                    style={[
+                      styles.registerButton,
+                      { backgroundColor: tintColor },
+                    ]}
+                    onPress={() => {
+                      console.log('Register for course:', id, 'round:', round.id)
+                      // TODO: Implement registration logic
+                    }}
+                  >
+                    <IconSymbol
+                      name='arrow.right.square'
+                      size={20}
+                      color='white'
+                    />
+                    <ThemedText style={styles.registerButtonText}>
+                      ลงทะเบียนเรียน
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
 
         {/* Main Content */}
         <View style={styles.mainContent}>
-          {/* Learning Objectives Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='target' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                เป้าหมายการเรียนรู้
+          {/* Course Information Sections */}
+          {courseInfoSections.map((section, index) => (
+            <ThemedView key={index} style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <IconSymbol
+                  name={section.icon as any}
+                  size={20}
+                  color={tintColor}
+                />
+                <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                  {section.title}
+                </ThemedText>
+              </View>
+              <ThemedText style={styles.sectionContent}>
+                {section.detail}
               </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(course.learningObjective)}
-            </ThemedText>
-          </ThemedView>
+            </ThemedView>
+          ))}
 
-          {/* Instructor Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='chart.bar' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                วิธีการประเมินผล
-              </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>
-              ทำแบบทดสอบหลังเรียนได้ตั้งแต่ 60 % ขึ้นไป
-            </ThemedText>
-          </ThemedView>
-
-          {/* Assessment Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='checkmark.circle' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                ประเด็นการเรียนรู้
-              </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>
-              <ThemedText style={styles.listItem}>
-                1. ประวัติโดยย่อของ AI
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                2. ปัญญาประดิษฐ์คืออะไร
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                3. เปรียบความฉลาดกับความรู้
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                4. ข้อมูลอยู่ทุกที่
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                5. การค้นหารูปแบบในข้อมูล
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                6. Machine Learning
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                7. ประเภทของ Machine Learning
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                8. การเรียนรู้เชิงลึก
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                9. การประมวลผลภาษาธรรมชาติ (NLP)
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.listItem}>
-                10. อัลกอริทึมของ AI
-              </ThemedText>
-            </ThemedText>
-          </ThemedView>
-
-          {/* Assessment Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='info.circle' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                หมายเหตุ
-              </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>
-              ไม่มีข้อกำหนดเอกสารใดนอกจากไฟล์
-            </ThemedText>
-          </ThemedView>
-
-          {/* Course Content Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='book.closed' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                ประมวลรายวิชา
-              </ThemedText>
-            </View>
-            <View style={styles.contentListContainer}>
-              <ContentList
-                contents={[
-                  {
-                    id: 1,
-                    courseId: 1089,
-                    no: 1,
-                    name: 'บทที่ 1: ความรู้เบื้องต้นเกี่ยวกับ AI',
-                    type: 'c',
-                    minutes: 45,
+          {/* Course Contents/Syllabus Section */}
+          {contents.length > 0 && (
+            <ThemedView style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <IconSymbol name='list.bullet' size={20} color={tintColor} />
+                <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                  ประมวลรายวิชา
+                </ThemedText>
+              </View>
+              <View style={styles.contentListContainer}>
+                <ContentList
+                  contents={contents.map((content: any, index: number) => ({
+                    id: content.id || index,
+                    courseId: content.courseId,
+                    no: content.no || index + 1,
+                    name: content.name || `เนื้อหา ${index + 1}`,
+                    type: content.type || 'c',
+                    minutes: content.minutes || 0,
                     completed: false,
-                  },
-                  {
-                    id: 2,
-                    courseId: 1089,
-                    no: 2,
-                    name: 'บทที่ 2: ประวัติและวิวัฒนาการของ AI',
-                    type: 'c',
-                    minutes: 60,
-                    completed: false,
-                  },
-                  {
-                    id: 3,
-                    courseId: 1089,
-                    no: 3,
-                    name: 'บทที่ 3: Machine Learning Fundamentals',
-                    type: 'c',
-                    minutes: 75,
-                    completed: false,
-                  },
-                  {
-                    id: 4,
-                    courseId: 1089,
-                    no: 4,
-                    name: 'แบบทดสอบบทที่ 1-3',
-                    type: 't',
-                    minutes: 30,
-                    completed: false,
-                  },
-                  {
-                    id: 5,
-                    courseId: 1089,
-                    no: 5,
-                    name: 'บทที่ 4: Deep Learning และ Neural Networks',
-                    type: 'c',
-                    minutes: 90,
-                    completed: false,
-                  },
-                  {
-                    id: 6,
-                    courseId: 1089,
-                    no: 6,
-                    name: 'บทที่ 5: Natural Language Processing',
-                    type: 'c',
-                    minutes: 60,
-                    completed: false,
-                  },
-                  {
-                    id: 7,
-                    courseId: 1089,
-                    no: 7,
-                    name: 'แบบทดสอบบทที่ 4-5',
-                    type: 't',
-                    minutes: 30,
-                    completed: false,
-                  },
-                  {
-                    id: 8,
-                    courseId: 1089,
-                    no: 8,
-                    name: 'แบบประเมินผลการเรียนรู้',
-                    type: 'e',
-                    minutes: 45,
-                    completed: false,
-                  },
-                ]}
-                selectedContentId={null}
-                completedContents={new Set()}
-                onContentSelect={() => {}} // No-op function since this is static
-                hideHeader={true}
-              />
-            </View>
-          </ThemedView>
-
-          {/* Learning Hours Section
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='clock' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                จำนวนชั่วโมงการเรียนรู้
-              </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>4 ชั่วโมง</ThemedText>
-          </ThemedView> */}
+                  }))}
+                  selectedContentId={null}
+                  completedContents={new Set()}
+                  onContentSelect={() => {}}
+                  hideHeader={true}
+                />
+              </View>
+            </ThemedView>
+          )}
         </View>
       </ScrollView>
     </ThemedView>
@@ -470,7 +447,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20, // Reduced from 100 since no fixed button
+    paddingBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  emptyText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
   },
   imageContainer: {
     height: 300,
@@ -495,8 +495,6 @@ const styles = StyleSheet.create({
     right: 0,
     height: 150,
     backgroundColor: 'transparent',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
   },
   heroContent: {
     position: 'absolute',
@@ -504,20 +502,9 @@ const styles = StyleSheet.create({
     left: 25,
     right: 20,
   },
-  courseBadge: {
-    backgroundColor: 'rgba(255, 193, 7, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#ffc107',
-    alignSelf: 'flex-start',
-    marginBottom: 12,
-  },
   categoryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
     marginTop: 12,
   },
   categoryDot: {
@@ -552,47 +539,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    marginTop: -40,
-    zIndex: 1,
-  },
-  statCard: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    minWidth: 100,
-    flex: 1,
-    marginHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginTop: 10,
-    marginBottom: 10,
-    fontFamily: 'Prompt-Regular',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  statValue: {
-    fontSize: 14,
-    color: '#374151',
-    fontFamily: 'Prompt-SemiBold',
-    textAlign: 'center',
-    lineHeight: 18,
   },
   mainContent: {
     padding: 20,
@@ -633,14 +579,6 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
   },
-  listItem: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#6B7280',
-    fontFamily: 'Prompt-Regular',
-    marginBottom: 6,
-    paddingHorizontal: 8,
-  },
   roundContainer: {
     backgroundColor: 'white',
     borderRadius: 20,
@@ -669,6 +607,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: 'Prompt-SemiBold',
     color: '#374151',
+    flex: 1,
+    marginRight: 12,
   },
   registrationCount: {
     alignItems: 'flex-end',
@@ -731,34 +671,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     color: 'white',
   },
-  contactSection: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 40,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 1,
-  },
-  contactTitle: {
-    fontSize: 16,
-    color: '#374151',
-    marginBottom: 8,
-  },
-  contactText: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
-    marginBottom: 4,
-  },
   contentListContainer: {
     paddingHorizontal: 0,
     marginVertical: -24,
     marginBottom: -24,
-    marginHorizontal: -24, // Compensate for the section padding
+    marginHorizontal: -24,
   },
 })
