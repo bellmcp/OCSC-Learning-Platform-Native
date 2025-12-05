@@ -2,6 +2,7 @@ import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React, { useEffect, useRef, useState } from 'react'
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Linking,
@@ -398,6 +399,7 @@ export default function HomeScreen() {
         {isPressesLoading ? (
           <ThemedView style={styles.section}>
             <ThemedView style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={tintColor} />
               <ThemedText style={styles.loadingText}>
                 กำลังโหลดข่าวสาร...
               </ThemedText>
@@ -448,6 +450,7 @@ export default function HomeScreen() {
           </ThemedView>
           {isRecommendedCoursesLoading ? (
             <ThemedView style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={tintColor} />
               <ThemedText style={styles.loadingText}>
                 กำลังโหลดรายวิชาแนะนำ...
               </ThemedText>
@@ -535,6 +538,7 @@ export default function HomeScreen() {
 
           {isCoursesLoading ? (
             <ThemedView style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={tintColor} />
               <ThemedText style={styles.loadingText}>
                 กำลังโหลดรายวิชา...
               </ThemedText>
@@ -580,6 +584,7 @@ export default function HomeScreen() {
           </ThemedView>
           {isCurriculumsLoading ? (
             <ThemedView style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={tintColor} />
               <ThemedText style={styles.loadingText}>
                 กำลังโหลดหลักสูตร...
               </ThemedText>
@@ -806,6 +811,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Prompt-Regular',
     opacity: 0.6,
+    marginTop: 16,
   },
   emptyContainer: {
     paddingHorizontal: 20,
