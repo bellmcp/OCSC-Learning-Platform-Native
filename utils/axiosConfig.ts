@@ -1,8 +1,11 @@
 import axios from 'axios'
+import { API_URL } from '@env'
 
 // Set the base URL for all axios requests
-// Matches the desktop version's REACT_APP_API_URL
-axios.defaults.baseURL = 'https://learningportal.ocsc.go.th/learningspaceapi/'
+// Loaded from environment variables (.env file)
+axios.defaults.baseURL = API_URL || 'https://learningportal.ocsc.go.th/learningspaceapi/'
+
+console.log('[Axios Config] Base URL:', axios.defaults.baseURL)
 
 // Request interceptor for adding auth token if needed
 axios.interceptors.request.use(
