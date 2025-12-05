@@ -99,6 +99,12 @@ export default function HomeScreen() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(0)
   const [showCategoryBottomSheet, setShowCategoryBottomSheet] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  // Local loading states for home page only (independent of Redux)
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false)
+  const [isLoadingCurriculums, setIsLoadingCurriculums] = useState(false)
+  // Local snapshots of data for home page (won't be affected by "See All" pages)
+  const [homePageCourses, setHomePageCourses] = useState<any[]>([])
+  const [homePageCurriculums, setHomePageCurriculums] = useState<any[]>([])
   const bannerFlatListRef = useRef<FlatList>(null)
   const scrollViewRef = useRef<ScrollView>(null)
   const autoScrollInterval = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -134,8 +140,8 @@ export default function HomeScreen() {
     targetUrl: release.targetUrl,
   }))
 
-  // Convert course data to display format
-  const coursesData: Course[] = courses
+  // Convert course data to display format (using home page snapshot)
+  const coursesData: Course[] = homePageCourses
     .slice(0, 6)
     .map((course: any) => convertCourseToDisplayFormat(course, categories))
 
@@ -144,8 +150,8 @@ export default function HomeScreen() {
     convertCourseToDisplayFormat(course, categories)
   )
 
-  // Convert curriculum data to display format
-  const curriculumData: Curriculum[] = curriculums.map(
+  // Convert curriculum data to display format (using home page snapshot)
+  const curriculumData: Curriculum[] = homePageCurriculums.map(
     convertCurriculumToDisplayFormat
   )
 
@@ -156,15 +162,19 @@ export default function HomeScreen() {
       : categories.find((cat) => cat.id === selectedCategoryId)
           ?.courseCategory || 'ทั้งหมด'
 
-  // Load initial data on mount (only if not already in Redux)
+  // Load initial data on mount (only if not already loaded)
   useEffect(() => {
-    // Check if we already have data in Redux - if yes, skip loading
-    const hasData = presses.length > 0 && 
-                    categories.length > 0 && 
-                    curriculums.length > 0
+    // Check if we already have data in Redux OR in local snapshots - if yes, skip loading
+    const hasReduxData = presses.length > 0 && 
+                         categories.length > 0 && 
+                         curriculums.length > 0
+    const hasSnapshotData = homePageCurriculums.length > 0 && homePageCourses.length > 0
+    const hasData = hasReduxData || hasSnapshotData
     
     if (!hasLoadedInitialData.current && !hasData) {
       console.log('HomeScreen: Loading initial data from API...')
+      setIsLoadingCourses(true)
+      setIsLoadingCurriculums(true)
       dispatch(pressesActions.loadPresses() as any)
       dispatch(coursesActions.loadRecommendedCourses() as any)
       dispatch(categoriesActions.loadCategories() as any)
@@ -173,12 +183,12 @@ export default function HomeScreen() {
       hasLoadedInitialData.current = true
       // Don't set lastLoadedCategoryId yet - let the category effect handle it
     } else if (hasData) {
-      console.log('HomeScreen: Using cached data from Redux')
+      console.log('HomeScreen: Using cached data (Redux or snapshots)')
       hasLoadedInitialData.current = true
       // Don't set lastLoadedCategoryId - let it remain null if not set
       // This allows category changes to work properly
     }
-  }, [dispatch, presses.length, categories.length, curriculums.length, courses.length, selectedCategoryId])
+  }, [dispatch, presses.length, categories.length, curriculums.length, homePageCurriculums.length, homePageCourses.length, selectedCategoryId])
 
   // Reload courses only when category actually changes
   useEffect(() => {
@@ -186,6 +196,7 @@ export default function HomeScreen() {
     if (hasLoadedInitialData.current && 
         (lastLoadedCategoryId.current === null || lastLoadedCategoryId.current !== selectedCategoryId)) {
       console.log('HomeScreen: Loading courses for category:', selectedCategoryId)
+      setIsLoadingCourses(true)
       if (selectedCategoryId === 0) {
         dispatch(coursesActions.loadCourses() as any)
       } else {
@@ -194,6 +205,38 @@ export default function HomeScreen() {
       lastLoadedCategoryId.current = selectedCategoryId
     }
   }, [selectedCategoryId])
+
+  // Turn off local loading states and save snapshots when data arrives
+  useEffect(() => {
+    // Save snapshot of courses for home page (separate from "See All" page data)
+    if (courses.length > 0) {
+      if (isLoadingCourses) {
+        setHomePageCourses([...courses])  // Create snapshot
+        setIsLoadingCourses(false)
+      } else if (!refreshing && homePageCourses.length === 0) {
+        // Initial load from cache
+        setHomePageCourses([...courses])
+      }
+    }
+    // Save snapshot of curriculums for home page (separate from "See All" page data)
+    if (curriculums.length > 0) {
+      if (isLoadingCurriculums) {
+        setHomePageCurriculums([...curriculums])  // Create snapshot
+        setIsLoadingCurriculums(false)
+      } else if (!refreshing && homePageCurriculums.length === 0) {
+        // Initial load from cache
+        setHomePageCurriculums([...curriculums])
+      }
+    }
+  }, [courses, curriculums, isLoadingCourses, isLoadingCurriculums, refreshing, homePageCourses.length, homePageCurriculums.length])
+  
+  // Update snapshots after pull-to-refresh completes
+  useEffect(() => {
+    if (!refreshing && courses.length > 0 && curriculums.length > 0) {
+      setHomePageCourses([...courses])
+      setHomePageCurriculums([...curriculums])
+    }
+  }, [refreshing, courses, curriculums])
 
   // Debug: Log when data changes
   useEffect(() => {
@@ -293,6 +336,7 @@ export default function HomeScreen() {
     
     try {
       // Force reload all data
+      // Note: Don't set local loading states here since refreshing state handles the UI
       await Promise.all([
         dispatch(pressesActions.loadPresses() as any),
         dispatch(
@@ -305,7 +349,7 @@ export default function HomeScreen() {
         dispatch(curriculumsActions.loadCurriculums('') as any),
         dispatch(uiActions.loadChatbotInfo() as any),
       ])
-      // Update cache flags
+      // Update cache flags (snapshots will be auto-updated by useEffect)
       lastLoadedCategoryId.current = selectedCategoryId
     } catch (error) {
       console.error('Error refreshing data:', error)
@@ -536,14 +580,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </ThemedView>
 
-          {isCoursesLoading ? (
-            <ThemedView style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={tintColor} />
-              <ThemedText style={styles.loadingText}>
-                กำลังโหลดรายวิชา...
-              </ThemedText>
-            </ThemedView>
-          ) : coursesData.length > 0 ? (
+          {coursesData.length > 0 ? (
             <FlatList
               data={coursesData}
               renderItem={renderRecommendedItem}
@@ -552,13 +589,20 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.carouselContainer}
             />
-          ) : (
+          ) : isLoadingCourses ? (
+            <ThemedView style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={tintColor} />
+              <ThemedText style={styles.loadingText}>
+                กำลังโหลดรายวิชา...
+              </ThemedText>
+            </ThemedView>
+          ) : coursesData.length === 0 ? (
             <ThemedView style={styles.emptyContainer}>
               <ThemedText style={styles.emptyText}>
                 ไม่มีรายวิชาในขณะนี้
               </ThemedText>
             </ThemedView>
-          )}
+          ) : null}
         </ThemedView>
 
         {/* Curriculum Section */}
@@ -582,14 +626,7 @@ export default function HomeScreen() {
               />
             </TouchableOpacity>
           </ThemedView>
-          {isCurriculumsLoading ? (
-            <ThemedView style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={tintColor} />
-              <ThemedText style={styles.loadingText}>
-                กำลังโหลดหลักสูตร...
-              </ThemedText>
-            </ThemedView>
-          ) : curriculumData.length > 0 ? (
+          {curriculumData.length > 0 ? (
             <FlatList
               data={curriculumData}
               renderItem={renderCurriculumItem}
@@ -598,13 +635,20 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.carouselContainer}
             />
-          ) : (
+          ) : isLoadingCurriculums ? (
+            <ThemedView style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={tintColor} />
+              <ThemedText style={styles.loadingText}>
+                กำลังโหลดหลักสูตร...
+              </ThemedText>
+            </ThemedView>
+          ) : curriculumData.length === 0 ? (
             <ThemedView style={styles.emptyContainer}>
               <ThemedText style={styles.emptyText}>
                 ไม่มีหลักสูตรในขณะนี้
               </ThemedText>
             </ThemedView>
-          )}
+          ) : null}
         </ThemedView>
       </ScrollView>
 

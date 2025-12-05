@@ -95,14 +95,12 @@ export default function CoursesScreen() {
     console.log('CoursesScreen: Pull-to-refresh triggered')
     setRefreshing(true)
     try {
-      await Promise.all([
-        dispatch(categoriesActions.loadCategories() as any),
-        dispatch(
-          coursesActions.loadCourses(
-            selectedCategory === null ? undefined : selectedCategory.toString()
-          ) as any
-        ),
-      ])
+      // Only refresh courses, not categories (categories are loaded once and cached)
+      await dispatch(
+        coursesActions.loadCourses(
+          selectedCategory === null ? undefined : selectedCategory.toString()
+        ) as any
+      )
     } catch (error) {
       console.error('Error refreshing courses:', error)
     } finally {
@@ -232,7 +230,7 @@ export default function CoursesScreen() {
 
       {/* Scrollable Content */}
       <ThemedView style={styles.content}>
-        {isLoading && !refreshing ? (
+        {isLoading && !refreshing && courses.length === 0 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size='large' color={tintColor} />
             <ThemedText style={styles.loadingText}>
