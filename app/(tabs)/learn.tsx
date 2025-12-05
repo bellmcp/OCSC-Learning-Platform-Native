@@ -136,7 +136,7 @@ export default function LearnScreen() {
         registeredCurriculum={item}
         myCourses={registeredCourses}
         onPress={(curriculum: RegisteredCurriculum) =>
-          router.push(`/curriculum-detail?id=${curriculum.code}`)
+          router.push(`/curriculum-detail?id=${curriculum.curriculumId}`)
         }
         onUpdateSatisfactionScore={(curriculumId: number, score: number) => {
           // TODO: Implement satisfaction score update

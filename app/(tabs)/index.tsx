@@ -72,6 +72,7 @@ const convertCurriculumToDisplayFormat = (realCurriculum: any): Curriculum => {
 
   return {
     id: realCurriculum.code,
+    numericId: realCurriculum.id,
     title: realCurriculum.name,
     description: cleanDescription,
     image: realCurriculum.thumbnail,
@@ -431,7 +432,7 @@ export default function HomeScreen() {
   const handleCurriculumPress = (item: Curriculum) => {
     router.push({
       pathname: '/curriculum-detail',
-      params: { id: item.id },
+      params: { id: item.numericId.toString() },
     })
   }
 

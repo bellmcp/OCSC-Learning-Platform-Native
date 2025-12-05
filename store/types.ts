@@ -30,6 +30,7 @@ export interface CoursesState {
 }
 
 export interface CurriculumsState {
+  currentCurriculum: any | null
   isLoading: boolean
   items: any[]
   child: any[]

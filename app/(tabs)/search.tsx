@@ -1,20 +1,20 @@
 import React, { useRef, useState } from 'react'
 import {
-    FlatList,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
+  FlatList,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native'
 
 import CourseItem, {
-    type Course,
-    type RealCourse,
+  type Course,
+  type RealCourse,
 } from '@/components/CourseItem'
 import CurriculumItem, {
-    type Curriculum,
-    type RealCurriculum,
+  type Curriculum,
+  type RealCurriculum,
 } from '@/components/CurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
@@ -64,6 +64,7 @@ const convertCurriculumToDisplayFormat = (
 
   return {
     id: realCurriculum.code,
+    numericId: realCurriculum.id,
     title: realCurriculum.name,
     description: cleanDescription,
     image: realCurriculum.thumbnail,

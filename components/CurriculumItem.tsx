@@ -20,7 +20,8 @@ export interface RealCurriculum {
 
 // Interface for display purposes
 export interface Curriculum {
-  id: string
+  id: string // curriculum code (e.g. "001M") for display
+  numericId: number // curriculum id (e.g. 1001) for API calls
   title: string
   description: string
   image: string

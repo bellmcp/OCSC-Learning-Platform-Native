@@ -1,31 +1,265 @@
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import {
+  ActivityIndicator,
   Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native'
+import RenderHtml, { defaultSystemFonts } from 'react-native-render-html'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { curriculums } from '@/constants/Curriculums'
+import { curriculumRegistrations } from '@/constants/CurriculumRegistrations'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as curriculumsActions from '@/modules/curriculums/actions'
+import type { RootState } from '@/store/types'
+
+import { LoginContext } from './(tabs)/_layout'
+
+// Prepare HTML for rendering - keeps HTML structure and converts legacy font tags
+const prepareHtmlContent = (htmlText: string | undefined | null) => {
+  if (!htmlText) return '<p>ไม่มีข้อมูล</p>'
+  return (
+    htmlText
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\\"/g, '"')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      // Convert inline color styles to custom tags for better rendering
+      .replace(
+        /<span[^>]*style=["'][^"']*color:\s*red[^"']*["'][^>]*>/gi,
+        '<span class="text-red">'
+      )
+      .replace(
+        /<span[^>]*style=["'][^"']*color:\s*#[a-fA-F0-9]{3,6}[^"']*["'][^>]*>/gi,
+        (match) => {
+          const colorMatch = match.match(/color:\s*(#[a-fA-F0-9]{3,6})/i)
+          if (colorMatch) {
+            return `<span data-color="${colorMatch[1]}">`
+          }
+          return match
+        }
+      )
+      // Convert legacy <font color="..."> tags to spans with text-red class
+      .replace(
+        /<font[^>]*color=["']?([^"'\s>]+)["']?[^>]*>/gi,
+        '<span class="text-red">'
+      )
+      // Close font tags properly
+      .replace(/<\/font>/gi, '</span>')
+  )
+}
+
+// Common RenderHtml configuration
+const systemFonts = [
+  ...defaultSystemFonts,
+  'Prompt-Regular',
+  'Prompt-Medium',
+  'Prompt-SemiBold',
+  'Prompt-Bold',
+]
+
+const baseStyle = {
+  fontFamily: 'Prompt-Regular',
+  fontSize: 16,
+  color: '#6B7280',
+}
+
+const tagsStyles = {
+  body: {
+    fontFamily: 'Prompt-Regular',
+    fontSize: 16,
+  },
+  p: {
+    fontFamily: 'Prompt-Regular',
+    fontSize: 16,
+    marginVertical: 2,
+  },
+  li: {
+    fontFamily: 'Prompt-Regular',
+    fontSize: 16,
+    marginBottom: 10,
+    marginTop: 0,
+  },
+  ol: { paddingLeft: 16 },
+  ul: { paddingLeft: 20 },
+  strong: { fontFamily: 'Prompt-SemiBold' },
+  b: { fontFamily: 'Prompt-SemiBold' },
+  span: { fontFamily: 'Prompt-Regular' },
+  font: { fontFamily: 'Prompt-Regular' },
+  a: {
+    color: '#1D4ED8',
+    textDecorationLine: 'underline' as const,
+  },
+}
+
+const classesStyles = {
+  'text-red': { color: 'red' },
+  'text-danger': { color: 'red' },
+  'text-red-500': { color: '#EF4444' },
+  'text-red-600': { color: '#DC2626' },
+}
+
+const renderersProps = {
+  ol: {
+    markerBoxStyle: {
+      paddingRight: 8,
+      alignItems: 'flex-start' as const,
+      justifyContent: 'flex-start' as const,
+      paddingTop: 0,
+      minWidth: 28,
+    },
+    markerTextStyle: {
+      fontFamily: 'Prompt-Regular',
+      fontSize: 16,
+      color: '#6B7280',
+      lineHeight: 24,
+    },
+  },
+  ul: {
+    markerBoxStyle: {
+      paddingRight: 8,
+      alignItems: 'flex-start' as const,
+      justifyContent: 'flex-start' as const,
+      paddingTop: 4,
+    },
+    markerTextStyle: {
+      fontSize: 14,
+      color: '#6B7280',
+    },
+  },
+}
 
 export default function CurriculumDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const backgroundColor = useThemeColor({}, 'background')
   const iconColor = useThemeColor({}, 'icon')
-  const textColor = useThemeColor({}, 'text')
   const tintColor = useThemeColor({}, 'tint')
 
-  // Find the curriculum by code (id)
-  const curriculum = curriculums.find((curr) => curr.code === id)
+  const { width: contentWidth } = useWindowDimensions()
 
-  if (!curriculum) {
+  const dispatch = useDispatch()
+
+  // Login context
+  const { isLoggedIn } = useContext(LoginContext)
+
+  // Redux state selectors
+  const { isLoading, currentCurriculum: curriculum } = useSelector(
+    (state: RootState) => state.curriculums
+  )
+
+  // Load curriculum data on mount
+  useEffect(() => {
+    if (id) {
+      console.log('CurriculumDetail: Loading curriculum data for ID:', id)
+      dispatch(curriculumsActions.loadCurriculum(id) as any)
+    }
+  }, [dispatch, id])
+
+  // Check if user is already registered for this curriculum
+  const isAlreadyRegistered = curriculumRegistrations.some(
+    (reg: any) => reg.curriculumId === parseInt(id || '0')
+  )
+
+  // Calculate content width for RenderHtml (accounting for padding)
+  const htmlContentWidth = contentWidth - 88 // 20 padding + 24 section padding on each side
+
+  // Render registration button based on login state
+  const renderRegisterButton = () => {
+    if (!isLoggedIn) {
+      return (
+        <View style={styles.registerMessageContainer}>
+          <ThemedText style={styles.registerMessage}>
+            โปรดเข้าสู่ระบบเพื่อลงทะเบียนหลักสูตร
+          </ThemedText>
+          <TouchableOpacity
+            style={[styles.registerButton, { backgroundColor: tintColor }]}
+            onPress={() => router.replace('/(tabs)?tab=account')}
+          >
+            <IconSymbol name='person.fill' size={20} color='white' />
+            <ThemedText style={styles.registerButtonText}>
+              เข้าสู่ระบบ
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      )
+    }
+
+    if (isAlreadyRegistered) {
+      return (
+        <View style={styles.registerMessageContainer}>
+          <ThemedText style={styles.registerMessage}>
+            คุณลงทะเบียนหลักสูตรนี้แล้ว เข้าเรียนได้เลย
+          </ThemedText>
+          <TouchableOpacity
+            style={[styles.registerButton, { backgroundColor: tintColor }]}
+            onPress={() => router.replace('/(tabs)?tab=learn')}
+          >
+            <IconSymbol name='arrow.right.square' size={20} color='white' />
+            <ThemedText style={styles.registerButtonText}>เข้าเรียน</ThemedText>
+          </TouchableOpacity>
+        </View>
+      )
+    }
+
+    return (
+      <TouchableOpacity
+        style={[styles.registerButton, { backgroundColor: tintColor }]}
+        onPress={() => {
+          console.log('Register for curriculum:', id)
+          // TODO: Implement curriculum registration API call
+        }}
+      >
+        <IconSymbol name='arrow.right.square' size={20} color='white' />
+        <ThemedText style={styles.registerButtonText}>
+          ลงทะเบียนหลักสูตร
+        </ThemedText>
+      </TouchableOpacity>
+    )
+  }
+
+  // Loading state
+  if (isLoading && !curriculum) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <ThemedView style={styles.header}>
+          <View style={styles.headerTop}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <IconSymbol name='chevron.left' size={24} color={iconColor} />
+            </TouchableOpacity>
+            <ThemedText type='title' style={styles.headerTitle}>
+              รายละเอียดหลักสูตร
+            </ThemedText>
+            <View style={styles.backButton} />
+          </View>
+        </ThemedView>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size='large' color={tintColor} />
+          <ThemedText style={styles.loadingText}>
+            กำลังโหลดรายละเอียดหลักสูตร...
+          </ThemedText>
+        </View>
+      </ThemedView>
+    )
+  }
+
+  // Curriculum not found
+  if (!curriculum && !isLoading) {
     return (
       <ThemedView style={[styles.container, { backgroundColor }]}>
         <ThemedView style={styles.header}>
@@ -42,21 +276,13 @@ export default function CurriculumDetailScreen() {
             <View style={styles.backButton} />
           </View>
         </ThemedView>
+        <View style={styles.emptyContainer}>
+          <ThemedText style={styles.emptyText}>
+            ไม่พบข้อมูลหลักสูตรที่ต้องการ
+          </ThemedText>
+        </View>
       </ThemedView>
     )
-  }
-
-  // Function to clean HTML tags from text
-  const cleanHtmlText = (htmlText: string) => {
-    return htmlText
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      .trim()
   }
 
   return (
@@ -80,133 +306,165 @@ export default function CurriculumDetailScreen() {
       {/* Scrollable Content */}
       <ScrollView
         style={styles.content}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isLoading && { flexGrow: 1 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Image */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: curriculum.thumbnail }}
-            style={styles.heroImage}
-            contentFit='cover'
-            transition={200}
-          />
-          <View style={styles.imageOverlay} />
-          <View style={styles.gradientOverlay} />
-          <View style={styles.heroContent}>
-            <ThemedText style={styles.curriculumType}>หลักสูตร</ThemedText>
-            <ThemedText style={styles.heroTitle}>{curriculum.name}</ThemedText>
-            <ThemedText style={styles.curriculumCode}>
-              {curriculum.code}
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size='large' color={tintColor} />
+            <ThemedText style={styles.loadingText}>
+              กำลังโหลดข้อมูล...
             </ThemedText>
           </View>
-        </View>
+        ) : (
+          <>
+            {/* Hero Section - Mobile Style with Blur Background */}
+            <View style={styles.heroContainer}>
+              {/* Blurred Background Image with Color Overlay */}
+              <Image
+                source={{ uri: curriculum?.thumbnail || '' }}
+                style={styles.heroBlurBackground}
+                contentFit='cover'
+                blurRadius={15}
+              />
+              {/* Dark overlay matching desktop: rgba(0,0,0,0.35) */}
+              <View style={styles.heroDarkOverlay} />
 
-        {/* Course Stats */}
-        {/* <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <IconSymbol name='clock' size={18} color={tintColor} />
-            <ThemedText style={styles.statLabel}>ระยะเวลา</ThemedText>
-            <ThemedText style={styles.statValue}>8 ชั่วโมง</ThemedText>
-          </View>
-          <View style={styles.statCard}>
-            <IconSymbol name='star' size={18} color={tintColor} />
-            <ThemedText style={styles.statLabel}>ระดับ</ThemedText>
-            <ThemedText style={styles.statValue}>เริ่มต้น</ThemedText>
-          </View>
-          <View style={styles.statCard}>
-            <IconSymbol name='person.3' size={18} color={tintColor} />
-            <ThemedText style={styles.statLabel}>ผู้เรียน</ThemedText>
-            <ThemedText style={styles.statValue}>156 คน</ThemedText>
-          </View>
-        </View> */}
+              {/* Yellow left border overlay */}
+              <View style={styles.heroLeftBorder} />
 
-        {/* Main Content */}
-        <View style={styles.mainContent}>
-          {/* Learning Objectives Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='target' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                เป้าหมายการเรียนรู้
-              </ThemedText>
+              {/* Hero Content - Vertical Layout for Mobile */}
+              <View style={styles.heroContentWrapper}>
+                {/* Curriculum Info */}
+                <View style={styles.heroInfoSection}>
+                  <ThemedText style={styles.curriculumType}>
+                    หลักสูตร
+                  </ThemedText>
+                  <ThemedText style={styles.heroTitle}>
+                    {curriculum?.name || 'หลักสูตร'}
+                  </ThemedText>
+                  <ThemedText style={styles.curriculumCode}>
+                    {curriculum?.code || ''}
+                  </ThemedText>
+                </View>
+
+                {/* Curriculum Thumbnail */}
+                <View style={styles.heroThumbnailSection}>
+                  <View style={styles.heroThumbnailShadow}>
+                    <Image
+                      source={{ uri: curriculum?.thumbnail || '' }}
+                      style={styles.heroThumbnail}
+                      contentFit='cover'
+                      transition={200}
+                    />
+                  </View>
+                </View>
+              </View>
             </View>
-            <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.learningObjective)}
-            </ThemedText>
-          </ThemedView>
 
-          {/* Learning Topics Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='book.closed' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                ประเด็นการเรียนรู้
-              </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.learningTopic)}
-            </ThemedText>
-          </ThemedView>
+            {/* Main Content */}
+            <View style={styles.mainContent}>
+              {/* Learning Objectives Section */}
+              <ThemedView style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionIconContainer}>
+                    <IconSymbol name='flag.fill' size={20} color='white' />
+                  </View>
+                  <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                    เป้าหมายการเรียนรู้
+                  </ThemedText>
+                </View>
+                <RenderHtml
+                  contentWidth={htmlContentWidth}
+                  source={{ html: prepareHtmlContent(curriculum?.learningObjective) }}
+                  systemFonts={systemFonts}
+                  baseStyle={baseStyle}
+                  enableExperimentalMarginCollapsing={true}
+                  tagsStyles={tagsStyles}
+                  classesStyles={classesStyles}
+                  renderersProps={renderersProps}
+                />
+              </ThemedView>
 
-          {/* Assessment Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='checkmark.circle' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                วิธีการประเมินผล
-              </ThemedText>
-            </View>
-            <ThemedText style={styles.sectionContent}>
-              {cleanHtmlText(curriculum.assessment)}
-            </ThemedText>
-          </ThemedView>
+              {/* Learning Topics Section */}
+              <ThemedView style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionIconContainer}>
+                    <IconSymbol name='doc.text.fill' size={20} color='white' />
+                  </View>
+                  <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                    ประเด็นการเรียนรู้
+                  </ThemedText>
+                </View>
+                <RenderHtml
+                  contentWidth={htmlContentWidth}
+                  source={{ html: prepareHtmlContent(curriculum?.learningTopic) }}
+                  systemFonts={systemFonts}
+                  baseStyle={baseStyle}
+                  enableExperimentalMarginCollapsing={true}
+                  tagsStyles={tagsStyles}
+                  classesStyles={classesStyles}
+                  renderersProps={renderersProps}
+                />
+              </ThemedView>
 
-          {/* Target Group Section */}
-          <ThemedView style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <IconSymbol name='person.2' size={20} color={tintColor} />
-              <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
-                กลุ่มเป้าหมาย
-              </ThemedText>
+              {/* Assessment Section */}
+              <ThemedView style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionIconContainer}>
+                    <IconSymbol name='chart.bar.fill' size={20} color='white' />
+                  </View>
+                  <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                    วิธีการประเมินผล
+                  </ThemedText>
+                </View>
+                <RenderHtml
+                  contentWidth={htmlContentWidth}
+                  source={{ html: prepareHtmlContent(curriculum?.assessment) }}
+                  systemFonts={systemFonts}
+                  baseStyle={baseStyle}
+                  enableExperimentalMarginCollapsing={true}
+                  tagsStyles={tagsStyles}
+                  classesStyles={classesStyles}
+                  renderersProps={renderersProps}
+                />
+              </ThemedView>
+
+              {/* Target Group Section */}
+              <ThemedView style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionIconContainer}>
+                    <IconSymbol name='person.2.fill' size={20} color='white' />
+                  </View>
+                  <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+                    กลุ่มเป้าหมาย
+                  </ThemedText>
+                </View>
+                <RenderHtml
+                  contentWidth={htmlContentWidth}
+                  source={{ html: prepareHtmlContent(curriculum?.targetGroup) }}
+                  systemFonts={systemFonts}
+                  baseStyle={baseStyle}
+                  enableExperimentalMarginCollapsing={true}
+                  tagsStyles={tagsStyles}
+                  classesStyles={classesStyles}
+                  renderersProps={renderersProps}
+                />
+              </ThemedView>
             </View>
-            <ThemedText style={styles.sectionContent}>
-              <ThemedText style={styles.bulletItem}>
-                • เป็นข้าราชการพลเรือน หรือข้าราชการประเภทอื่น ๆ
-                ที่ได้รับอนุญาตให้เรียนได้
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.bulletItem}>
-                • เป็นผู้มีวินัยต่อการพัฒนาตนเอง
-                มีความตั้งใจจริงในการเข้ารับการอบรมแบบออนไลน์
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.bulletItem}>
-                • พร้อมจะปฏิบัติตามหลักเกณฑ์
-              </ThemedText>
-              {'\n'}
-              <ThemedText style={styles.bulletItem}>
-                •
-                เป็นผู้สามารถใช้เครื่องคอมพิวเตอร์ที่เชื่อมต่อระบบเครือข่ายอินเทอร์เน็ต
-                เพื่อการอบรมออนไลน์ได้ตามกำหนด
-              </ThemedText>
-            </ThemedText>
-          </ThemedView>
-        </View>
+          </>
+        )}
       </ScrollView>
 
       {/* Fixed Registration Button */}
-      <View style={[styles.fixedButtonContainer, { backgroundColor }]}>
-        <TouchableOpacity
-          style={[styles.registerButton, { backgroundColor: tintColor }]}
-          onPress={() => router.push('/learn')}
-        >
-          <IconSymbol name='arrow.right.square' size={20} color='white' />
-          <ThemedText style={styles.registerButtonText}>
-            ลงทะเบียนหลักสูตร
-          </ThemedText>
-        </TouchableOpacity>
-      </View>
+      {!isLoading && curriculum && (
+        <View style={[styles.fixedButtonContainer, { backgroundColor }]}>
+          {renderRegisterButton()}
+        </View>
+      )}
     </ThemedView>
   )
 }
@@ -244,112 +502,124 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 100, // Add space for fixed button
   },
-  imageContainer: {
-    height: 300,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  emptyText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
+  },
+  heroContainer: {
     position: 'relative',
-    borderLeftWidth: 8,
-    borderLeftColor: 'rgb(255, 193, 7)',
+    overflow: 'hidden',
   },
-  heroImage: {
-    width: '100%',
-    height: '100%',
+  heroBlurBackground: {
+    position: 'absolute',
+    top: -20,
+    left: -20,
+    right: -20,
+    bottom: -20,
+    transform: [{ scale: 1.1 }],
   },
-  imageOverlay: {
+  heroDarkOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
-  gradientOverlay: {
+  heroLeftBorder: {
     position: 'absolute',
-    bottom: 0,
+    top: 0,
     left: 0,
-    right: 0,
-    height: 150,
-    backgroundColor: 'transparent',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    bottom: 0,
+    width: 8,
+    backgroundColor: 'rgb(255, 193, 7)',
+    zIndex: 10,
   },
-  heroContent: {
-    position: 'absolute',
-    bottom: 40,
-    left: 25,
-    right: 20,
+  heroContentWrapper: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingHorizontal: 36,
+    paddingTop: 48,
+    paddingBottom: 48,
+    position: 'relative',
+    zIndex: 1,
   },
-  curriculumBadge: {
-    backgroundColor: 'rgba(255, 193, 7, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#ffc107',
-    alignSelf: 'flex-start',
-    marginBottom: 12,
+  heroInfoSection: {
+    width: '100%',
+    alignItems: 'flex-start',
+    marginBottom: 24,
+  },
+  heroThumbnailSection: {
+    width: '100%',
+    marginTop: 24,
+    maxWidth: 280,
+    aspectRatio: 4 / 3,
+  },
+  heroThumbnailShadow: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.16,
+    shadowRadius: 16,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  heroThumbnail: {
+    width: '100%',
+    height: '100%',
   },
   curriculumType: {
-    fontSize: 14,
+    fontSize: 18,
     color: '#ffc107',
     fontFamily: 'Prompt-SemiBold',
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-    marginBottom: 4,
   },
   heroTitle: {
-    fontSize: 28,
+    fontSize: 26,
     color: 'white',
     fontFamily: 'Prompt-SemiBold',
     lineHeight: 36,
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    marginBottom: 16,
+    marginTop: 12,
+    textAlign: 'left',
+    textShadowColor: 'rgba(68, 56, 56, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   curriculumCode: {
-    fontSize: 20,
+    fontSize: 18,
     color: 'white',
     fontFamily: 'Prompt-Medium',
-    opacity: 0.9,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textAlign: 'left',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    marginTop: -40,
-    zIndex: 1,
-  },
-  statCard: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    minWidth: 100,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginTop: 8,
-    marginBottom: 4,
-    fontFamily: 'Prompt-Regular',
-  },
-  statValue: {
-    fontSize: 14,
-    color: '#374151',
-    fontFamily: 'Prompt-SemiBold',
   },
   mainContent: {
     padding: 20,
@@ -377,9 +647,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.08)',
   },
+  sectionIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#183A7C',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   sectionTitle: {
     fontSize: 18,
-    marginLeft: 12,
+    marginLeft: 16,
     color: '#374151',
     flex: 1,
     fontFamily: 'Prompt-SemiBold',
@@ -389,14 +667,6 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     color: '#6B7280',
     fontFamily: 'Prompt-Regular',
-  },
-  bulletItem: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#6B7280',
-    fontFamily: 'Prompt-Regular',
-    marginBottom: 12,
-    paddingLeft: 8,
   },
   fixedButtonContainer: {
     position: 'absolute',
@@ -408,6 +678,16 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     borderTopWidth: 0.5,
     borderTopColor: '#F0F0F0',
+  },
+  registerMessageContainer: {
+    alignItems: 'center',
+  },
+  registerMessage: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+    color: '#6B7280',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   registerButton: {
     flexDirection: 'row',
@@ -424,35 +704,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 5,
+    width: '100%',
   },
   registerButtonText: {
     fontSize: 18,
     fontFamily: 'Prompt-SemiBold',
     marginLeft: 8,
     color: 'white',
-  },
-  contactSection: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 40,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 1,
-  },
-  contactTitle: {
-    fontSize: 16,
-    color: '#374151',
-    marginBottom: 8,
-  },
-  contactText: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
-    marginBottom: 4,
   },
 })
