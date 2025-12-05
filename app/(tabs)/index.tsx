@@ -6,6 +6,7 @@ import {
   FlatList,
   Linking,
   Platform,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -96,6 +97,7 @@ export default function HomeScreen() {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0)
   const [selectedCategoryId, setSelectedCategoryId] = useState(0)
   const [showCategoryBottomSheet, setShowCategoryBottomSheet] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const bannerFlatListRef = useRef<FlatList>(null)
   const scrollViewRef = useRef<ScrollView>(null)
   const autoScrollInterval = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -232,19 +234,19 @@ export default function HomeScreen() {
     if (autoScrollInterval.current) {
       clearInterval(autoScrollInterval.current)
     }
-    
+
     // Only restart auto-scroll if there are more than 3 banners
     if (bannerData.length > 3) {
       autoScrollInterval.current = setInterval(() => {
         setCurrentBannerIndex((prevIndex) => {
           const nextIndex = (prevIndex + 1) % bannerData.length
           const slideWidth = screenWidth - 40 + 16
-          
+
           bannerFlatListRef.current?.scrollToOffset({
             offset: nextIndex * slideWidth,
             animated: true,
           })
-          
+
           return nextIndex
         })
       }, 6000)
@@ -254,6 +256,29 @@ export default function HomeScreen() {
   const handleSelectCategory = (categoryId: number) => {
     console.log('Selected category:', categoryId)
     setSelectedCategoryId(categoryId)
+  }
+
+  const onRefresh = async () => {
+    setRefreshing(true)
+    try {
+      // Reload all data
+      await Promise.all([
+        dispatch(pressesActions.loadPresses() as any),
+        dispatch(
+          coursesActions.loadCourses(
+            selectedCategoryId === 0 ? undefined : selectedCategoryId.toString()
+          ) as any
+        ),
+        dispatch(coursesActions.loadRecommendedCourses() as any),
+        dispatch(categoriesActions.loadCategories() as any),
+        dispatch(curriculumsActions.loadCurriculums('') as any),
+        dispatch(uiActions.loadChatbotInfo() as any),
+      ])
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+    } finally {
+      setRefreshing(false)
+    }
   }
 
   const renderBannerItem = ({ item }: { item: BannerItem }) => (
@@ -313,6 +338,16 @@ export default function HomeScreen() {
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={tintColor}
+            colors={[tintColor, '#2E9AB6', '#00A69C']}
+            progressBackgroundColor='#ffffff'
+            progressViewOffset={60}
+          />
+        }
       >
         {/* Header */}
         <ThemedView style={styles.header}>
