@@ -11,9 +11,13 @@ import {
   PaperProvider,
 } from 'react-native-paper'
 import 'react-native-reanimated'
+import { Provider } from 'react-redux'
 
 import { useColorScheme } from '@/hooks/useColorScheme'
+import configureStore from '@/store/configureStore'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+
+const store = configureStore()
 
 const theme = {
   ...DefaultReactNativePaperTheme,
@@ -208,54 +212,65 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <PaperProvider theme={theme}>
-        <ThemeProvider
-          value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
-        >
-          <Stack>
-            <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-            <Stack.Screen name='courses' options={{ headerShown: false }} />
-            <Stack.Screen name='curriculums' options={{ headerShown: false }} />
-            <Stack.Screen
-              name='curriculum-detail'
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name='+not-found' />
-            <Stack.Screen
-              name='course-detail'
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name='curriculum-courses'
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name='classroom' options={{ headerShown: false }} />
-            <Stack.Screen name='test' options={{ headerShown: false }} />
-            <Stack.Screen name='evaluation' options={{ headerShown: false }} />
-            <Stack.Screen name='certificate' options={{ headerShown: false }} />
-            <Stack.Screen name='register' options={{ headerShown: false }} />
-            <Stack.Screen
-              name='certificate-list'
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name='edit-profile'
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name='change-password'
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name='notifications'
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name='coins' options={{ headerShown: false }} />
-          </Stack>
-          <StatusBar style='dark' backgroundColor='transparent' translucent />
-        </ThemeProvider>
-      </PaperProvider>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <PaperProvider theme={theme}>
+          <ThemeProvider
+            value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+          >
+            <Stack>
+              <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+              <Stack.Screen name='courses' options={{ headerShown: false }} />
+              <Stack.Screen
+                name='curriculums'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name='curriculum-detail'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name='+not-found' />
+              <Stack.Screen
+                name='course-detail'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name='curriculum-courses'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name='classroom' options={{ headerShown: false }} />
+              <Stack.Screen name='test' options={{ headerShown: false }} />
+              <Stack.Screen
+                name='evaluation'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name='certificate'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name='register' options={{ headerShown: false }} />
+              <Stack.Screen
+                name='certificate-list'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name='edit-profile'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name='change-password'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name='notifications'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name='coins' options={{ headerShown: false }} />
+            </Stack>
+            <StatusBar style='dark' backgroundColor='transparent' translucent />
+          </ThemeProvider>
+        </PaperProvider>
+      </SafeAreaProvider>
+    </Provider>
   )
 }

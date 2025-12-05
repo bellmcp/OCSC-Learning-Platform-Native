@@ -1,6 +1,6 @@
 import { Image } from 'expo-image'
 import { router } from 'expo-router'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   Dimensions,
   FlatList,
@@ -11,39 +11,38 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import CourseItem, {
-  type Course,
-  type RealCourse,
-} from '@/components/CourseItem'
-import CurriculumItem, {
-  type Curriculum,
-  type RealCurriculum,
-} from '@/components/CurriculumItem'
+import CourseItem, { type Course } from '@/components/CourseItem'
+import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { courseCategories } from '@/constants/CourseCategories'
-import { courses } from '@/constants/Courses'
-import { curriculums } from '@/constants/Curriculums'
-import { pressReleases } from '@/constants/PressReleases'
-import { recommendedCourses } from '@/constants/RecommendedCourses'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as categoriesActions from '@/modules/categories/actions'
+import * as coursesActions from '@/modules/courses/actions'
+import * as curriculumsActions from '@/modules/curriculums/actions'
+import * as pressesActions from '@/modules/press/actions'
+import * as uiActions from '@/modules/ui/actions'
+import type { RootState } from '@/store/types'
 
 const { width: screenWidth } = Dimensions.get('window')
 
-// Utility function to convert real course data to display format
-const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
-  const category = courseCategories.find(
+// Utility function to convert course data to display format
+const convertCourseToDisplayFormat = (
+  realCourse: any,
+  categories: any[]
+): Course => {
+  const category = categories.find(
     (cat) => cat.id === realCourse.courseCategoryId
   )
   const cleanDescription =
     realCourse.learningObjective
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      ?.replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/\n/g, ' ') // Replace newlines with spaces
       .trim()
-      .substring(0, 100) + '...' // Limit length
+      .substring(0, 100) + '...' || '' // Limit length
 
   return {
     id: realCourse.code,
@@ -57,39 +56,14 @@ const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
   }
 }
 
-// Utility function to convert recommended course data to display format
-const convertRecommendedCourseToDisplayFormat = (
-  recommendedCourse: any
-): Course => {
-  const cleanDescription =
-    recommendedCourse.learningObjective
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/\n/g, ' ') // Replace newlines with spaces
-      .trim()
-      .substring(0, 100) + '...' // Limit length
-
-  return {
-    id: recommendedCourse.code,
-    title: recommendedCourse.name,
-    description: cleanDescription,
-    image: recommendedCourse.thumbnail,
-    category: recommendedCourse.courseCategory || 'ทั่วไป',
-    courseCategoryId: recommendedCourse.courseCategoryId,
-    level: 'ทักษะขั้นพื้นฐาน',
-    badge: recommendedCourse.courseCategory || 'ทั่วไป',
-  }
-}
-
-// Utility function to convert real curriculum data to display format
-const convertCurriculumToDisplayFormat = (
-  realCurriculum: RealCurriculum
-): Curriculum => {
+// Utility function to convert curriculum data to display format
+const convertCurriculumToDisplayFormat = (realCurriculum: any): Curriculum => {
   const cleanDescription =
     realCurriculum.learningObjective
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      ?.replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/\n/g, ' ') // Replace newlines with spaces
       .trim()
-      .substring(0, 80) + '...' // Limit length
+      .substring(0, 80) + '...' || '' // Limit length
 
   return {
     id: realCurriculum.code,
@@ -102,14 +76,6 @@ const convertCurriculumToDisplayFormat = (
   }
 }
 
-// Define types for press release
-type PressRelease = {
-  id: number
-  headline: string
-  imageUrl: string
-  targetUrl: string
-}
-
 // Define type for banner data
 type BannerItem = {
   id: string
@@ -119,38 +85,79 @@ type BannerItem = {
   targetUrl: string
 }
 
-// Transform press releases data for banner display
-const bannerData: BannerItem[] = pressReleases.map((release: PressRelease) => ({
-  id: release.id.toString(),
-  image: release.imageUrl,
-  title: release.headline || 'ข้อมูลข่าวสาร',
-  subtitle: '', // Press releases don't have subtitles, so we'll leave this empty
-  targetUrl: release.targetUrl,
-}))
-
-// Convert real course data to display format
-const coursesData: Course[] = courses
-  .slice(0, 6)
-  .map(convertCourseToDisplayFormat)
-
-// Convert real course data to recommended format
-const recommendedData: Course[] = recommendedCourses.map(
-  convertRecommendedCourseToDisplayFormat
-)
-
-// Convert real curriculum data to display format
-const curriculumData: Curriculum[] = curriculums.map(
-  convertCurriculumToDisplayFormat
-)
-
 export default function HomeScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const tintColor = useThemeColor({}, 'tint')
   const iconColor = useThemeColor({}, 'icon')
 
+  const dispatch = useDispatch()
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0)
   const bannerFlatListRef = useRef<FlatList>(null)
   const scrollViewRef = useRef<ScrollView>(null)
+
+  // Redux state selectors
+  const { items: users } = useSelector((state: RootState) => state.user)
+  const { isLoading: isPressesLoading, items: presses } = useSelector(
+    (state: RootState) => state.press
+  )
+  const { isLoading: isCoursesLoading, items: courses } = useSelector(
+    (state: RootState) => state.courses
+  )
+  const { isRecommendedCoursesLoading, recommended: recommendedCourses } =
+    useSelector((state: RootState) => state.courses)
+  const { isLoading: isCurriculumsLoading, items: curriculums } = useSelector(
+    (state: RootState) => state.curriculums
+  )
+  const { items: categories } = useSelector(
+    (state: RootState) => state.categories
+  )
+  const { chatbotInfo } = useSelector((state: RootState) => state.ui)
+
+  // Transform press releases data for banner display
+  const bannerData: BannerItem[] = presses.map((release: any) => ({
+    id: release.id.toString(),
+    image: release.imageUrl,
+    title: release.headline || 'ข้อมูลข่าวสาร',
+    subtitle: '',
+    targetUrl: release.targetUrl,
+  }))
+
+  // Convert course data to display format
+  const coursesData: Course[] = courses
+    .slice(0, 6)
+    .map((course: any) => convertCourseToDisplayFormat(course, categories))
+
+  // Convert recommended course data to display format
+  const recommendedData: Course[] = recommendedCourses.map((course: any) =>
+    convertCourseToDisplayFormat(course, categories)
+  )
+
+  // Convert curriculum data to display format
+  const curriculumData: Curriculum[] = curriculums.map(
+    convertCurriculumToDisplayFormat
+  )
+
+  // Load data on mount - consolidated into one useEffect
+  useEffect(() => {
+    console.log('HomeScreen: Loading data from API...')
+    dispatch(pressesActions.loadPresses() as any)
+    dispatch(coursesActions.loadCourses() as any)
+    dispatch(coursesActions.loadRecommendedCourses() as any)
+    dispatch(categoriesActions.loadCategories() as any)
+    dispatch(curriculumsActions.loadCurriculums('') as any)
+    dispatch(uiActions.loadChatbotInfo() as any)
+  }, [dispatch])
+
+  // Debug: Log when data changes
+  useEffect(() => {
+    console.log('Redux State Updated:', {
+      presses: presses.length,
+      courses: courses.length,
+      recommendedCourses: recommendedCourses.length,
+      curriculums: curriculums.length,
+      categories: categories.length,
+    })
+  }, [presses, courses, recommendedCourses, curriculums, categories])
 
   // Reset scroll position when component mounts or becomes visible
   React.useEffect(() => {
@@ -238,7 +245,9 @@ export default function HomeScreen() {
         {/* Header */}
         <ThemedView style={styles.header}>
           <ThemedText type='title' style={styles.headerTitle}>
-            OCSC Learning Space
+            {users?.firstname
+              ? `สวัสดี คุณ${users.firstname}`
+              : 'OCSC Learning Space'}
           </ThemedText>
           <ThemedText type='subtitle' style={styles.headerSubtitle}>
             โลกแห่งการเรียนรู้ ไม่มีวันจบสิ้น{'\n'}ยิ่งเรียนยิ่งรู้
@@ -247,59 +256,83 @@ export default function HomeScreen() {
         </ThemedView>
 
         {/* Banner Carousel */}
-        <ThemedView style={styles.section}>
-          <FlatList
-            ref={bannerFlatListRef}
-            data={bannerData}
-            renderItem={renderBannerItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled={true}
-            snapToInterval={screenWidth - 40 + 16}
-            snapToAlignment='start'
-            decelerationRate='fast'
-            bounces={false}
-            onMomentumScrollEnd={handleBannerScroll}
-            onScrollEndDrag={handleBannerScroll}
-            contentContainerStyle={styles.carouselContainer}
-            getItemLayout={(data, index) => ({
-              length: screenWidth - 40 + 16,
-              offset: (screenWidth - 40 + 16) * index,
-              index,
-            })}
-          />
-          <ThemedView style={styles.dotsContainer}>
-            {bannerData.map((_: BannerItem, index: number) => (
-              <ThemedView
-                key={index}
-                style={[
-                  styles.dot,
-                  index === currentBannerIndex && styles.activeDot,
-                ]}
-              />
-            ))}
+        {isPressesLoading ? (
+          <ThemedView style={styles.section}>
+            <ThemedView style={styles.loadingContainer}>
+              <ThemedText style={styles.loadingText}>
+                กำลังโหลดข่าวสาร...
+              </ThemedText>
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
+        ) : bannerData.length > 0 ? (
+          <ThemedView style={styles.section}>
+            <FlatList
+              ref={bannerFlatListRef}
+              data={bannerData}
+              renderItem={renderBannerItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled={true}
+              snapToInterval={screenWidth - 40 + 16}
+              snapToAlignment='start'
+              decelerationRate='fast'
+              bounces={false}
+              onMomentumScrollEnd={handleBannerScroll}
+              onScrollEndDrag={handleBannerScroll}
+              contentContainerStyle={styles.carouselContainer}
+              getItemLayout={(data, index) => ({
+                length: screenWidth - 40 + 16,
+                offset: (screenWidth - 40 + 16) * index,
+                index,
+              })}
+            />
+            <ThemedView style={styles.dotsContainer}>
+              {bannerData.map((_: BannerItem, index: number) => (
+                <ThemedView
+                  key={index}
+                  style={[
+                    styles.dot,
+                    index === currentBannerIndex && styles.activeDot,
+                  ]}
+                />
+              ))}
+            </ThemedView>
+          </ThemedView>
+        ) : null}
 
-        {/* Courses Section */}
+        {/* Recommended Courses Section */}
         <ThemedView style={styles.section}>
           <ThemedView style={styles.sectionHeader}>
             <ThemedText type='subtitle' style={styles.sectionTitle}>
               รายการแนะนำ
             </ThemedText>
           </ThemedView>
-          <FlatList
-            data={recommendedData}
-            renderItem={renderCourseItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.carouselContainer}
-          />
+          {isRecommendedCoursesLoading ? (
+            <ThemedView style={styles.loadingContainer}>
+              <ThemedText style={styles.loadingText}>
+                กำลังโหลดรายวิชาแนะนำ...
+              </ThemedText>
+            </ThemedView>
+          ) : recommendedData.length > 0 ? (
+            <FlatList
+              data={recommendedData}
+              renderItem={renderCourseItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.carouselContainer}
+            />
+          ) : (
+            <ThemedView style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>
+                ไม่มีรายวิชาแนะนำในขณะนี้
+              </ThemedText>
+            </ThemedView>
+          )}
         </ThemedView>
 
-        {/* Recommended Section */}
+        {/* Courses Section */}
         <ThemedView style={styles.section}>
           <ThemedView style={styles.sectionHeader}>
             <ThemedText type='subtitle' style={styles.sectionTitle}>
@@ -320,14 +353,28 @@ export default function HomeScreen() {
               />
             </TouchableOpacity>
           </ThemedView>
-          <FlatList
-            data={coursesData}
-            renderItem={renderRecommendedItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.carouselContainer}
-          />
+          {isCoursesLoading ? (
+            <ThemedView style={styles.loadingContainer}>
+              <ThemedText style={styles.loadingText}>
+                กำลังโหลดรายวิชา...
+              </ThemedText>
+            </ThemedView>
+          ) : coursesData.length > 0 ? (
+            <FlatList
+              data={coursesData}
+              renderItem={renderRecommendedItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.carouselContainer}
+            />
+          ) : (
+            <ThemedView style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>
+                ไม่มีรายวิชาในขณะนี้
+              </ThemedText>
+            </ThemedView>
+          )}
         </ThemedView>
 
         {/* Curriculum Section */}
@@ -351,14 +398,28 @@ export default function HomeScreen() {
               />
             </TouchableOpacity>
           </ThemedView>
-          <FlatList
-            data={curriculumData}
-            renderItem={renderCurriculumItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.carouselContainer}
-          />
+          {isCurriculumsLoading ? (
+            <ThemedView style={styles.loadingContainer}>
+              <ThemedText style={styles.loadingText}>
+                กำลังโหลดหลักสูตร...
+              </ThemedText>
+            </ThemedView>
+          ) : curriculumData.length > 0 ? (
+            <FlatList
+              data={curriculumData}
+              renderItem={renderCurriculumItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.carouselContainer}
+            />
+          ) : (
+            <ThemedView style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>
+                ไม่มีหลักสูตรในขณะนี้
+              </ThemedText>
+            </ThemedView>
+          )}
         </ThemedView>
       </ScrollView>
       <StatusBarGradient />
@@ -544,5 +605,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#183A7C',
     width: 20,
     borderRadius: 3,
+  },
+  loadingContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
+  },
+  emptyContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
   },
 })

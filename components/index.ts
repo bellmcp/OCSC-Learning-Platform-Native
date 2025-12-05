@@ -7,4 +7,8 @@ export { EvaluationWelcomeCard } from './EvaluationWelcomeCard'
 export { ProgressBar } from './ProgressBar'
 export { StarRating } from './StarRating'
 export { TestWelcomeCard } from './TestWelcomeCard'
-export * from './types'
+export type {
+  ClassroomContent,
+  ContentView as ContentViewType,
+  CourseData,
+} from './types'
