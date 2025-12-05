@@ -1,52 +1,41 @@
-import { router } from 'expo-router'
-import React, { useState } from 'react'
+import { router, useLocalSearchParams } from 'expo-router'
+import React, { useEffect, useState } from 'react'
 import {
+  ActivityIndicator,
   FlatList,
   Platform,
+  RefreshControl,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import CourseItem, {
-  type Course,
-  type RealCourse,
-} from '@/components/CourseItem'
+import CourseItem, { type Course } from '@/components/CourseItem'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { courseCategories } from '@/constants/CourseCategories'
-import { courses } from '@/constants/Courses'
 import { useThemeColor } from '@/hooks/useThemeColor'
-
-// Removed Dimensions since we're using full-width layout
-
-// Category colors following Material-UI color palette
-const getCategoryColor = (categoryId: number) => {
-  const colors: { [key: number]: string } = {
-    1: '#9C27B0', // purple[500] - การพัฒนาองค์ความรู้
-    2: '#3F51B5', // indigo[500] - การพัฒนากรอบความคิด
-    3: '#E91E63', // pink[500] - ทักษะเชิงยุทธศาสตร์และภาวะผู้นำ
-    4: '#FF9800', // orange[500] - ทักษะดิจิทัล
-    5: '#4CAF50', // green[500] - ทักษะด้านภาษา
-    6: '#2196F3', // blue[500]
-    7: '#795548', // brown[500]
-  }
-  return colors[categoryId] || '#9E9E9E' // grey[500] as default
-}
+import * as categoriesActions from '@/modules/categories/actions'
+import * as coursesActions from '@/modules/courses/actions'
+import type { RootState } from '@/store/types'
+import categoryColor from '@/utils/categoryColor'
 
 // Utility function to convert real course data to display format
-const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
-  const category = courseCategories.find(
+const convertCourseToDisplayFormat = (
+  realCourse: any,
+  categories: any[]
+): Course => {
+  const category = categories.find(
     (cat) => cat.id === realCourse.courseCategoryId
   )
   const cleanDescription =
     realCourse.learningObjective
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      ?.replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/\n/g, ' ') // Replace newlines with spaces
       .trim()
-      .substring(0, 100) + '...' // Limit length
+      .substring(0, 100) + '...' || '' // Limit length
 
   return {
     id: realCourse.code,
@@ -66,20 +55,72 @@ export default function CoursesScreen() {
   const iconColor = useThemeColor({}, 'icon')
   const textColor = useThemeColor({}, 'text')
 
+  // Get initial category from route params (from home page navigation)
+  const params = useLocalSearchParams()
+  const initialCategoryId = params.categoryId ? parseInt(params.categoryId as string) : null
+
+  const dispatch = useDispatch()
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(initialCategoryId)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Redux state selectors
+  const { isLoading, items: courses } = useSelector(
+    (state: RootState) => state.courses
+  )
+  const { items: categories } = useSelector(
+    (state: RootState) => state.categories
+  )
+
+  // Load categories on mount
+  useEffect(() => {
+    if (categories.length === 0) {
+      console.log('CoursesScreen: Loading categories...')
+      dispatch(categoriesActions.loadCategories() as any)
+    }
+  }, [dispatch, categories.length])
+
+  // Load courses when category changes
+  useEffect(() => {
+    console.log('CoursesScreen: Loading courses for category:', selectedCategory)
+    if (selectedCategory === null) {
+      dispatch(coursesActions.loadCourses() as any)
+    } else {
+      dispatch(coursesActions.loadCourses(selectedCategory.toString()) as any)
+    }
+  }, [dispatch, selectedCategory])
+
+  // Pull to refresh
+  const onRefresh = async () => {
+    console.log('CoursesScreen: Pull-to-refresh triggered')
+    setRefreshing(true)
+    try {
+      await Promise.all([
+        dispatch(categoriesActions.loadCategories() as any),
+        dispatch(
+          coursesActions.loadCourses(
+            selectedCategory === null ? undefined : selectedCategory.toString()
+          ) as any
+        ),
+      ])
+    } catch (error) {
+      console.error('Error refreshing courses:', error)
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   // Convert all courses to display format
-  const allCoursesData: Course[] = courses.map(convertCourseToDisplayFormat)
+  const allCoursesData: Course[] = courses.map((course: any) =>
+    convertCourseToDisplayFormat(course, categories)
+  )
 
-  // Filter courses based on search query and selected category
+  // Filter courses based on search query (client-side search)
   const filteredCourses = allCoursesData.filter((course) => {
     const matchesSearch = course.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
-    const matchesCategory =
-      selectedCategory === null || course.courseCategoryId === selectedCategory
-    return matchesSearch && matchesCategory
+    return matchesSearch
   })
 
   const renderCourseItem = ({ item }: { item: Course }) => (
@@ -112,7 +153,7 @@ export default function CoursesScreen() {
               {
                 backgroundColor: isSelected
                   ? '#FFFFFF'
-                  : getCategoryColor(item.id),
+                  : categoryColor(item.id),
               },
             ]}
           />
@@ -123,6 +164,22 @@ export default function CoursesScreen() {
           {item.courseCategory}
         </ThemedText>
       </TouchableOpacity>
+    )
+  }
+
+  const renderEmptyState = () => {
+    if (isLoading) {
+      return null
+    }
+
+    return (
+      <View style={styles.emptyContainer}>
+        <ThemedText style={styles.emptyText}>
+          {searchQuery
+            ? `ไม่พบรายวิชาที่ค้นหา "${searchQuery}"`
+            : 'ไม่พบรายวิชาในหมวดหมู่นี้'}
+        </ThemedText>
+      </View>
     )
   }
 
@@ -164,7 +221,7 @@ export default function CoursesScreen() {
       {/* Category Filter - Outside header for full width scrolling */}
       <ThemedView style={styles.filterSection}>
         <FlatList
-          data={[{ id: null, courseCategory: 'ทั้งหมด' }, ...courseCategories]}
+          data={[{ id: null, courseCategory: 'ทั้งหมด' }, ...categories]}
           renderItem={renderCategoryChip}
           keyExtractor={(item) => item.id?.toString() || 'all'}
           horizontal
@@ -175,18 +232,38 @@ export default function CoursesScreen() {
 
       {/* Scrollable Content */}
       <ThemedView style={styles.content}>
-        <ThemedText style={styles.resultCount}>
-          ผลลัพธ์ {filteredCourses.length} รายการ
-        </ThemedText>
+        {isLoading && !refreshing ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size='large' color={tintColor} />
+            <ThemedText style={styles.loadingText}>
+              กำลังโหลดรายวิชา...
+            </ThemedText>
+          </View>
+        ) : (
+          <>
+            <ThemedText style={styles.resultCount}>
+              ผลลัพธ์ {filteredCourses.length} รายการ
+            </ThemedText>
 
-        <FlatList
-          data={filteredCourses}
-          renderItem={renderCourseItem}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.coursesGrid}
-          style={styles.coursesList}
-        />
+            <FlatList
+              data={filteredCourses}
+              renderItem={renderCourseItem}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.coursesGrid}
+              style={styles.coursesList}
+              ListEmptyComponent={renderEmptyState}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={tintColor}
+                  colors={[tintColor]}
+                />
+              }
+            />
+          </>
+        )}
       </ThemedView>
     </ThemedView>
   )
@@ -233,7 +310,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
-    paddingVertical: 0
+    paddingVertical: 0,
   },
   filterSection: {
     borderBottomWidth: 1,
@@ -282,5 +359,27 @@ const styles = StyleSheet.create({
   },
   courseItemWrapper: {
     marginBottom: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#666',
+  },
+  emptyContainer: {
+    paddingVertical: 60,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#999',
+    textAlign: 'center',
   },
 })
