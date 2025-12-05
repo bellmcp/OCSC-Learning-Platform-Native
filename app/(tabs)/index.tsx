@@ -101,6 +101,10 @@ export default function HomeScreen() {
   const bannerFlatListRef = useRef<FlatList>(null)
   const scrollViewRef = useRef<ScrollView>(null)
   const autoScrollInterval = useRef<ReturnType<typeof setInterval> | null>(null)
+  
+  // Cache flags to prevent unnecessary reloads
+  const hasLoadedInitialData = useRef(false)
+  const lastLoadedCategoryId = useRef<number | null>(null)
 
   // Redux state selectors
   const { items: users } = useSelector((state: RootState) => state.user)
@@ -151,24 +155,44 @@ export default function HomeScreen() {
       : categories.find((cat) => cat.id === selectedCategoryId)
           ?.courseCategory || 'ทั้งหมด'
 
-  // Load initial data on mount
+  // Load initial data on mount (only if not already in Redux)
   useEffect(() => {
-    console.log('HomeScreen: Loading data from API...')
-    dispatch(pressesActions.loadPresses() as any)
-    dispatch(coursesActions.loadRecommendedCourses() as any)
-    dispatch(categoriesActions.loadCategories() as any)
-    dispatch(curriculumsActions.loadCurriculums('') as any)
-    dispatch(uiActions.loadChatbotInfo() as any)
-  }, [dispatch])
-
-  // Reload courses when category changes
-  useEffect(() => {
-    if (selectedCategoryId === 0) {
-      dispatch(coursesActions.loadCourses() as any)
-    } else {
-      dispatch(coursesActions.loadCourses(selectedCategoryId.toString()) as any)
+    // Check if we already have data in Redux - if yes, skip loading
+    const hasData = presses.length > 0 && 
+                    categories.length > 0 && 
+                    curriculums.length > 0
+    
+    if (!hasLoadedInitialData.current && !hasData) {
+      console.log('HomeScreen: Loading initial data from API...')
+      dispatch(pressesActions.loadPresses() as any)
+      dispatch(coursesActions.loadRecommendedCourses() as any)
+      dispatch(categoriesActions.loadCategories() as any)
+      dispatch(curriculumsActions.loadCurriculums('') as any)
+      dispatch(uiActions.loadChatbotInfo() as any)
+      hasLoadedInitialData.current = true
+      // Don't set lastLoadedCategoryId yet - let the category effect handle it
+    } else if (hasData) {
+      console.log('HomeScreen: Using cached data from Redux')
+      hasLoadedInitialData.current = true
+      // Don't set lastLoadedCategoryId - let it remain null if not set
+      // This allows category changes to work properly
     }
-  }, [dispatch, selectedCategoryId])
+  }, [dispatch, presses.length, categories.length, curriculums.length, courses.length, selectedCategoryId])
+
+  // Reload courses only when category actually changes
+  useEffect(() => {
+    // Load if: initialized AND (first time OR category changed)
+    if (hasLoadedInitialData.current && 
+        (lastLoadedCategoryId.current === null || lastLoadedCategoryId.current !== selectedCategoryId)) {
+      console.log('HomeScreen: Loading courses for category:', selectedCategoryId)
+      if (selectedCategoryId === 0) {
+        dispatch(coursesActions.loadCourses() as any)
+      } else {
+        dispatch(coursesActions.loadCourses(selectedCategoryId.toString()) as any)
+      }
+      lastLoadedCategoryId.current = selectedCategoryId
+    }
+  }, [selectedCategoryId])
 
   // Debug: Log when data changes
   useEffect(() => {
@@ -259,9 +283,15 @@ export default function HomeScreen() {
   }
 
   const onRefresh = async () => {
+    console.log('HomeScreen: Pull-to-refresh triggered')
     setRefreshing(true)
+    
+    // Reset carousel to first item
+    setCurrentBannerIndex(0)
+    bannerFlatListRef.current?.scrollToOffset({ offset: 0, animated: false })
+    
     try {
-      // Reload all data
+      // Force reload all data
       await Promise.all([
         dispatch(pressesActions.loadPresses() as any),
         dispatch(
@@ -274,6 +304,8 @@ export default function HomeScreen() {
         dispatch(curriculumsActions.loadCurriculums('') as any),
         dispatch(uiActions.loadChatbotInfo() as any),
       ])
+      // Update cache flags
+      lastLoadedCategoryId.current = selectedCategoryId
     } catch (error) {
       console.error('Error refreshing data:', error)
     } finally {
