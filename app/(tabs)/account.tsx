@@ -1,7 +1,10 @@
 import { Image } from 'expo-image'
+import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
-import React, { useContext, useRef, useState } from 'react'
+import * as WebBrowser from 'expo-web-browser'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
+  ActivityIndicator,
   Alert,
   Platform,
   ScrollView,
@@ -16,6 +19,12 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import {
+  THAID_CLIENT_ID,
+  THAID_REDIRECT_URI,
+  THAID_AUTH_URL,
+  THAID_API_URL,
+} from '@env'
 import { LoginContext } from './_layout'
 
 // Mock user data
@@ -46,6 +55,116 @@ export default function AccountScreen() {
   const [password, setPassword] = useState('')
   const [otp, setOtp] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [isThaiDLoading, setIsThaiDLoading] = useState(false)
+  const [thaiDState, setThaiDState] = useState<string | null>(null)
+
+  // ThaiD OAuth configuration loaded from @env
+
+  // Generate random state string for OAuth security
+  const generateState = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let state = ''
+    for (let i = 0; i < 11; i++) {
+      state += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return state
+  }
+
+  // Handle ThaiD OAuth login
+  const handleThaiDLogin = async () => {
+    try {
+      setIsThaiDLoading(true)
+      
+      // Generate and save state for verification
+      const state = generateState()
+      setThaiDState(state)
+      
+      // Build OAuth URL
+      const authUrl = `${THAID_AUTH_URL}?response_type=code&client_id=${THAID_CLIENT_ID}&redirect_uri=${encodeURIComponent(THAID_REDIRECT_URI)}&scope=pid%20given_name%20family_name&state=${state}`
+      
+      // Open browser for authentication
+      await WebBrowser.openBrowserAsync(authUrl)
+      
+      setIsThaiDLoading(false)
+    } catch (error) {
+      console.error('ThaiD login error:', error)
+      setIsThaiDLoading(false)
+      Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถเปิดหน้าเข้าสู่ระบบ ThaiD ได้')
+    }
+  }
+
+  // Handle deep link callback from ThaiD
+  useEffect(() => {
+    const handleDeepLink = async (event: { url: string }) => {
+      const url = event.url
+      
+      // Check if this is a ThaiD callback
+      if (url.includes('thaid/callback') || url.includes('thaid')) {
+        try {
+          setIsThaiDLoading(true)
+          
+          // Parse URL to get code and state
+          const urlParams = new URL(url.replace('ocsclearningspace://', 'https://'))
+          const code = urlParams.searchParams.get('code')
+          const returnedState = urlParams.searchParams.get('state')
+          
+          // Verify state matches (security check)
+          if (thaiDState && returnedState !== thaiDState) {
+            throw new Error('State mismatch - possible CSRF attack')
+          }
+          
+          if (!code) {
+            throw new Error('No authorization code received')
+          }
+          
+          // Exchange code for token
+          const response = await fetch(`${THAID_API_URL}?code=${code}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          
+          if (!response.ok) {
+            throw new Error('Failed to exchange code for token')
+          }
+          
+          const data = await response.json()
+          
+          if (data.token) {
+            // Store token (you may want to use AsyncStorage)
+            console.log('ThaiD login successful, token:', data.token)
+            
+            // Set logged in state
+            setIsLoggedIn(true)
+            setThaiDState(null)
+          } else {
+            throw new Error('No token received')
+          }
+          
+          setIsThaiDLoading(false)
+        } catch (error) {
+          console.error('ThaiD callback error:', error)
+          setIsThaiDLoading(false)
+          Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง')
+        }
+      }
+    }
+
+    // Listen for deep links
+    const subscription = Linking.addEventListener('url', handleDeepLink)
+    
+    // Check if app was opened via deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink({ url })
+      }
+    })
+
+    return () => {
+      subscription.remove()
+    }
+  }, [thaiDState, setIsLoggedIn])
 
   // Reset scroll position when component mounts or becomes visible
   React.useEffect(() => {
@@ -194,16 +313,22 @@ export default function AccountScreen() {
               style={[
                 styles.actionButton,
                 { backgroundColor: tintColor, marginVertical: 48 },
+                isThaiDLoading && { opacity: 0.7 },
               ]}
-              onPress={handleLogin}
+              onPress={handleThaiDLogin}
+              disabled={isThaiDLoading}
             >
-              <Image
-                source={require('@/assets/images/thaid_logo.jpg')}
-                style={styles.thaidLogo}
-                contentFit='contain'
-              />
+              {isThaiDLoading ? (
+                <ActivityIndicator size="small" color="white" style={{ marginRight: 8 }} />
+              ) : (
+                <Image
+                  source={require('@/assets/images/thaid_logo.jpg')}
+                  style={styles.thaidLogo}
+                  contentFit='contain'
+                />
+              )}
               <ThemedText style={styles.actionButtonText}>
-                เข้าสู่ระบบด้วยแอปพลิเคชัน ThaiD
+                {isThaiDLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วยแอปพลิเคชัน ThaiD'}
               </ThemedText>
             </TouchableOpacity>
           </ThemedView>
