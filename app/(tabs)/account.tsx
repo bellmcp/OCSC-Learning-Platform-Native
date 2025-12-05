@@ -79,23 +79,86 @@ export default function AccountScreen() {
       const state = generateState()
       setThaiDState(state)
       
-      // Build OAuth URL
-      const authUrl = `${THAID_AUTH_URL}?response_type=code&client_id=${THAID_CLIENT_ID}&redirect_uri=${encodeURIComponent(THAID_REDIRECT_URI)}&scope=pid%20given_name%20family_name&state=${state}`
+      // Get the app's redirect URI for debugging
+      const appRedirectUri = Linking.createURL('thaid/callback')
+      console.log("App's expected deep link:", appRedirectUri)
+      console.log("Note: In Expo Go, custom schemes don't work. Use a development build.")
       
-      // Open browser for authentication
-      await WebBrowser.openBrowserAsync(authUrl)
+      // Build OAuth URL
+      const authUrl = `${THAID_AUTH_URL}?response_type=code&client_id=${THAID_CLIENT_ID}&redirect_uri=${THAID_REDIRECT_URI}&scope=pid%20given_name%20family_name&state=${state}`
+      
+      console.log("ThaiD Auth URL:", authUrl)
+      console.log("Server redirect URI:", THAID_REDIRECT_URI)
+      console.log("The server's callback2.html should redirect to:", "ocsclearningspace://thaid/callback?code=XXX&state=XXX")
+      
+      // Use openAuthSessionAsync for better OAuth handling
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, THAID_REDIRECT_URI)
+      
+      console.log("WebBrowser result:", JSON.stringify(result, null, 2))
+      
+      if (result.type === 'success' && result.url) {
+        console.log("Callback URL received:", result.url)
+        
+        // Parse the callback URL
+        const urlParams = new URL(result.url)
+        const code = urlParams.searchParams.get('code')
+        const returnedState = urlParams.searchParams.get('state')
+        
+        console.log("Code:", code)
+        console.log("Returned state:", returnedState)
+        
+        // Verify state matches (security check)
+        if (state && returnedState !== state) {
+          throw new Error('State mismatch - possible CSRF attack')
+        }
+        
+        if (!code) {
+          throw new Error('No authorization code received')
+        }
+        
+        // Exchange code for token
+        console.log("Exchanging code for token at:", `${THAID_API_URL}?code=${code}`)
+        const response = await fetch(`${THAID_API_URL}?code=${code}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        const responseText = await response.text()
+        console.log("Token exchange response:", responseText)
+        
+        if (!response.ok) {
+          throw new Error(`Failed to exchange code for token: ${responseText}`)
+        }
+        
+        const data = JSON.parse(responseText)
+        
+        if (data.token) {
+          console.log('ThaiD login successful!')
+          setIsLoggedIn(true)
+          setThaiDState(null)
+        } else {
+          throw new Error('No token received')
+        }
+      } else if (result.type === 'cancel') {
+        console.log("User cancelled the login")
+      } else {
+        console.log("Unexpected result type:", result.type)
+      }
       
       setIsThaiDLoading(false)
     } catch (error) {
       console.error('ThaiD login error:', error)
       setIsThaiDLoading(false)
-      Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถเปิดหน้าเข้าสู่ระบบ ThaiD ได้')
+      Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง')
     }
   }
 
   // Handle deep link callback from ThaiD
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
+      console.log("Deep link received:", event.url)
       const url = event.url
       
       // Check if this is a ThaiD callback
@@ -155,7 +218,9 @@ export default function AccountScreen() {
     const subscription = Linking.addEventListener('url', handleDeepLink)
     
     // Check if app was opened via deep link
+    console.log('Setting up deep link listener...')
     Linking.getInitialURL().then((url) => {
+      console.log('Initial URL:', url)
       if (url) {
         handleDeepLink({ url })
       }
