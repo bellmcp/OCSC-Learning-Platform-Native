@@ -19,6 +19,7 @@ export interface CategoriesState {
 }
 
 export interface CoursesState {
+  currentCourse: any | null
   isRecommendedCoursesLoading: boolean
   isLoading: boolean
   items: any[]

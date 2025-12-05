@@ -38,7 +38,8 @@ const convertCourseToDisplayFormat = (
       .substring(0, 100) + '...' || '' // Limit length
 
   return {
-    id: realCourse.id.toString(), // Use numeric ID for API calls
+    id: realCourse.code, // Course code for display (e.g., "DS01")
+    numericId: realCourse.id.toString(), // Numeric ID for API calls
     title: realCourse.name,
     description: cleanDescription,
     image: realCourse.thumbnail,
@@ -126,7 +127,7 @@ export default function CoursesScreen() {
       <CourseItem
         item={item}
         variant='fullWidth'
-        onPress={(course) => router.push(`/course-detail?id=${course.id}`)}
+        onPress={(course) => router.push(`/course-detail?id=${course.numericId}`)}
       />
     </View>
   )

@@ -25,7 +25,8 @@ export interface RealCourse {
 
 // Interface for display purposes
 export interface Course {
-  id: string
+  id: string // Course code for display (e.g., "DS01")
+  numericId: string // Numeric ID for API calls
   title: string
   description: string
   image: string
