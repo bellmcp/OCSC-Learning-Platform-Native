@@ -33,10 +33,7 @@ export function CategoryBottomSheet({
   onSelectCategory,
 }: CategoryBottomSheetProps) {
   const tintColor = useThemeColor({}, 'tint')
-  const borderColor = useThemeColor(
-    { light: '#E5E7EB', dark: '#374151' },
-    'border'
-  )
+  const borderColor = '#E5E7EB' // Light gray border
 
   const [overlayOpacity] = useState(new Animated.Value(0))
   const [slideAnim] = useState(new Animated.Value(300))

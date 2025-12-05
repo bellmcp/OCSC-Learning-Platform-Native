@@ -98,6 +98,7 @@ export default function HomeScreen() {
   const [showCategoryBottomSheet, setShowCategoryBottomSheet] = useState(false)
   const bannerFlatListRef = useRef<FlatList>(null)
   const scrollViewRef = useRef<ScrollView>(null)
+  const autoScrollInterval = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Redux state selectors
   const { items: users } = useSelector((state: RootState) => state.user)
@@ -187,19 +188,66 @@ export default function HomeScreen() {
     return () => clearTimeout(timeout)
   }, [])
 
-  const handleBannerScroll = (event: any) => {
-    const slideWidth = screenWidth - 24 // Match the snapToInterval
-    const contentOffsetX = event.nativeEvent.contentOffset.x
-    const index = Math.round(contentOffsetX / slideWidth)
-    const clampedIndex = Math.max(0, Math.min(index, bannerData.length - 1))
-    setCurrentBannerIndex(clampedIndex)
-  }
+  // Auto-scroll banner carousel (like desktop version)
+  useEffect(() => {
+    autoScrollInterval.current = setInterval(() => {
+      setCurrentBannerIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % bannerData.length
+        const slideWidth = screenWidth - 40 + 16
 
+        bannerFlatListRef.current?.scrollToOffset({
+          offset: nextIndex * slideWidth,
+          animated: true,
+        })
+
+        return nextIndex
+      })
+    }, 6000) // 6 seconds interval (same as desktop)
+
+    // Cleanup on unmount
+    return () => {
+      if (autoScrollInterval.current) {
+        clearInterval(autoScrollInterval.current)
+      }
+    }
+  }, [bannerData.length])
+
+  // Pause auto-scroll when user manually scrolls
   const handleBannerPress = (targetUrl: string) => {
     if (targetUrl) {
       Linking.openURL(targetUrl).catch((err: any) =>
         console.error('Failed to open URL:', err)
       )
+    }
+  }
+
+  const handleBannerScroll = (event: any) => {
+    const slideWidth = screenWidth - 40 + 16
+    const contentOffsetX = event.nativeEvent.contentOffset.x
+    const index = Math.round(contentOffsetX / slideWidth)
+    const clampedIndex = Math.max(0, Math.min(index, bannerData.length - 1))
+    setCurrentBannerIndex(clampedIndex)
+
+    // Reset auto-scroll timer when user manually scrolls
+    if (autoScrollInterval.current) {
+      clearInterval(autoScrollInterval.current)
+    }
+    
+    // Only restart auto-scroll if there are more than 3 banners
+    if (bannerData.length > 3) {
+      autoScrollInterval.current = setInterval(() => {
+        setCurrentBannerIndex((prevIndex) => {
+          const nextIndex = (prevIndex + 1) % bannerData.length
+          const slideWidth = screenWidth - 40 + 16
+          
+          bannerFlatListRef.current?.scrollToOffset({
+            offset: nextIndex * slideWidth,
+            animated: true,
+          })
+          
+          return nextIndex
+        })
+      }, 6000)
     }
   }
 
@@ -297,11 +345,10 @@ export default function HomeScreen() {
               keyExtractor={(item) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
-              pagingEnabled={true}
               snapToInterval={screenWidth - 40 + 16}
               snapToAlignment='start'
               decelerationRate='fast'
-              bounces={false}
+              scrollEventThrottle={16}
               onMomentumScrollEnd={handleBannerScroll}
               onScrollEndDrag={handleBannerScroll}
               contentContainerStyle={styles.carouselContainer}
