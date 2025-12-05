@@ -10,7 +10,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native'
-import RenderHtml from 'react-native-render-html'
+import RenderHtml, { defaultSystemFonts } from 'react-native-render-html'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ContentList } from '@/components/ContentList'
@@ -40,11 +40,35 @@ const cleanHtmlText = (htmlText: string | undefined | null) => {
 // Prepare HTML for rendering - keeps HTML structure
 const prepareHtmlContent = (htmlText: string | undefined | null) => {
   if (!htmlText) return '<p>ไม่มีข้อมูล</p>'
-  return htmlText
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
+  return (
+    htmlText
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\\"/g, '"')
+      // Convert inline color styles to custom tags for better rendering
+      .replace(
+        /<span[^>]*style=["'][^"']*color:\s*red[^"']*["'][^>]*>/gi,
+        '<span class="text-red">'
+      )
+      .replace(
+        /<span[^>]*style=["'][^"']*color:\s*#[a-fA-F0-9]{3,6}[^"']*["'][^>]*>/gi,
+        (match) => {
+          const colorMatch = match.match(/color:\s*(#[a-fA-F0-9]{3,6})/i)
+          if (colorMatch) {
+            return `<span data-color="${colorMatch[1]}">`
+          }
+          return match
+        }
+      )
+      .replace(
+        /<font[^>]*color=["']?([^"'\s>]+)["']?[^>]*>/gi,
+        '<span class="text-red">'
+      )
+  )
 }
 
 export default function CourseDetailScreen() {
@@ -447,42 +471,78 @@ export default function CourseDetailScreen() {
                     <RenderHtml
                       contentWidth={contentWidth - 88}
                       source={{ html: section.detail }}
-                      systemFonts={['Prompt-Regular', 'Prompt-Medium', 'Prompt-SemiBold', 'Prompt-Bold']}
-                      defaultTextProps={{
-                        style: { fontFamily: 'Prompt-Regular' }
-                      }}
+                      systemFonts={[
+                        ...defaultSystemFonts,
+                        'Prompt-Regular',
+                        'Prompt-Medium',
+                        'Prompt-SemiBold',
+                        'Prompt-Bold',
+                      ]}
                       baseStyle={{
                         fontFamily: 'Prompt-Regular',
                         fontSize: 16,
                         color: '#6B7280',
-                        lineHeight: 28,
                       }}
+                      enableExperimentalMarginCollapsing={true}
                       tagsStyles={{
-                        body: { fontFamily: 'Prompt-Regular', fontSize: 16, color: '#6B7280', lineHeight: 28 },
-                        p: { fontFamily: 'Prompt-Regular', fontSize: 16, color: '#6B7280', marginVertical: 2, lineHeight: 28 },
-                        li: { fontFamily: 'Prompt-Regular', fontSize: 16, color: '#6B7280', marginVertical: 4, lineHeight: 28 },
-                        ol: { fontFamily: 'Prompt-Regular', paddingLeft: 20, marginVertical: 0 },
-                        ul: { fontFamily: 'Prompt-Regular', paddingLeft: 20, marginVertical: 0 },
+                        body: {
+                          fontFamily: 'Prompt-Regular',
+                          fontSize: 16,
+                        },
+                        p: {
+                          fontFamily: 'Prompt-Regular',
+                          fontSize: 16,
+                          marginVertical: 2,
+                        },
+                        li: {
+                          fontFamily: 'Prompt-Regular',
+                          fontSize: 16,
+                          marginBottom: 10,
+                          marginTop: 0,
+                        },
+                        ol: { paddingLeft: 16 },
+                        ul: { paddingLeft: 20 },
                         strong: { fontFamily: 'Prompt-SemiBold' },
                         b: { fontFamily: 'Prompt-SemiBold' },
                         span: { fontFamily: 'Prompt-Regular' },
+                        font: { fontFamily: 'Prompt-Regular' },
+                        a: {
+                          color: '#1D4ED8',
+                          textDecorationLine: 'underline',
+                        },
+                      }}
+                      classesStyles={{
+                        'text-red': { color: 'red' },
+                        'text-danger': { color: 'red' },
+                        'text-red-500': { color: '#EF4444' },
+                        'text-red-600': { color: '#DC2626' },
                       }}
                       renderersProps={{
                         ol: {
+                          markerBoxStyle: {
+                            paddingRight: 8,
+                            alignItems: 'flex-start',
+                            justifyContent: 'flex-start',
+                            paddingTop: 0,
+                            minWidth: 28,
+                          },
                           markerTextStyle: {
                             fontFamily: 'Prompt-Regular',
                             fontSize: 16,
                             color: '#6B7280',
-                            lineHeight: 28,
-                            top: 0,
+                            lineHeight: 24,
                           },
                         },
                         ul: {
+                          markerBoxStyle: {
+                            paddingRight: 10,
+                            alignItems: 'flex-start',
+                            justifyContent: 'flex-start',
+                            paddingTop: 5,
+                          },
                           markerTextStyle: {
-                            fontFamily: 'Prompt-Regular',
-                            fontSize: 16,
+                            fontSize: 10,
                             color: '#6B7280',
-                            lineHeight: 28,
                           },
                         },
                       }}
@@ -683,7 +743,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     color: 'white',
     fontFamily: 'Prompt-SemiBold',
-    lineHeight: 34,
+    lineHeight: 36,
     marginBottom: 16,
     textAlign: 'left',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
