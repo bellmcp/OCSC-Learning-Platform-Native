@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   userCard: {
     flexDirection: 'row',
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   coinNumber: {
     fontSize: 48,
     color: '#333',
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     marginRight: 8,
     lineHeight: 72,
   },
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     color: '#333',
     marginBottom: 4,
   },
@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
   },
   amountText: {
     fontSize: 18,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     marginBottom: 2,
   },
   amountUnit: {

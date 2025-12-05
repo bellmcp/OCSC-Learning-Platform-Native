@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   },
   coinLabel: {
     fontSize: 16,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     color: '#FFD700',
     marginTop: 4,
   },
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   successText: {
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     color: '#059669',
     marginBottom: 4,
   },

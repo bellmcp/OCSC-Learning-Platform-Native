@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: 'white',
     fontSize: 12,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   ticketItem: {
     padding: 16,

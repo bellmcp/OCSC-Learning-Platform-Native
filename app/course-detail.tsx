@@ -85,8 +85,10 @@ export default function CourseDetailScreen() {
   const { isLoggedIn } = useContext(LoginContext)
 
   // Registration button state
-  const [isRegisterButtonDisabled, setIsRegisterButtonDisabled] = useState(false)
-  const [registerButtonLabel, setRegisterButtonLabel] = useState('ลงทะเบียนเรียน')
+  const [isRegisterButtonDisabled, setIsRegisterButtonDisabled] =
+    useState(false)
+  const [registerButtonLabel, setRegisterButtonLabel] =
+    useState('ลงทะเบียนเรียน')
 
   const { width: contentWidth } = useWindowDimensions()
 
@@ -454,7 +456,9 @@ export default function CourseDetailScreen() {
                                   styles.registerButton,
                                   { backgroundColor: tintColor },
                                 ]}
-                                onPress={() => router.replace('/(tabs)?tab=account')}
+                                onPress={() =>
+                                  router.replace('/(tabs)?tab=account')
+                                }
                               >
                                 <IconSymbol
                                   name='person.fill'
@@ -505,7 +509,9 @@ export default function CourseDetailScreen() {
                         ) {
                           return (
                             <View style={styles.registerMessageContainer}>
-                              <ThemedText style={styles.registerMessageDisabled}>
+                              <ThemedText
+                                style={styles.registerMessageDisabled}
+                              >
                                 จำนวนผู้เรียนเต็มแล้ว
                               </ThemedText>
                             </View>
@@ -516,7 +522,9 @@ export default function CourseDetailScreen() {
                         if (!isEligibleForAccess) {
                           return (
                             <View style={styles.registerMessageContainer}>
-                              <ThemedText style={styles.registerMessageDisabled}>
+                              <ThemedText
+                                style={styles.registerMessageDisabled}
+                              >
                                 ไม่เปิดให้ลงทะเบียน
                               </ThemedText>
                             </View>
@@ -596,7 +604,7 @@ export default function CourseDetailScreen() {
                         'Prompt-Regular',
                         'Prompt-Medium',
                         'Prompt-SemiBold',
-                        'Prompt-Bold',
+                        'Prompt-SemiBold',
                       ]}
                       baseStyle={{
                         fontFamily: 'Prompt-Regular',
@@ -743,7 +751,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'left',
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   content: {
     flex: 1,
@@ -969,7 +977,7 @@ const styles = StyleSheet.create({
   registrationNumber: {
     fontSize: 24,
     lineHeight: 32,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     color: '#183A7C',
   },
   registrationText: {

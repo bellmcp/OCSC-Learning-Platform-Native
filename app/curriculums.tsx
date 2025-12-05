@@ -76,8 +76,8 @@ export default function CurriculumsScreen() {
   }
 
   // Convert all curriculums to display format
-  const allCurriculumsData: Curriculum[] = curriculums.map(
-    (curriculum: any) => convertCurriculumToDisplayFormat(curriculum)
+  const allCurriculumsData: Curriculum[] = curriculums.map((curriculum: any) =>
+    convertCurriculumToDisplayFormat(curriculum)
   )
 
   // Filter curriculums based on search query (client-side search)
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   searchContainer: {
     flexDirection: 'row',

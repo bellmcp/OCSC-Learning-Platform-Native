@@ -300,6 +300,6 @@ const styles = StyleSheet.create({
   checkmarkText: {
     color: 'white',
     fontSize: 14,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
 })

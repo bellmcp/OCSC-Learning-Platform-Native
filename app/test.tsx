@@ -242,7 +242,7 @@ const createStyles = (tintColor: string) =>
     headerTitle: {
       textAlign: 'center',
       fontSize: 20,
-      fontFamily: 'Prompt-Bold',
+      fontFamily: 'Prompt-SemiBold',
     },
     content: {
       flex: 1,

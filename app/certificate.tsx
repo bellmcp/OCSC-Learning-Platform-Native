@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   header: {
-  paddingTop: Platform.OS === 'ios' ? 80 : 50,
+    paddingTop: Platform.OS === 'ios' ? 80 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderTopWidth: 1,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   curriculumContainer: {
     marginHorizontal: 20,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   curriculumTitle: {
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
     marginBottom: 0,
     textAlign: 'left',
     color: '#183A7C',

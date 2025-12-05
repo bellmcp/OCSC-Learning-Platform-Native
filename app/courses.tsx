@@ -58,11 +58,15 @@ export default function CoursesScreen() {
 
   // Get initial category from route params (from home page navigation)
   const params = useLocalSearchParams()
-  const initialCategoryId = params.categoryId ? parseInt(params.categoryId as string) : null
+  const initialCategoryId = params.categoryId
+    ? parseInt(params.categoryId as string)
+    : null
 
   const dispatch = useDispatch()
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(initialCategoryId)
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(
+    initialCategoryId
+  )
   const [refreshing, setRefreshing] = useState(false)
 
   // Redux state selectors
@@ -83,7 +87,10 @@ export default function CoursesScreen() {
 
   // Load courses when category changes
   useEffect(() => {
-    console.log('CoursesScreen: Loading courses for category:', selectedCategory)
+    console.log(
+      'CoursesScreen: Loading courses for category:',
+      selectedCategory
+    )
     if (selectedCategory === null) {
       dispatch(coursesActions.loadCourses() as any)
     } else {
@@ -127,7 +134,9 @@ export default function CoursesScreen() {
       <CourseItem
         item={item}
         variant='fullWidth'
-        onPress={(course) => router.push(`/course-detail?id=${course.numericId}`)}
+        onPress={(course) =>
+          router.push(`/course-detail?id=${course.numericId}`)
+        }
       />
     </View>
   )
@@ -292,7 +301,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   searchContainer: {
     flexDirection: 'row',

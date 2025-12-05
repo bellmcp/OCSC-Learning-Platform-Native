@@ -717,7 +717,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     textAlign: 'center',
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   header: {
     paddingTop: Platform.OS === 'ios' ? 80 : 40,
@@ -765,7 +765,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
     textAlign: 'center',
     marginBottom: 8,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   heroSubtitle: {
     color: 'white',

@@ -68,7 +68,7 @@ const systemFonts = [
   'Prompt-Regular',
   'Prompt-Medium',
   'Prompt-SemiBold',
-  'Prompt-Bold',
+  'Prompt-SemiBold',
 ]
 
 const baseStyle = {
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
-    fontFamily: 'Prompt-Bold',
+    fontFamily: 'Prompt-SemiBold',
   },
   content: {
     flex: 1,
