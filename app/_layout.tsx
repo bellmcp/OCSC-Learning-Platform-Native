@@ -272,6 +272,10 @@ export default function RootLayout() {
                 name='portal-webview'
                 options={{ headerShown: false }}
               />
+              <Stack.Screen
+                name='orientation-score'
+                options={{ headerShown: false }}
+              />
             </Stack>
             <StatusBar style='dark' backgroundColor='transparent' translucent />
             {/* Toast Notification Component - Listens to Redux for flash messages */}

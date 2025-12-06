@@ -43,10 +43,12 @@ export interface MeState {
   isCurriculumCertificatesLoading: boolean
   isCourseCertificateInfoLoading: boolean
   isCurriculumCertificateInfoLoading: boolean
+  isOrientationScoreLoading: boolean
   courseCertificates: any[]
   curriculumCertificates: any[]
   courseCertificateInfo: any | null
   curriculumCertificateInfo: any | null
+  orientationScore: any | null
 }
 
 export interface PressState {

@@ -13,6 +13,9 @@ import {
   LOAD_CURRICULUM_CERTIFICATE_INFO_FAILURE,
   LOAD_CURRICULUM_CERTIFICATE_INFO_REQUEST,
   LOAD_CURRICULUM_CERTIFICATE_INFO_SUCCESS,
+  LOAD_ORIENTATION_SCORE_FAILURE,
+  LOAD_ORIENTATION_SCORE_REQUEST,
+  LOAD_ORIENTATION_SCORE_SUCCESS,
 } from './actions'
 
 interface MeState {
@@ -20,10 +23,12 @@ interface MeState {
   isCurriculumCertificatesLoading: boolean
   isCourseCertificateInfoLoading: boolean
   isCurriculumCertificateInfoLoading: boolean
+  isOrientationScoreLoading: boolean
   courseCertificates: any[]
   curriculumCertificates: any[]
   courseCertificateInfo: any | null
   curriculumCertificateInfo: any | null
+  orientationScore: any | null
 }
 
 const initialState: MeState = {
@@ -31,10 +36,12 @@ const initialState: MeState = {
   isCurriculumCertificatesLoading: false,
   isCourseCertificateInfoLoading: false,
   isCurriculumCertificateInfoLoading: false,
+  isOrientationScoreLoading: false,
   courseCertificates: [],
   curriculumCertificates: [],
   courseCertificateInfo: null,
   curriculumCertificateInfo: null,
+  orientationScore: null,
 }
 
 export default function meReducer(state = initialState, action: any): MeState {
@@ -104,6 +111,23 @@ export default function meReducer(state = initialState, action: any): MeState {
       return {
         ...state,
         isCurriculumCertificateInfoLoading: false,
+      }
+    case LOAD_ORIENTATION_SCORE_REQUEST:
+      return {
+        ...state,
+        isOrientationScoreLoading: true,
+        orientationScore: null,
+      }
+    case LOAD_ORIENTATION_SCORE_SUCCESS:
+      return {
+        ...state,
+        isOrientationScoreLoading: false,
+        orientationScore: action.payload.orientationScore,
+      }
+    case LOAD_ORIENTATION_SCORE_FAILURE:
+      return {
+        ...state,
+        isOrientationScoreLoading: false,
       }
     case CLEAR_CERTIFICATE_INFO:
       return {

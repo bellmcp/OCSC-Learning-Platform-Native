@@ -92,6 +92,11 @@ export default function CertificateListScreen() {
     })
   }
 
+  // Special handler for orientation score (curriculum 001M)
+  const handleOrientationScore = () => {
+    router.push('/orientation-score')
+  }
+
   const renderCertificateItem = (
     certificate: any,
     type: 'course' | 'curriculum',
@@ -157,17 +162,29 @@ export default function CertificateListScreen() {
         {/* Divider */}
         <ThemedView style={styles.divider} />
 
-        {/* Button section */}
+        {/* Button section - special handling for curriculum 001M */}
         <ThemedView style={styles.buttonSection}>
-          <TouchableOpacity
-            style={styles.printButton}
-            onPress={() => handlePrintCertificate(certificate, type)}
-          >
-            <IconSymbol name='printer' size={16} color='#183A7C' />
-            <ThemedText style={styles.printButtonText}>
-              พิมพ์ประกาศนียบัตร
-            </ThemedText>
-          </TouchableOpacity>
+          {type === 'curriculum' && code === '001M' ? (
+            <TouchableOpacity
+              style={styles.printButton}
+              onPress={handleOrientationScore}
+            >
+              <IconSymbol name='flag.fill' size={16} color='#183A7C' />
+              <ThemedText style={styles.printButtonText}>
+                ผลการเรียนรู้ด้วยตนเอง
+              </ThemedText>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.printButton}
+              onPress={() => handlePrintCertificate(certificate, type)}
+            >
+              <IconSymbol name='printer' size={16} color='#183A7C' />
+              <ThemedText style={styles.printButtonText}>
+                พิมพ์ประกาศนียบัตร
+              </ThemedText>
+            </TouchableOpacity>
+          )}
         </ThemedView>
       </ThemedView>
     )
@@ -263,7 +280,7 @@ export default function CertificateListScreen() {
         </ThemedView>
 
         {/* Help Section */}
-        <ThemedView style={styles.helpContainer}>
+        {/* <ThemedView style={styles.helpContainer}>
           <ThemedText type='subtitle' style={styles.helpTitle}>
             ต้องการความช่วยเหลือ?
           </ThemedText>
@@ -281,7 +298,7 @@ export default function CertificateListScreen() {
               ติดต่อเจ้าหน้าที่
             </ThemedText>
           </TouchableOpacity>
-        </ThemedView>
+        </ThemedView> */}
       </ScrollView>
       <StatusBarGradient />
     </ThemedView>
@@ -291,6 +308,7 @@ export default function CertificateListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 20,
   },
   content: {
     flex: 1,

@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system'
 import * as MediaLibrary from 'expo-media-library'
 import * as Print from 'expo-print'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router } from 'expo-router'
 import * as Sharing from 'expo-sharing'
 import React, { useEffect, useRef, useState } from 'react'
 import {
@@ -16,9 +16,7 @@ import {
 import { captureRef } from 'react-native-view-shot'
 import { useDispatch, useSelector } from 'react-redux'
 
-import CertificateRenderer, {
-  CertificateRendererRef,
-} from '@/components/CertificateRenderer'
+import ScoreRenderer, { ScoreRendererRef } from '@/components/ScoreRenderer'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -55,89 +53,42 @@ const formatThaiDateFull = (dateString: string | null | undefined) => {
   }
 }
 
-export default function CertificateScreen() {
-  const { id, type } = useLocalSearchParams<{ id: string; type: string }>()
+export default function OrientationScoreScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const tintColor = useThemeColor({}, 'tint')
   const iconColor = useThemeColor({}, 'icon')
 
   const dispatch = useDispatch<AppDispatch>()
-  const certificateRef = useRef<CertificateRendererRef>(null)
+  const scoreRef = useRef<ScoreRendererRef>(null)
 
   const [loadingImage, setLoadingImage] = useState(false)
   const [loadingPDF, setLoadingPDF] = useState(false)
 
   // Redux state selectors
-  const {
-    isCourseCertificatesLoading,
-    isCurriculumCertificatesLoading,
-    isCourseCertificateInfoLoading,
-    isCurriculumCertificateInfoLoading,
-    courseCertificates,
-    curriculumCertificates,
-    courseCertificateInfo,
-    curriculumCertificateInfo,
-  } = useSelector((state: RootState) => state.me)
+  const { isOrientationScoreLoading, orientationScore } = useSelector(
+    (state: RootState) => state.me
+  )
 
-  // Get the current certificate from the list (contains user info: firstname, lastname, enddate)
-  const currentCertificate =
-    type === 'course'
-      ? courseCertificates.find((c: any) => c.id === parseInt(id || '0'))
-      : curriculumCertificates.find((c: any) => c.id === parseInt(id || '0'))
-
-  // Get the certificate template info (contains print info: text1-4, signature)
-  const certificateTemplateInfo =
-    type === 'course' ? courseCertificateInfo : curriculumCertificateInfo
-
-  // Determine loading state
-  const isLoading =
-    type === 'course'
-      ? isCourseCertificatesLoading || isCourseCertificateInfoLoading
-      : isCurriculumCertificatesLoading || isCurriculumCertificateInfoLoading
-
-  // Load certificate list and info on mount
+  // Load orientation score on mount
   useEffect(() => {
-    if (id) {
-      // Clear previous certificate info
-      dispatch(meActions.clearCertificateInfo())
-
-      if (type === 'course') {
-        // Load list if not already loaded
-        if (courseCertificates.length === 0) {
-          dispatch(meActions.loadCourseCertificates())
-        }
-        dispatch(meActions.loadCourseCertificateInfo(id))
-      } else {
-        // Load list if not already loaded
-        if (curriculumCertificates.length === 0) {
-          dispatch(meActions.loadCurriculumCertificates())
-        }
-        dispatch(meActions.loadCurriculumCertificateInfo(id))
-      }
-    }
-  }, [dispatch, id, type])
+    dispatch(meActions.loadOrientationScore())
+  }, [dispatch])
 
   const handleBack = () => {
     router.back()
   }
 
-  // Get certificate filename
+  // Get file name
   const getFileName = () => {
-    const contentName =
-      type === 'course'
-        ? currentCertificate?.course
-        : currentCertificate?.curriculum
-    const name = `${currentCertificate?.firstname || ''} ${
-      currentCertificate?.lastname || ''
+    const name = `${orientationScore?.firstName || ''} ${
+      orientationScore?.lastName || ''
     }`
-    const prefix =
-      type === 'course' ? 'ประกาศนียบัตรรายวิชา' : 'ประกาศนียบัตรหลักสูตร'
-    return `${prefix}${contentName}-${name}`
+    return `ผลการเรียนรู้ด้วยตนเอง-หลักสูตรฝึกอบรมข้าราชการบรรจุใหม่-${name}`
   }
 
   // Save as image
   const handleSaveAsImage = async () => {
-    if (!certificateRef.current?.containerRef?.current) {
+    if (!scoreRef.current?.containerRef?.current) {
       Alert.alert('ข้อผิดพลาด', 'ไม่สามารถบันทึกรูปภาพได้')
       return
     }
@@ -150,14 +101,14 @@ export default function CertificateScreen() {
       if (status !== 'granted') {
         Alert.alert(
           'ต้องการสิทธิ์',
-          'กรุณาอนุญาตให้แอปเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตร'
+          'กรุณาอนุญาตให้แอปเข้าถึงคลังรูปภาพเพื่อบันทึกผลการเรียนรู้'
         )
         setLoadingImage(false)
         return
       }
 
       // Capture the view as image
-      const uri = await captureRef(certificateRef.current.containerRef, {
+      const uri = await captureRef(scoreRef.current.containerRef, {
         format: 'png',
         quality: 1,
         result: 'tmpfile',
@@ -173,7 +124,7 @@ export default function CertificateScreen() {
         // Album creation might fail if album exists, that's ok
       }
 
-      Alert.alert('สำเร็จ', 'บันทึกประกาศนียบัตรเป็นไฟล์รูปภาพเรียบร้อยแล้ว', [
+      Alert.alert('สำเร็จ', 'บันทึกผลการเรียนรู้เป็นไฟล์รูปภาพเรียบร้อยแล้ว', [
         { text: 'ตกลง' },
         {
           text: 'แชร์',
@@ -194,7 +145,7 @@ export default function CertificateScreen() {
 
   // Save as PDF
   const handleSaveAsPDF = async () => {
-    const html = certificateRef.current?.getPrintHTML()
+    const html = scoreRef.current?.getPrintHTML()
     if (!html) {
       Alert.alert('ข้อผิดพลาด', 'ไม่สามารถสร้างไฟล์ PDF ได้')
       return
@@ -206,8 +157,8 @@ export default function CertificateScreen() {
       // Generate PDF from HTML
       const { uri } = await Print.printToFileAsync({
         html,
-        width: 595, // A4 width in points (72 dpi)
-        height: 842, // A4 height in points (72 dpi)
+        width: 595,
+        height: 842,
       })
 
       // Move to documents directory with proper name
@@ -223,11 +174,11 @@ export default function CertificateScreen() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           mimeType: 'application/pdf',
-          dialogTitle: 'บันทึกประกาศนียบัตร PDF',
+          dialogTitle: 'บันทึกผลการเรียนรู้ PDF',
           UTI: 'com.adobe.pdf',
         })
       } else {
-        Alert.alert('สำเร็จ', 'บันทึกประกาศนียบัตรเป็นไฟล์ PDF เรียบร้อยแล้ว')
+        Alert.alert('สำเร็จ', 'บันทึกผลการเรียนรู้เป็นไฟล์ PDF เรียบร้อยแล้ว')
       }
     } catch (error) {
       console.error('Error saving PDF:', error)
@@ -241,7 +192,7 @@ export default function CertificateScreen() {
   }
 
   // Loading state
-  if (isLoading) {
+  if (isOrientationScoreLoading) {
     return (
       <ThemedView style={[styles.container, { backgroundColor }]}>
         <ThemedView style={styles.header}>
@@ -250,7 +201,7 @@ export default function CertificateScreen() {
               <IconSymbol name='chevron.left' size={24} color={iconColor} />
             </TouchableOpacity>
             <ThemedText type='title' style={styles.headerTitle}>
-              ประกาศนียบัตร
+              ผลการเรียนรู้ด้วยตนเอง
             </ThemedText>
             <View style={styles.backButton} />
           </View>
@@ -258,7 +209,7 @@ export default function CertificateScreen() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size='large' color={tintColor} />
           <ThemedText style={styles.loadingText}>
-            กำลังโหลดข้อมูลประกาศนียบัตร...
+            กำลังโหลดข้อมูลผลการเรียนรู้...
           </ThemedText>
         </View>
         <StatusBarGradient />
@@ -266,8 +217,8 @@ export default function CertificateScreen() {
     )
   }
 
-  // Empty state - need both certificate data and template info
-  if (!currentCertificate || !certificateTemplateInfo) {
+  // Empty state
+  if (!orientationScore) {
     return (
       <ThemedView style={[styles.container, { backgroundColor }]}>
         <ThemedView style={styles.header}>
@@ -276,29 +227,24 @@ export default function CertificateScreen() {
               <IconSymbol name='chevron.left' size={24} color={iconColor} />
             </TouchableOpacity>
             <ThemedText type='title' style={styles.headerTitle}>
-              ประกาศนียบัตร
+              ผลการเรียนรู้ด้วยตนเอง
             </ThemedText>
             <View style={styles.backButton} />
           </View>
         </ThemedView>
         <View style={styles.loadingContainer}>
           <IconSymbol name='tray' size={54} color='#9CA3AF' />
-          <ThemedText style={styles.loadingText}>
-            ไม่พบข้อมูลประกาศนียบัตร
+          <ThemedText style={styles.emptyTitle}>ไม่พบข้อมูล</ThemedText>
+          <ThemedText style={styles.emptyText}>
+            ยังเรียนไม่จบหลักสูตร{'\n'}
+            ระบบจะออกใบคะแนนฯ ให้เมื่อท่านเรียนจบหลักสูตร{'\n'}
+            และได้ประกาศนียบัตรหลักสูตรแล้ว
           </ThemedText>
         </View>
         <StatusBarGradient />
       </ThemedView>
     )
   }
-
-  // Extract certificate data
-  // User info from certificate list: title, firstname, lastname, enddate, hour, course/curriculum, platform
-  // Template info from certificate info API: text1-4, signature, signer, position, coCert, etc.
-  const contentName =
-    type === 'course'
-      ? currentCertificate.course
-      : currentCertificate.curriculum
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
@@ -309,7 +255,7 @@ export default function CertificateScreen() {
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
-            ประกาศนียบัตร
+            ผลการเรียนรู้ด้วยตนเอง
           </ThemedText>
           <View style={styles.backButton} />
         </View>
@@ -324,68 +270,47 @@ export default function CertificateScreen() {
         {/* Title Section */}
         <ThemedView style={styles.titleContainer}>
           <ThemedText type='title' style={styles.titleText}>
-            {type === 'course' ? 'วิชา' : 'หลักสูตร'} {contentName}
+            ผลการเรียนรู้ด้วยตนเอง{'\n'}หลักสูตรฝึกอบรมข้าราชการบรรจุใหม่
           </ThemedText>
         </ThemedView>
 
-        {/* Certificate Metadata */}
+        {/* Metadata */}
         <ThemedView style={styles.metadataContainer}>
           <ThemedView style={styles.metadataItem}>
-            <ThemedText style={styles.metadataLabel}>
-              ผู้สำเร็จการศึกษา
-            </ThemedText>
+            <ThemedText style={styles.metadataLabel}>ชื่อ - สกุล</ThemedText>
             <ThemedText type='defaultSemiBold' style={styles.metadataValue}>
-              {currentCertificate.title}
-              {currentCertificate.firstname} {currentCertificate.lastname}
+              {orientationScore.title}
+              {orientationScore.firstName} {orientationScore.lastName}
             </ThemedText>
           </ThemedView>
 
           <ThemedView style={styles.metadataItem}>
-            <ThemedText style={styles.metadataLabel}>
-              วันที่สำเร็จการศึกษา
-            </ThemedText>
+            <ThemedText style={styles.metadataLabel}>ตำแหน่ง</ThemedText>
             <ThemedText type='defaultSemiBold' style={styles.metadataValue}>
-              {formatThaiDateFull(currentCertificate.enddate)}
+              {orientationScore.jobTitle} {orientationScore.jobLevel}
+            </ThemedText>
+          </ThemedView>
+
+          <ThemedView style={styles.metadataItem}>
+            <ThemedText style={styles.metadataLabel}>หน่วยงาน</ThemedText>
+            <ThemedText type='defaultSemiBold' style={styles.metadataValue}>
+              {orientationScore.department} {orientationScore.ministry}
             </ThemedText>
           </ThemedView>
 
           <ThemedView style={[styles.metadataItem, { borderBottomWidth: 0 }]}>
-            <ThemedText style={styles.metadataLabel}>หน่วยงานรับรอง</ThemedText>
+            <ThemedText style={styles.metadataLabel}>
+              วันที่จบหลักสูตร
+            </ThemedText>
             <ThemedText type='defaultSemiBold' style={styles.metadataValue}>
-              {currentCertificate.platform || 'สำนักงาน ก.พ.'}
+              {formatThaiDateFull(orientationScore.date)}
             </ThemedText>
           </ThemedView>
         </ThemedView>
 
-        {/* Certificate Renderer */}
-        <ThemedView style={styles.certificateContainer}>
-          <CertificateRenderer
-            ref={certificateRef}
-            // User info from certificate list
-            title={currentCertificate.title}
-            firstName={currentCertificate.firstname}
-            lastName={currentCertificate.lastname}
-            contentName={contentName || ''}
-            hour={currentCertificate.hour}
-            endDate={currentCertificate.enddate}
-            isCurriculum={type === 'curriculum'}
-            // Template info from certificate info API
-            text1={certificateTemplateInfo.text1}
-            text2={certificateTemplateInfo.text2}
-            text3={certificateTemplateInfo.text3}
-            text4={certificateTemplateInfo.text4}
-            signature={certificateTemplateInfo.signature}
-            signer={certificateTemplateInfo.signer}
-            position1={certificateTemplateInfo.position1}
-            position2={certificateTemplateInfo.position2}
-            signatureUrl={certificateTemplateInfo.signatureUrl}
-            coCert={certificateTemplateInfo.coCert}
-            coLogo={certificateTemplateInfo.coLogo}
-            coSigner={certificateTemplateInfo.coSigner}
-            coSignatureUrl={certificateTemplateInfo.coSignatureUrl}
-            coPosition1={certificateTemplateInfo.coPosition1}
-            coPosition2={certificateTemplateInfo.coPosition2}
-          />
+        {/* Score Renderer */}
+        <ThemedView style={styles.scoreContainer}>
+          <ScoreRenderer ref={scoreRef} {...orientationScore} />
         </ThemedView>
 
         {/* Action Buttons */}
@@ -464,13 +389,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Prompt-SemiBold',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 40,
   },
   loadingText: {
     marginTop: 16,
@@ -478,15 +404,29 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Regular',
     opacity: 0.6,
   },
+  emptyTitle: {
+    marginTop: 16,
+    fontSize: 18,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#6B7280',
+  },
+  emptyText: {
+    marginTop: 8,
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
   titleContainer: {
     marginHorizontal: 20,
     marginBottom: 20,
   },
   titleText: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: 'Prompt-SemiBold',
     color: '#183A7C',
-    lineHeight: 30,
+    lineHeight: 28,
   },
   metadataContainer: {
     marginHorizontal: 20,
@@ -519,10 +459,10 @@ const styles = StyleSheet.create({
   metadataValue: {
     fontSize: 14,
     color: '#333',
-    flex: 1,
+    flex: 1.5,
     textAlign: 'right',
   },
-  certificateContainer: {
+  scoreContainer: {
     marginHorizontal: 20,
     marginBottom: 20,
     borderRadius: 8,

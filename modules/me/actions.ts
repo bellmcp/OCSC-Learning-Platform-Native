@@ -1,6 +1,6 @@
 import * as uiActions from '@/modules/ui/actions'
 import axios from '@/utils/axiosConfig'
-import { PORTAL_API_URL } from '@env'
+import { API_URL, PORTAL_API_URL } from '@env'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 // Action Types
@@ -32,6 +32,12 @@ export const CLEAR_CERTIFICATE_INFO =
   'learning-platform/me/CLEAR_CERTIFICATE_INFO'
 export const CLEAR_ALL_CERTIFICATES =
   'learning-platform/me/CLEAR_ALL_CERTIFICATES'
+export const LOAD_ORIENTATION_SCORE_REQUEST =
+  'learning-platform/me/LOAD_ORIENTATION_SCORE_REQUEST'
+export const LOAD_ORIENTATION_SCORE_SUCCESS =
+  'learning-platform/me/LOAD_ORIENTATION_SCORE_SUCCESS'
+export const LOAD_ORIENTATION_SCORE_FAILURE =
+  'learning-platform/me/LOAD_ORIENTATION_SCORE_FAILURE'
 
 // Helper function to parse JWT token
 function parseJwt(token: string) {
@@ -50,8 +56,13 @@ function parseJwt(token: string) {
   }
 }
 
+// Two different base URLs like desktop:
+// - portalApiBaseUrl: for Certificates (learningportalapi)
+// - platformApiBaseUrl: for OrientationScore (learningspaceapi)
 const portalApiBaseUrl =
   PORTAL_API_URL || 'https://learningportal.ocsc.go.th/learningportalapi/'
+const platformApiBaseUrl =
+  API_URL || 'https://learningportal.ocsc.go.th/learningspaceapi/'
 
 export function loadCourseCertificates() {
   return async (dispatch: any) => {
@@ -235,5 +246,47 @@ export function clearCertificateInfo() {
 export function clearAllCertificates() {
   return {
     type: CLEAR_ALL_CERTIFICATES,
+  }
+}
+
+export function loadOrientationScore() {
+  return async (dispatch: any) => {
+    const token = await AsyncStorage.getItem('token')
+    if (!token) {
+      console.log('[Me] No token found, skipping load')
+      return
+    }
+
+    const parsed = parseJwt(token)
+    const userId = parsed?.unique_name
+
+    if (!userId) {
+      console.log('[Me] No userId found in token')
+      return
+    }
+
+    dispatch({ type: LOAD_ORIENTATION_SCORE_REQUEST })
+    try {
+      // OrientationScore uses platformApiBaseUrl (learningspaceapi), not portalApiBaseUrl
+      const { data } = await axios.get(`/Users/${userId}/OrientationScore`, {
+        baseURL: platformApiBaseUrl,
+      })
+      dispatch({
+        type: LOAD_ORIENTATION_SCORE_SUCCESS,
+        payload: {
+          orientationScore: data || null,
+        },
+      })
+    } catch (err: any) {
+      dispatch({ type: LOAD_ORIENTATION_SCORE_FAILURE })
+      if (err?.response?.status !== 404) {
+        dispatch(
+          uiActions.setFlashMessage(
+            `โหลดผลการเรียนรู้ด้วยตนเองไม่สำเร็จ เกิดข้อผิดพลาด ${err?.response?.status}`,
+            'error'
+          )
+        )
+      }
+    }
   }
 }
