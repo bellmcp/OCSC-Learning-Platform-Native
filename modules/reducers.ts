@@ -3,6 +3,7 @@ import { combineReducers } from 'redux'
 import categories from './categories/reducer'
 import courses from './courses/reducer'
 import curriculums from './curriculums/reducer'
+import me from './me/reducer'
 import press from './press/reducer'
 import registrations from './registrations/reducer'
 import ui from './ui/reducer'
@@ -14,6 +15,7 @@ export default () =>
     categories,
     courses,
     curriculums,
+    me,
     press,
     registrations,
     ui,

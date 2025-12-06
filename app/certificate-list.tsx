@@ -1,131 +1,188 @@
 import { router } from 'expo-router'
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
+  ActivityIndicator,
   Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as meActions from '@/modules/me/actions'
+import type { AppDispatch, RootState } from '@/store/types'
 
-// Mock certificate data based on the screenshot
-const mockCourseCertificates = [
-  {
-    id: '002M',
-    name: 'ผู้นำทีมที่มีประสิทธิภาพ',
-    type: 'หลักสูตร',
-    status: 'ผ่านเกณฑ์แล้ว',
-    completionDate: '13 ธ.ค. 2566',
-    enrollmentPeriod: '1 ม.ค. 2564 ถึง 13 ธ.ค. 2566',
-  },
-]
-
-const mockSubjectCertificates = [
-  {
-    id: 'DS26',
-    name: 'AI Basic',
-    type: 'รายวิชา',
-    status: 'ผ่านเกณฑ์แล้ว',
-    completionDate: '30 พ.ค. 2568',
-    enrollmentPeriod: '1 ม.ค. 2564 ถึง 30 พ.ค. 2568',
-  },
-  {
-    id: 'KD09',
-    name: 'คดีปกครองและวิธีพิจารณาคดีปกครอง',
-    type: 'รายวิชา',
-    status: 'ผ่านเกณฑ์แล้ว',
-    completionDate: '19 ส.ค. 2568',
-    enrollmentPeriod: '19 ส.ค. 2568 ถึง 19 ส.ค. 2568',
-  },
-]
+// Helper to format date in Thai Buddhist calendar
+const formatThaiDate = (dateString: string | null | undefined) => {
+  if (!dateString) return '-'
+  try {
+    const date = new Date(dateString)
+    const thaiMonths = [
+      'ม.ค.',
+      'ก.พ.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.',
+    ]
+    const day = date.getDate()
+    const month = thaiMonths[date.getMonth()]
+    const year = date.getFullYear() + 543
+    return `${day} ${month} ${year}`
+  } catch (e) {
+    return dateString
+  }
+}
 
 export default function CertificateListScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const tintColor = useThemeColor({}, 'tint')
   const iconColor = useThemeColor({}, 'icon')
 
+  const dispatch = useDispatch<AppDispatch>()
+
+  // Redux state selectors
+  const {
+    isCourseCertificatesLoading,
+    isCurriculumCertificatesLoading,
+    courseCertificates,
+    curriculumCertificates,
+  } = useSelector((state: RootState) => state.me)
+
+  // Filter to only show passed certificates (matching desktop behavior)
+  const passedCourseCertificates = courseCertificates.filter(
+    (certificate: any) => certificate.pass === true
+  )
+  const passedCurriculumCertificates = curriculumCertificates.filter(
+    (certificate: any) => certificate.pass === true
+  )
+
+  // Load certificates on mount
+  useEffect(() => {
+    dispatch(meActions.loadCourseCertificates())
+    dispatch(meActions.loadCurriculumCertificates())
+  }, [dispatch])
+
   const handleBack = () => {
     router.back()
   }
 
-  const handlePrintCertificate = (certificate: any) => {
-    router.push('/certificate' as any)
+  const handlePrintCertificate = (
+    certificate: any,
+    type: 'course' | 'curriculum'
+  ) => {
+    router.push({
+      pathname: '/certificate',
+      params: {
+        id: certificate.id,
+        type: type,
+      },
+    })
   }
 
   const renderCertificateItem = (
     certificate: any,
-    index: number,
+    type: 'course' | 'curriculum',
     isLast: boolean
-  ) => (
-    <ThemedView
-      key={certificate.id}
-      style={[styles.certificateCard, isLast && styles.lastItem]}
-    >
-      {/* Main content area */}
-      <ThemedView style={styles.mainContent}>
-        <ThemedView style={styles.certificateContent}>
-          <ThemedView style={styles.contentHeader}>
-            <ThemedView style={styles.titleSection}>
-              <ThemedText
-                type='defaultSemiBold'
-                style={styles.certificateTitle}
-                numberOfLines={1}
-              >
-                {certificate.name}
-              </ThemedText>
-              <ThemedText style={styles.certificateCode} numberOfLines={1}>
-                {certificate.type} {certificate.id}
-              </ThemedText>
-              <ThemedText
-                style={[styles.certificateStatus, { color: '#10B981' }]}
-                numberOfLines={1}
-              >
-                {certificate.status}
-              </ThemedText>
+  ) => {
+    // Get the correct field names based on API response
+    // Desktop uses: course/curriculum, courseid/curriculumid, startdate/enddate
+    const name = type === 'course' ? certificate.course : certificate.curriculum
+    const code =
+      type === 'course' ? certificate.courseid : certificate.curriculumid
+    const startDate = certificate.startdate
+    const endDate = certificate.enddate // enddate is also used as completion date
 
-              <ThemedView style={styles.dateInfo}>
+    return (
+      <ThemedView
+        key={certificate.id}
+        style={[styles.certificateCard, isLast && styles.lastItem]}
+      >
+        {/* Main content area */}
+        <ThemedView style={styles.mainContent}>
+          <ThemedView style={styles.certificateContent}>
+            <ThemedView style={styles.contentHeader}>
+              <ThemedView style={styles.titleSection}>
                 <ThemedText
-                  style={[styles.dateLabel, { marginBottom: 4 }]}
+                  type='defaultSemiBold'
+                  style={styles.certificateTitle}
+                  numberOfLines={2}
+                >
+                  {name}
+                </ThemedText>
+                <ThemedText style={styles.certificateCode} numberOfLines={1}>
+                  {type === 'course' ? 'รายวิชา' : 'หลักสูตร'} {code}
+                </ThemedText>
+                <ThemedText
+                  style={[styles.certificateStatus, { color: '#10B981' }]}
                   numberOfLines={1}
                 >
-                  <ThemedText style={styles.dateLabelBold}>
-                    สำเร็จการศึกษา{' '}
-                  </ThemedText>
-                  {certificate.completionDate}
+                  ผ่านเกณฑ์แล้ว
                 </ThemedText>
-                <ThemedText style={styles.dateLabel} numberOfLines={1}>
-                  <ThemedText style={styles.dateLabelBold}>
-                    ระยะเวลาเข้าเรียน{' '}
+
+                <ThemedView style={styles.dateInfo}>
+                  <ThemedText
+                    style={[styles.dateLabel, { marginBottom: 4 }]}
+                    numberOfLines={1}
+                  >
+                    <ThemedText style={styles.dateLabelBold}>
+                      สำเร็จการศึกษา{' '}
+                    </ThemedText>
+                    {formatThaiDate(endDate)}
                   </ThemedText>
-                  {certificate.enrollmentPeriod}
-                </ThemedText>
+                  <ThemedText style={styles.dateLabel} numberOfLines={1}>
+                    <ThemedText style={styles.dateLabelBold}>
+                      ระยะเวลาเข้าเรียน{' '}
+                    </ThemedText>
+                    {formatThaiDate(startDate)} ถึง {formatThaiDate(endDate)}
+                  </ThemedText>
+                </ThemedView>
               </ThemedView>
             </ThemedView>
           </ThemedView>
         </ThemedView>
-      </ThemedView>
 
-      {/* Divider */}
-      <ThemedView style={styles.divider} />
+        {/* Divider */}
+        <ThemedView style={styles.divider} />
 
-      {/* Button section */}
-      <ThemedView style={styles.buttonSection}>
-        <TouchableOpacity
-          style={styles.printButton}
-          onPress={() => handlePrintCertificate(certificate)}
-        >
-          <IconSymbol name='printer' size={16} color='#183A7C' />
-          <ThemedText style={styles.printButtonText}>
-            พิมพ์ประกาศนียบัตร
-          </ThemedText>
-        </TouchableOpacity>
+        {/* Button section */}
+        <ThemedView style={styles.buttonSection}>
+          <TouchableOpacity
+            style={styles.printButton}
+            onPress={() => handlePrintCertificate(certificate, type)}
+          >
+            <IconSymbol name='printer' size={16} color='#183A7C' />
+            <ThemedText style={styles.printButtonText}>
+              พิมพ์ประกาศนียบัตร
+            </ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
       </ThemedView>
+    )
+  }
+
+  const renderEmptyState = () => (
+    <ThemedView style={styles.emptyContainer}>
+      <IconSymbol name='tray' size={54} color='#9CA3AF' />
+      <ThemedText style={styles.emptyText}>ไม่พบประกาศนียบัตร</ThemedText>
+    </ThemedView>
+  )
+
+  const renderLoadingState = () => (
+    <ThemedView style={styles.loadingContainer}>
+      <ActivityIndicator size='large' color={tintColor} />
     </ThemedView>
   )
 
@@ -166,34 +223,43 @@ export default function CertificateListScreen() {
           </ThemedText>
         </ThemedView>
 
-        {/* Course Certificates Section */}
+        {/* Curriculum Certificates Section */}
         <ThemedView style={styles.sectionContainer}>
           <ThemedText type='subtitle' style={styles.sectionTitle}>
             ประกาศนียบัตรหลักสูตร
           </ThemedText>
 
-          {mockCourseCertificates.map((certificate, index) =>
-            renderCertificateItem(
-              certificate,
-              index,
-              index === mockCourseCertificates.length - 1
-            )
-          )}
+          {isCurriculumCertificatesLoading
+            ? renderLoadingState()
+            : passedCurriculumCertificates.length === 0
+            ? renderEmptyState()
+            : passedCurriculumCertificates.map(
+                (certificate: any, index: number) =>
+                  renderCertificateItem(
+                    certificate,
+                    'curriculum',
+                    index === passedCurriculumCertificates.length - 1
+                  )
+              )}
         </ThemedView>
 
-        {/* Subject Certificates Section */}
+        {/* Course Certificates Section */}
         <ThemedView style={styles.sectionContainer}>
           <ThemedText type='subtitle' style={styles.sectionTitle}>
             ประกาศนียบัตรรายวิชา
           </ThemedText>
 
-          {mockSubjectCertificates.map((certificate, index) =>
-            renderCertificateItem(
-              certificate,
-              index,
-              index === mockSubjectCertificates.length - 1
-            )
-          )}
+          {isCourseCertificatesLoading
+            ? renderLoadingState()
+            : passedCourseCertificates.length === 0
+            ? renderEmptyState()
+            : passedCourseCertificates.map((certificate: any, index: number) =>
+                renderCertificateItem(
+                  certificate,
+                  'course',
+                  index === passedCourseCertificates.length - 1
+                )
+              )}
         </ThemedView>
 
         {/* Help Section */}
@@ -373,6 +439,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Medium',
     color: '#183A7C',
     marginLeft: 8,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 150,
+  },
+  emptyText: {
+    marginTop: 14,
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 150,
   },
   helpContainer: {
     marginHorizontal: 20,

@@ -45,6 +45,10 @@
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>แอปต้องการเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตรของคุณ</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>แอปต้องการเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตรของคุณ</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>

@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 export const LOAD_USER_REQUEST = 'learning-platform/user/LOAD_USER_REQUEST'
 export const LOAD_USER_SUCCESS = 'learning-platform/user/LOAD_USER_SUCCESS'
 export const LOAD_USER_FAILURE = 'learning-platform/user/LOAD_USER_FAILURE'
+export const CLEAR_USER = 'learning-platform/user/CLEAR_USER'
 
 // Parse JWT token to get user ID
 const parseJwt = (token: string) => {
@@ -39,7 +40,7 @@ export function loadUser() {
       // Parse JWT to get userId
       const tokenData = parseJwt(token)
       const userId = tokenData?.unique_name
-      
+
       if (!userId) {
         console.log('[User Actions] No userId in token')
         dispatch({ type: LOAD_USER_FAILURE })
@@ -47,10 +48,10 @@ export function loadUser() {
       }
 
       console.log('[User Actions] Loading user data for:', userId)
-      
+
       // axios.get will automatically include the token via interceptor
       const { data } = await axios.get(`/Users/${userId}`)
-      
+
       if (data.length === 0) {
         dispatch({
           type: LOAD_USER_SUCCESS,
@@ -60,7 +61,7 @@ export function loadUser() {
         })
         return
       }
-      
+
       dispatch({
         type: LOAD_USER_SUCCESS,
         payload: {
@@ -78,4 +79,8 @@ export function loadUser() {
       )
     }
   }
+}
+
+export function clearUser() {
+  return { type: CLEAR_USER }
 }

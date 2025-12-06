@@ -11,7 +11,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ocsc.learningplatformnative",
-      "displayName": "Learning Space"
+      "displayName": "Learning Space",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "แอปต้องการเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตรของคุณ",
+        "NSPhotoLibraryAddUsageDescription": "แอปต้องการเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตรของคุณ"
+      }
     },
     "android": {
       "package": "com.ocsc.learningplatformnative",
@@ -36,6 +40,14 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "แอปต้องการเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตรของคุณ",
+          "savePhotosPermission": "แอปต้องการเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตรของคุณ",
+          "isAccessMediaLocationEnabled": true
         }
       ]
     ],

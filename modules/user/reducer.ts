@@ -1,4 +1,5 @@
 import {
+  CLEAR_USER,
   LOAD_USER_FAILURE,
   LOAD_USER_REQUEST,
   LOAD_USER_SUCCESS,
@@ -36,6 +37,8 @@ export default function userReducer(
         ...state,
         isLoading: false,
       }
+    case CLEAR_USER:
+      return initialState
     default:
       return state
   }

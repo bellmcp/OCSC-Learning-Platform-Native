@@ -4,6 +4,7 @@ export interface RootState {
   categories: CategoriesState
   courses: CoursesState
   curriculums: CurriculumsState
+  me: MeState
   press: PressState
   registrations: RegistrationsState
   ui: UIState
@@ -35,6 +36,17 @@ export interface CurriculumsState {
   isLoading: boolean
   items: any[]
   child: any[]
+}
+
+export interface MeState {
+  isCourseCertificatesLoading: boolean
+  isCurriculumCertificatesLoading: boolean
+  isCourseCertificateInfoLoading: boolean
+  isCurriculumCertificateInfoLoading: boolean
+  courseCertificates: any[]
+  curriculumCertificates: any[]
+  courseCertificateInfo: any | null
+  curriculumCertificateInfo: any | null
 }
 
 export interface PressState {

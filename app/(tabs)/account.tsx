@@ -20,6 +20,8 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as meActions from '@/modules/me/actions'
+import * as registrationsActions from '@/modules/registrations/actions'
 import * as uiActions from '@/modules/ui/actions'
 import * as userActions from '@/modules/user/actions'
 import type { AppDispatch, RootState } from '@/store/types'
@@ -54,6 +56,32 @@ export default function AccountScreen() {
   const [showPassword, setShowPassword] = useState(false)
   const [isThaiDLoading, setIsThaiDLoading] = useState(false)
   const [thaiDState, setThaiDState] = useState<string | null>(null)
+
+  // Secret debug login tap counter
+  const [debugTapCount, setDebugTapCount] = useState(0)
+  const debugTapTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleSecretTap = () => {
+    // Reset timeout on each tap
+    if (debugTapTimeout.current) {
+      clearTimeout(debugTapTimeout.current)
+    }
+
+    const newCount = debugTapCount + 1
+    setDebugTapCount(newCount)
+
+    // Navigate to debug login after 5 taps
+    if (newCount >= 5) {
+      setDebugTapCount(0)
+      router.push('/debug-login')
+      return
+    }
+
+    // Reset counter after 2 seconds of inactivity
+    debugTapTimeout.current = setTimeout(() => {
+      setDebugTapCount(0)
+    }, 2000)
+  }
 
   // ThaiD OAuth configuration loaded from @env
 
@@ -365,6 +393,13 @@ export default function AccountScreen() {
           // Clear token from AsyncStorage
           await AsyncStorage.removeItem('token')
           console.log('[Auth] Token removed from AsyncStorage')
+
+          // Clear all Redux state
+          dispatch(userActions.clearUser())
+          dispatch(registrationsActions.clearRegistrations())
+          dispatch(meActions.clearAllCertificates())
+          console.log('[Auth] Redux state cleared')
+
           setIsLoggedIn(false)
         },
       },
@@ -380,9 +415,11 @@ export default function AccountScreen() {
     <ThemedView style={styles.loginContainer}>
       {/* Header */}
       <ThemedView style={styles.header}>
-        <ThemedText type='title' style={styles.headerTitle}>
-          OCSC Learning Space
-        </ThemedText>
+        <TouchableOpacity onPress={handleSecretTap} activeOpacity={1}>
+          <ThemedText type='title' style={styles.headerTitle}>
+            OCSC Learning Space
+          </ThemedText>
+        </TouchableOpacity>
         <ThemedText type='subtitle' style={styles.subtitleText}>
           คุณสามารถเข้าสู่ระบบได้ 2 วิธี
         </ThemedText>

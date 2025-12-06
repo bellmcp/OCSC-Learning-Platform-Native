@@ -83,6 +83,11 @@ const MAPPING = {
   'play.circle.fill': 'play-circle-filled',
   ellipsis: 'more-horiz',
   'arrow.clockwise': 'refresh',
+  tray: 'inbox',
+  'tray.fill': 'inbox',
+  'flag.fill': 'flag',
+  'chart.bar.fill': 'bar-chart',
+  'person.2.fill': 'group',
 } as IconMapping
 
 /**
