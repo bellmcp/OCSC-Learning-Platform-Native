@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
-  Linking as RNLinking,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -799,7 +798,15 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => RNLinking.openURL(`${PORTAL_URL}history`)}
+            onPress={() =>
+              router.push({
+                pathname: '/portal-webview',
+                params: {
+                  url: `${PORTAL_URL}history`,
+                  title: 'ประวัติการเรียน',
+                },
+              })
+            }
           >
             <IconSymbol name='doc.text' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
@@ -809,7 +816,15 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => RNLinking.openURL(`${PORTAL_URL}edit`)}
+            onPress={() =>
+              router.push({
+                pathname: '/portal-webview',
+                params: {
+                  url: `${PORTAL_URL}edit`,
+                  title: 'แก้ไขข้อมูลส่วนบุคคล',
+                },
+              })
+            }
           >
             <IconSymbol name='pencil' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
@@ -819,7 +834,15 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => RNLinking.openURL(`${PORTAL_URL}reset`)}
+            onPress={() =>
+              router.push({
+                pathname: '/portal-webview',
+                params: {
+                  url: `${PORTAL_URL}reset`,
+                  title: 'ตั้งรหัสผ่านใหม่',
+                },
+              })
+            }
           >
             <IconSymbol name='lock' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
@@ -829,7 +852,15 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => RNLinking.openURL(`${PORTAL_URL}otp`)}
+            onPress={() =>
+              router.push({
+                pathname: '/portal-webview',
+                params: {
+                  url: `${PORTAL_URL}otp`,
+                  title: 'ตั้งค่า OTP',
+                },
+              })
+            }
           >
             <IconSymbol name='gear' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>
