@@ -368,11 +368,11 @@ export function registerCourse(courseRoundId: number, courseId: number) {
     } catch (err: any) {
       const data = err?.response?.data
       const { title, mesg } = data || {}
-      // Show error modal for registration conditions failure
+      // Show error modal for registration conditions failure (matching desktop behavior)
       dispatch(
-        uiActions.setFlashMessage(
-          mesg || title || 'ไม่มีสิทธิ์ลงทะเบียนตามเงื่อนไขที่กำหนด',
-          'error'
+        uiActions.openGlobalModal(
+          title || 'ไม่สามารถลงทะเบียนได้',
+          mesg || 'ไม่มีสิทธิ์ลงทะเบียนตามเงื่อนไขที่กำหนด'
         )
       )
       return false
@@ -450,11 +450,11 @@ export function registerCurriculum(curriculumId: number) {
     } catch (err: any) {
       const data = err?.response?.data
       const { title, mesg } = data || {}
-      // Show error modal for registration conditions failure
+      // Show error modal for registration conditions failure (matching desktop behavior)
       dispatch(
-        uiActions.setFlashMessage(
-          mesg || title || 'ไม่มีสิทธิ์ลงทะเบียนตามเงื่อนไขที่กำหนด',
-          'error'
+        uiActions.openGlobalModal(
+          title || 'ไม่สามารถลงทะเบียนได้',
+          mesg || 'ไม่มีสิทธิ์ลงทะเบียนตามเงื่อนไขที่กำหนด'
         )
       )
       return false
