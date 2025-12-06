@@ -57,10 +57,22 @@ export default function coursesReducer(
     case LOAD_RECOMMENDED_COURSES_FAILURE:
       return { ...state, isRecommendedCoursesLoading: false }
     case LOAD_COURSE_REQUEST:
-      return { ...state, isLoading: true }
+      // Clear previous course data when starting a new load
+      return {
+        ...state,
+        isLoading: true,
+        currentCourse: null,
+        rounds: [],
+        contents: [],
+        hour: 0,
+      }
     case LOAD_COURSE_SUCCESS:
       // Store single course in currentCourse instead of overwriting items
-      return { ...state, isLoading: false, currentCourse: action.payload.course }
+      return {
+        ...state,
+        isLoading: false,
+        currentCourse: action.payload.course,
+      }
     case LOAD_COURSE_ROUND_SUCCESS:
       return { ...state, rounds: action.payload.courseRounds } // Fixed: use courseRounds
     case LOAD_COURSE_CONTENT_SUCCESS:
@@ -68,7 +80,15 @@ export default function coursesReducer(
     case LOAD_COURSE_HOUR_SUCCESS:
       return { ...state, hour: action.payload.courseHour } // Fixed: use courseHour
     case LOAD_COURSE_FAILURE:
-      return { ...state, isLoading: false }
+      // Clear course data on failure to show empty state
+      return {
+        ...state,
+        isLoading: false,
+        currentCourse: null,
+        rounds: [],
+        contents: [],
+        hour: 0,
+      }
     default:
       return state
   }

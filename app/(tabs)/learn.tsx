@@ -1,15 +1,15 @@
-import React, { useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
+  ActivityIndicator,
   FlatList,
   Platform,
-  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { type Curriculum } from '@/components/CurriculumItem'
 import MyCourseItem, { type RegisteredCourse } from '@/components/MyCourseItem'
 import MyCurriculumItem, {
   type RegisteredCurriculum,
@@ -18,115 +18,143 @@ import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { courseRegistrations } from '@/constants/CourseRegistrations'
-import { curriculumRegistrations } from '@/constants/CurriculumRegistrations'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as registrationsActions from '@/modules/registrations/actions'
+import type { AppDispatch, RootState } from '@/store/types'
 import { router } from 'expo-router'
-
-// Utility function to convert curriculum registration data to display format
-const convertCurriculumRegistrationToDisplayFormat = (
-  curriculumReg: any
-): Curriculum => {
-  const cleanDescription =
-    curriculumReg.learningObjective
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/\n/g, ' ') // Replace newlines with spaces
-      .trim()
-      .substring(0, 80) + '...' // Limit length
-
-  return {
-    id: curriculumReg.code,
-    title: curriculumReg.name,
-    description: cleanDescription,
-    image: curriculumReg.thumbnail,
-    type: curriculumReg.code.includes('mini') ? curriculumReg.code : 'หลักสูตร',
-  }
-}
-
-// Use raw registered course data
-const registeredCourses: RegisteredCourse[] = courseRegistrations
-
-// Use raw registered curriculum data
-const registeredCurriculums: RegisteredCurriculum[] = curriculumRegistrations
-
-// Convert registered curriculum data for search (keeping for search functionality)
-const curriculumDisplayItems: Curriculum[] = curriculumRegistrations.map(
-  convertCurriculumRegistrationToDisplayFormat
-)
+import { LoginContext } from './_layout'
 
 export default function LearnScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const tintColor = useThemeColor({}, 'tint')
   const iconColor = useThemeColor({}, 'icon')
-  const textColor = useThemeColor({}, 'text')
 
+  const dispatch = useDispatch<AppDispatch>()
+
+  // Get login context
+  const { isLoggedIn } = useContext(LoginContext)
+
+  // Redux state selectors
+  const {
+    isCourseRegistrationsLoading,
+    isCurriculumRegistrationsLoading,
+    myCourses,
+    myCurriculums,
+  } = useSelector((state: RootState) => state.registrations)
+
+  // Local state
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState<'courses' | 'curriculums'>(
     'courses'
   )
-  const scrollViewRef = useRef<ScrollView>(null)
-
-  // Reset scroll position when component mounts or becomes visible
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: false })
-    }, 100) // Small delay to ensure component is mounted
-
-    return () => clearTimeout(timeout)
-  }, [])
-  const [filteredCourses, setFilteredCourses] =
-    useState<RegisteredCourse[]>(registeredCourses)
+  const [filteredCourses, setFilteredCourses] = useState<RegisteredCourse[]>([])
   const [filteredCurriculums, setFilteredCurriculums] = useState<
     RegisteredCurriculum[]
-  >(registeredCurriculums)
+  >([])
+
+  // Cache flag to prevent unnecessary reloads
+  const hasLoadedInitialData = useRef(false)
+
+  // Filter courses that don't belong to any curriculum (matching desktop behavior)
+  const standaloneCourses = myCourses.filter(
+    (course: RegisteredCourse) => course.curriculumRegistrationId === null
+  )
+
+  // Load registrations data when logged in
+  useEffect(() => {
+    if (isLoggedIn && !hasLoadedInitialData.current) {
+      console.log('LearnScreen: Loading registrations from API...')
+      dispatch(registrationsActions.loadCourseRegistrations())
+      dispatch(registrationsActions.loadCurriculumRegistrations())
+      dispatch(registrationsActions.loadLocalDateTime())
+      hasLoadedInitialData.current = true
+    } else if (!isLoggedIn) {
+      hasLoadedInitialData.current = false
+    }
+  }, [isLoggedIn, dispatch])
+
+  // Update filtered data when Redux data changes
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredCourses(standaloneCourses)
+      setFilteredCurriculums(myCurriculums)
+    } else {
+      handleSearch(searchQuery)
+    }
+  }, [myCourses, myCurriculums, standaloneCourses.length])
 
   // Search functionality
   const handleSearch = (query: string) => {
     setSearchQuery(query)
 
     if (query.trim() === '') {
-      setFilteredCourses(registeredCourses)
-      setFilteredCurriculums(registeredCurriculums)
+      setFilteredCourses(standaloneCourses)
+      setFilteredCurriculums(myCurriculums)
       return
     }
 
     const searchLower = query.toLowerCase()
 
     // Filter registered courses
-    const coursesResults = registeredCourses.filter(
-      (course) =>
-        course.name.toLowerCase().includes(searchLower) ||
-        course.learningObjective.toLowerCase().includes(searchLower) ||
-        course.code.toLowerCase().includes(searchLower) ||
-        course.courseRoundName.toLowerCase().includes(searchLower)
+    const coursesResults = standaloneCourses.filter(
+      (course: RegisteredCourse) =>
+        course.name?.toLowerCase().includes(searchLower) ||
+        course.learningObjective?.toLowerCase().includes(searchLower) ||
+        course.code?.toLowerCase().includes(searchLower) ||
+        course.courseRoundName?.toLowerCase().includes(searchLower)
     )
 
     // Filter registered curriculums
-    const curriculumsResults = registeredCurriculums.filter(
-      (curriculum) =>
-        curriculum.name.toLowerCase().includes(searchLower) ||
-        curriculum.learningObjective.toLowerCase().includes(searchLower) ||
-        curriculum.code.toLowerCase().includes(searchLower) ||
-        curriculum.learningTopic.toLowerCase().includes(searchLower)
+    const curriculumsResults = myCurriculums.filter(
+      (curriculum: RegisteredCurriculum) =>
+        curriculum.name?.toLowerCase().includes(searchLower) ||
+        curriculum.learningObjective?.toLowerCase().includes(searchLower) ||
+        curriculum.code?.toLowerCase().includes(searchLower) ||
+        curriculum.learningTopic?.toLowerCase().includes(searchLower)
     )
 
     setFilteredCourses(coursesResults)
     setFilteredCurriculums(curriculumsResults)
   }
 
-  // Reset search when tab changes
-  React.useEffect(() => {
-    if (searchQuery.trim() !== '') {
-      handleSearch(searchQuery)
-    }
-  }, [activeTab])
+  const handleCoursePress = (course: RegisteredCourse) => {
+    router.push(`/classroom?courseId=${course.id}`)
+  }
+
+  const handleCurriculumPress = (curriculum: RegisteredCurriculum) => {
+    router.push(`/curriculum-detail?id=${curriculum.curriculumId}`)
+  }
+
+  const handleUpdateSatisfactionScore = (
+    curriculumId: number,
+    score: number
+  ) => {
+    dispatch(
+      registrationsActions.updateCurriculumSatisfactionScore(
+        curriculumId,
+        score
+      )
+    )
+  }
+
+  const handleUnregisterCurriculum = (
+    curriculumId: number,
+    curriculumName: string
+  ) => {
+    dispatch(registrationsActions.unEnrollCurriculum(curriculumId))
+  }
+
+  const linkToCourses = () => {
+    router.push('/courses')
+  }
+
+  const linkToCurriculums = () => {
+    router.push('/curriculums')
+  }
 
   const renderCourseItem = ({ item }: { item: RegisteredCourse }) => (
     <View style={styles.courseItemWrapper}>
-      <MyCourseItem
-        registeredCourse={item}
-        onPress={(course) => router.push(`/classroom?courseId=${course.id}`)}
-      />
+      <MyCourseItem registeredCourse={item} onPress={handleCoursePress} />
     </View>
   )
 
@@ -134,22 +162,10 @@ export default function LearnScreen() {
     <View style={styles.curriculumItemWrapper}>
       <MyCurriculumItem
         registeredCurriculum={item}
-        myCourses={registeredCourses}
-        onPress={(curriculum: RegisteredCurriculum) =>
-          router.push(`/curriculum-detail?id=${curriculum.curriculumId}`)
-        }
-        onUpdateSatisfactionScore={(curriculumId: number, score: number) => {
-          // TODO: Implement satisfaction score update
-          console.log('Update satisfaction score:', curriculumId, score)
-        }}
-        onUnregister={(curriculumId: number, curriculumName: string) => {
-          // TODO: Implement unregister functionality
-          console.log(
-            'Unregister from curriculum:',
-            curriculumId,
-            curriculumName
-          )
-        }}
+        myCourses={myCourses}
+        onPress={handleCurriculumPress}
+        onUpdateSatisfactionScore={handleUpdateSatisfactionScore}
+        onUnregister={handleUnregisterCurriculum}
       />
     </View>
   )
@@ -157,12 +173,16 @@ export default function LearnScreen() {
   // Get current data based on active tab
   const currentData =
     activeTab === 'courses' ? filteredCourses : filteredCurriculums
+  const isCurrentTabLoading =
+    activeTab === 'courses'
+      ? isCourseRegistrationsLoading
+      : isCurriculumRegistrationsLoading
   const hasRegistrations =
     activeTab === 'courses'
-      ? registeredCourses.length > 0
-      : registeredCurriculums.length > 0
+      ? standaloneCourses.length > 0
+      : myCurriculums.length > 0
   const showNoResults = searchQuery.trim() !== '' && currentData.length === 0
-  const showWelcome = !hasRegistrations
+  const showWelcome = !hasRegistrations && !isCurrentTabLoading
 
   // Render function that handles both types
   const renderListItem = ({
@@ -175,6 +195,42 @@ export default function LearnScreen() {
     } else {
       return renderCurriculumItem({ item: item as RegisteredCurriculum })
     }
+  }
+
+  // If not logged in, show login prompt
+  if (!isLoggedIn) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        {/* Header */}
+        <ThemedView style={styles.header}>
+          <ThemedText type='title' style={styles.headerTitle}>
+            เข้าเรียน
+          </ThemedText>
+        </ThemedView>
+
+        <ThemedView style={styles.loginPromptContainer}>
+          <IconSymbol name='person.circle' size={80} color={iconColor + '60'} />
+          <ThemedText
+            type='subtitle'
+            style={[styles.loginPromptTitle, { color: '#000000' }]}
+          >
+            กรุณาเข้าสู่ระบบ
+          </ThemedText>
+          <ThemedText
+            style={[styles.loginPromptDescription, { color: iconColor }]}
+          >
+            เพื่อดูรายวิชาและหลักสูตรที่ลงทะเบียน
+          </ThemedText>
+          <TouchableOpacity
+            style={[styles.loginButton, { backgroundColor: tintColor }]}
+            onPress={() => router.push('/(tabs)/account')}
+          >
+            <ThemedText style={styles.loginButtonText}>เข้าสู่ระบบ</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+        <StatusBarGradient />
+      </ThemedView>
+    )
   }
 
   return (
@@ -290,8 +346,20 @@ export default function LearnScreen() {
 
       {/* Content */}
       <ThemedView style={styles.content}>
+        {/* Loading state */}
+        {isCurrentTabLoading && (
+          <ThemedView style={styles.loadingContainer}>
+            <ActivityIndicator size='large' color={tintColor} />
+            <ThemedText style={styles.loadingText}>
+              {activeTab === 'courses'
+                ? 'กำลังโหลดรายวิชา...'
+                : 'กำลังโหลดหลักสูตร...'}
+            </ThemedText>
+          </ThemedView>
+        )}
+
         {/* Show welcome message when no registered items */}
-        {showWelcome && (
+        {!isCurrentTabLoading && showWelcome && (
           <ThemedView style={styles.welcomeContainer}>
             <IconSymbol name='book.circle' size={80} color={iconColor + '60'} />
             <ThemedText
@@ -308,17 +376,23 @@ export default function LearnScreen() {
               ไปที่หน้าค้นหาเพื่อดู
               {activeTab === 'courses' ? 'รายวิชา' : 'หลักสูตร'}ที่มีให้เลือก
             </ThemedText>
-            <ThemedText
-              style={[styles.welcomeDescription, { color: iconColor }]}
+            <TouchableOpacity
+              style={[styles.viewAllButton, { backgroundColor: tintColor }]}
+              onPress={
+                activeTab === 'courses' ? linkToCourses : linkToCurriculums
+              }
             >
-              และลงทะเบียนเรียน
-              {activeTab === 'courses' ? 'รายวิชา' : 'หลักสูตร'}ที่สนใจ
-            </ThemedText>
+              <ThemedText style={styles.viewAllButtonText}>
+                {activeTab === 'courses'
+                  ? 'ดูรายวิชาทั้งหมด'
+                  : 'ดูหลักสูตรทั้งหมด'}
+              </ThemedText>
+            </TouchableOpacity>
           </ThemedView>
         )}
 
         {/* No Results */}
-        {!showWelcome && showNoResults && (
+        {!isCurrentTabLoading && !showWelcome && showNoResults && (
           <ThemedView style={styles.noResultsContainer}>
             <IconSymbol
               name='exclamationmark.circle'
@@ -345,7 +419,7 @@ export default function LearnScreen() {
         )}
 
         {/* Results */}
-        {!showWelcome && !showNoResults && (
+        {!isCurrentTabLoading && !showWelcome && !showNoResults && (
           <FlatList
             data={currentData}
             renderItem={renderListItem}
@@ -441,6 +515,18 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
+    marginTop: 16,
+  },
   welcomeContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -457,6 +543,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  viewAllButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 200,
+    alignItems: 'center',
+  },
+  viewAllButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
   },
   noResultsContainer: {
     flex: 1,
@@ -475,7 +574,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     paddingHorizontal: 20,
   },
-
   list: {
     flex: 1,
   },
@@ -487,5 +585,36 @@ const styles = StyleSheet.create({
   },
   curriculumItemWrapper: {
     marginBottom: 12,
+  },
+  // Login prompt styles
+  loginPromptContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 100,
+  },
+  loginPromptTitle: {
+    marginTop: 20,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  loginPromptDescription: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  loginButton: {
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+    minWidth: 200,
+    alignItems: 'center',
+  },
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
   },
 })

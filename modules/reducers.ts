@@ -4,6 +4,7 @@ import categories from './categories/reducer'
 import courses from './courses/reducer'
 import curriculums from './curriculums/reducer'
 import press from './press/reducer'
+import registrations from './registrations/reducer'
 import ui from './ui/reducer'
 import user from './user/reducer'
 
@@ -14,5 +15,6 @@ export default () =>
     courses,
     curriculums,
     press,
+    registrations,
     ui,
   })

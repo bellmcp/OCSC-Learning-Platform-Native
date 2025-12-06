@@ -7,14 +7,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSelector } from 'react-redux'
 
 import MyCourseItem, { RegisteredCourse } from '@/components/MyCourseItem'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { courseRegistrations } from '@/constants/CourseRegistrations'
-import { curriculumRegistrations } from '@/constants/CurriculumRegistrations'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import type { RootState } from '@/store/types'
 
 export default function CurriculumCoursesScreen() {
   const backgroundColor = useThemeColor({}, 'background')
@@ -25,14 +25,19 @@ export default function CurriculumCoursesScreen() {
     curriculumRegistrationId: string
   }>()
 
-  // Find the curriculum registration
-  const curriculumRegistration = curriculumRegistrations.find(
-    (reg) => reg.id.toString() === curriculumRegistrationId
+  // Get Redux state
+  const { myCourses, myCurriculums } = useSelector(
+    (state: RootState) => state.registrations
   )
 
-  // Filter courses that belong to this curriculum registration
-  const curriculumCourses = courseRegistrations.filter(
-    (course) =>
+  // Find the curriculum registration from Redux
+  const curriculumRegistration = myCurriculums.find(
+    (reg: any) => reg.id.toString() === curriculumRegistrationId
+  )
+
+  // Filter courses that belong to this curriculum registration from Redux
+  const curriculumCourses = myCourses.filter(
+    (course: RegisteredCourse) =>
       course.curriculumRegistrationId?.toString() === curriculumRegistrationId
   )
 

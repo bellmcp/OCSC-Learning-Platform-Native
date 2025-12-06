@@ -32,18 +32,26 @@ export default function curriculumsReducer(
     case LOAD_CURRICULUMS_REQUEST:
       return { ...state, isLoading: true }
     case LOAD_CURRICULUM_REQUEST:
-      return { ...state, isLoading: true }
+      // Clear previous curriculum data when starting a new load
+      return { ...state, isLoading: true, currentCurriculum: null }
     case LOAD_CURRICULUM_CHILD_REQUEST:
       return { ...state, isLoading: true, child: [] }
     case LOAD_CURRICULUMS_SUCCESS:
       return { ...state, isLoading: false, items: action.payload.curriculums }
     case LOAD_CURRICULUM_SUCCESS:
       // Store single curriculum in currentCurriculum instead of overwriting items
-      return { ...state, isLoading: false, currentCurriculum: action.payload.curriculum }
+      return {
+        ...state,
+        isLoading: false,
+        currentCurriculum: action.payload.curriculum,
+      }
     case LOAD_CURRICULUM_CHILD_SUCCESS:
       return { ...state, isLoading: false, child: action.payload.childCourses }
     case LOAD_CURRICULUMS_FAILURE:
+      return { ...state, isLoading: false }
     case LOAD_CURRICULUM_FAILURE:
+      // Clear curriculum data on failure to show empty state
+      return { ...state, isLoading: false, currentCurriculum: null }
     case LOAD_CURRICULUM_CHILD_FAILURE:
       return { ...state, isLoading: false }
     default:

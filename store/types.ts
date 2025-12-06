@@ -5,6 +5,7 @@ export interface RootState {
   courses: CoursesState
   curriculums: CurriculumsState
   press: PressState
+  registrations: RegistrationsState
   ui: UIState
 }
 
@@ -43,6 +44,15 @@ export interface PressState {
   announcement: any[]
 }
 
+export interface RegistrationsState {
+  isLoading: boolean
+  isCourseRegistrationsLoading: boolean
+  isCurriculumRegistrationsLoading: boolean
+  myCourses: any[]
+  myCurriculums: any[]
+  localDateTime: string[]
+}
+
 export interface UIState {
   isSnackbarOpen: boolean
   flashMessage: string | null
@@ -65,7 +75,7 @@ export interface UIState {
 }
 
 // AppDispatch type for Redux Thunk support
-import { ThunkDispatch } from 'redux-thunk'
 import { UnknownAction } from 'redux'
+import { ThunkDispatch } from 'redux-thunk'
 
 export type AppDispatch = ThunkDispatch<RootState, unknown, UnknownAction>

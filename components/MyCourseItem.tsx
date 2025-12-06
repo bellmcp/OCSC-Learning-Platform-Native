@@ -1,15 +1,12 @@
 import { Image } from 'expo-image'
 import React, { useState } from 'react'
-import {
-  Alert,
-  Animated,
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native'
+import { Animated, Modal, StyleSheet, TouchableOpacity } from 'react-native'
+import { useDispatch } from 'react-redux'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
+import * as registrationsActions from '@/modules/registrations/actions'
+import type { AppDispatch } from '@/store/types'
 import { IconSymbol } from './ui/IconSymbol'
 
 // Interface for registered course data
@@ -87,6 +84,7 @@ export default function MyCourseItem({
   registeredCourse,
   onPress,
 }: MyCourseItemProps) {
+  const dispatch = useDispatch<AppDispatch>()
   const [showMenu, setShowMenu] = useState(false)
   const overlayOpacity = useState(new Animated.Value(0))[0]
   const slideAnim = useState(new Animated.Value(300))[0]
@@ -130,37 +128,23 @@ export default function MyCourseItem({
 
   const handleRequestCompletion = () => {
     hideBottomSheet()
-    Alert.alert(
-      'ขอสำเร็จการศึกษา',
-      `คุณต้องการขอสำเร็จการศึกษารายวิชา "${registeredCourse.name}" หรือไม่?`,
-      [
-        {
-          text: 'ยกเลิก',
-          style: 'cancel',
-        },
-        {
-          text: 'ยืนยัน',
-          style: 'default',
-          onPress: () => {
-            // Mock action for requesting course completion
-            Alert.alert('สำเร็จ', 'ได้ส่งคำขอสำเร็จการศึกษาเรียบร้อยแล้ว', [
-              { text: 'ตกลง', style: 'default' },
-            ])
-          },
-        },
-      ]
-    )
+    dispatch(registrationsActions.completeCourse(registeredCourse.id))
   }
 
   const handleShowDetails = () => {
     hideBottomSheet()
-    // Mock action for showing course details
-    Alert.alert(
-      'ข้อมูลรายวิชา',
-      `ชื่อรายวิชา: ${registeredCourse.name}\nรหัสวิชา: ${registeredCourse.code}\nรอบการเรียน: ${registeredCourse.courseRoundName}`,
-      [{ text: 'ตกลง', style: 'default' }]
-    )
+    // Navigate to course detail page
+    const { router } = require('expo-router')
+    router.push(`/course-detail?id=${registeredCourse.courseId}`)
   }
+
+  const handleUnregister = () => {
+    hideBottomSheet()
+    dispatch(registrationsActions.unEnrollCourse(registeredCourse.id))
+  }
+
+  // Check if this is a child course (part of a curriculum)
+  const isChildCourse = !!registeredCourse.curriculumRegistrationId
 
   return (
     <ThemedView style={styles.courseCard}>
@@ -291,6 +275,20 @@ export default function MyCourseItem({
                   ขอสำเร็จการศึกษา
                 </ThemedText>
               </TouchableOpacity>
+
+              {!isChildCourse && (
+                <TouchableOpacity
+                  style={styles.bottomSheetItem}
+                  onPress={handleUnregister}
+                >
+                  <IconSymbol name='trash' size={20} color='#EF4444' />
+                  <ThemedText
+                    style={[styles.bottomSheetItemText, { color: '#EF4444' }]}
+                  >
+                    ยกเลิกการลงทะเบียนรายวิชา
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
             </ThemedView>
           </Animated.View>
         </Animated.View>

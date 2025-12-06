@@ -1,16 +1,13 @@
 import { Image } from 'expo-image'
 import React, { useState } from 'react'
-import {
-  Alert,
-  Animated,
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native'
+import { Animated, Modal, StyleSheet, TouchableOpacity } from 'react-native'
+import { useDispatch } from 'react-redux'
 
 import { StarRating } from '@/components/StarRating'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
+import * as registrationsActions from '@/modules/registrations/actions'
+import type { AppDispatch } from '@/store/types'
 import { RegisteredCourse } from './MyCourseItem'
 import { IconSymbol } from './ui/IconSymbol'
 
@@ -38,7 +35,6 @@ interface MyCurriculumItemProps {
   onPress?: (registeredCurriculum: RegisteredCurriculum) => void
   onCoursePress?: (registeredCourse: RegisteredCourse) => void
   onUpdateSatisfactionScore?: (curriculumId: number, score: number) => void
-  onUnregister?: (curriculumId: number, curriculumName: string) => void
 }
 
 // Helper function to format Thai dates
@@ -72,8 +68,8 @@ export default function MyCurriculumItem({
   onPress,
   onCoursePress,
   onUpdateSatisfactionScore,
-  onUnregister,
 }: MyCurriculumItemProps) {
+  const dispatch = useDispatch<AppDispatch>()
   const [showMenu, setShowMenu] = useState(false)
   const [satisfactionScore, setSatisfactionScore] = useState(
     registeredCurriculum.satisfactionScore || 0
@@ -138,26 +134,7 @@ export default function MyCurriculumItem({
 
   const handleUnregister = () => {
     hideBottomSheet()
-    Alert.alert(
-      'ยกเลิกการลงทะเบียนหลักสูตร',
-      `คุณต้องการยกเลิกการลงทะเบียนหลักสูตร "${registeredCurriculum.name}" หรือไม่?`,
-      [
-        {
-          text: 'ยกเลิก',
-          style: 'cancel',
-        },
-        {
-          text: 'ยืนยัน',
-          style: 'destructive',
-          onPress: () => {
-            onUnregister?.(
-              registeredCurriculum.curriculumId,
-              registeredCurriculum.name
-            )
-          },
-        },
-      ]
-    )
+    dispatch(registrationsActions.unEnrollCurriculum(registeredCurriculum.id))
   }
 
   const handleShowDetails = () => {
