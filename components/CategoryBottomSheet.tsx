@@ -11,6 +11,7 @@ import {
 } from 'react-native'
 import { ThemedText } from './ThemedText'
 import { ThemedView } from './ThemedView'
+import { IconSymbol } from './ui/IconSymbol'
 
 interface Category {
   id: number
@@ -113,11 +114,7 @@ export function CategoryBottomSheet({
           <View style={styles.header}>
             <ThemedText style={styles.headerTitle}>หมวดหมู่</ThemedText>
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <ThemedText
-                style={[styles.closeButtonText, { color: tintColor }]}
-              >
-                ปิด
-              </ThemedText>
+              <IconSymbol name='xmark' size={20} color='#6B7280' />
             </TouchableOpacity>
           </View>
 
@@ -239,15 +236,11 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 4,
   },
-  closeButtonText: {
-    fontSize: 16,
-    fontFamily: 'Prompt-Medium',
-  },
   scrollView: {
     maxHeight: 500,
   },
   bottomSheetContent: {
-    paddingTop: 8,
+    paddingTop: 0,
   },
   categoryItem: {
     paddingVertical: 16,

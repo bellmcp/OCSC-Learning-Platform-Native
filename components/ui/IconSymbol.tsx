@@ -50,6 +50,7 @@ const MAPPING = {
   magnifyingglass: 'search',
   'magnifyingglass.circle': 'search',
   'xmark.circle.fill': 'cancel',
+  xmark: 'close',
   'exclamationmark.circle': 'error-outline',
   printer: 'print',
   'doc.text': 'description',

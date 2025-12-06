@@ -1,6 +1,5 @@
-import { Image } from 'expo-image'
-import { Linking as RNLinking } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Image } from 'expo-image'
 import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
@@ -9,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Linking as RNLinking,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -21,18 +21,18 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import {
-  THAID_CLIENT_ID,
-  THAID_REDIRECT_URI,
-  THAID_AUTH_URL,
-  THAID_API_URL,
-} from '@env'
-import { LoginContext } from './_layout'
-import { useDispatch as useReduxDispatch, useSelector } from 'react-redux'
 import * as uiActions from '@/modules/ui/actions'
 import * as userActions from '@/modules/user/actions'
-import type { RootState, AppDispatch } from '@/store/types'
-import { PORTAL_URL } from '@env'
+import type { AppDispatch, RootState } from '@/store/types'
+import {
+  PORTAL_URL,
+  THAID_API_URL,
+  THAID_AUTH_URL,
+  THAID_CLIENT_ID,
+  THAID_REDIRECT_URI,
+} from '@env'
+import { useDispatch as useReduxDispatch, useSelector } from 'react-redux'
+import { LoginContext } from './_layout'
 
 export default function AccountScreen() {
   const backgroundColor = useThemeColor({}, 'background')
@@ -60,7 +60,8 @@ export default function AccountScreen() {
 
   // Generate random state string for OAuth security
   const generateState = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     let state = ''
     for (let i = 0; i < 11; i++) {
       state += chars.charAt(Math.floor(Math.random() * chars.length))
@@ -68,105 +69,124 @@ export default function AccountScreen() {
     return state
   }
 
-
-    // Handle ThaiD OAuth login
+  // Handle ThaiD OAuth login
   const handleThaiDLogin = async () => {
     try {
       setIsThaiDLoading(true)
-      
+
       // Generate and save state for verification
       const state = generateState()
       setThaiDState(state)
-      
+
       // Get the app's redirect URI for debugging
       const appRedirectUri = Linking.createURL('thaid/callback')
       console.log("App's expected deep link:", appRedirectUri)
-      console.log("Note: In Expo Go, custom schemes don't work. Use a development build.")
-      
+      console.log(
+        "Note: In Expo Go, custom schemes don't work. Use a development build."
+      )
+
       // Build OAuth URL
       const authUrl = `${THAID_AUTH_URL}?response_type=code&client_id=${THAID_CLIENT_ID}&redirect_uri=${THAID_REDIRECT_URI}&scope=pid%20given_name%20family_name&state=${state}`
-      
-      console.log("ThaiD Auth URL:", authUrl)
-      console.log("Server redirect URI:", THAID_REDIRECT_URI)
-      console.log("The server's callback2.html should redirect to:", "ocsclearningspace://thaid/callback?code=XXX&state=XXX")
-      
+
+      console.log('ThaiD Auth URL:', authUrl)
+      console.log('Server redirect URI:', THAID_REDIRECT_URI)
+      console.log(
+        "The server's callback2.html should redirect to:",
+        'ocsclearningspace://thaid/callback?code=XXX&state=XXX'
+      )
+
       // Use openAuthSessionAsync for better OAuth handling
-      const result = await WebBrowser.openAuthSessionAsync(authUrl, THAID_REDIRECT_URI)
-      
-      console.log("WebBrowser result:", JSON.stringify(result, null, 2))
-      
+      const result = await WebBrowser.openAuthSessionAsync(
+        authUrl,
+        THAID_REDIRECT_URI
+      )
+
+      console.log('WebBrowser result:', JSON.stringify(result, null, 2))
+
       if (result.type === 'success' && result.url) {
-        console.log("Callback URL received:", result.url)
-        
+        console.log('Callback URL received:', result.url)
+
         // Parse the callback URL
         const urlParams = new URL(result.url)
         const code = urlParams.searchParams.get('code')
         const returnedState = urlParams.searchParams.get('state')
-        
-        console.log("Code:", code)
-        console.log("Returned state:", returnedState)
-        
+
+        console.log('Code:', code)
+        console.log('Returned state:', returnedState)
+
         // Verify state matches (security check)
         if (state && returnedState !== state) {
           throw new Error('State mismatch - possible CSRF attack')
         }
-        
+
         if (!code) {
           throw new Error('No authorization code received')
         }
-        
+
         // Exchange code for token
-        console.log("Exchanging code for token at:", `${THAID_API_URL}?code=${code}`)
+        console.log(
+          'Exchanging code for token at:',
+          `${THAID_API_URL}?code=${code}`
+        )
         const response = await fetch(`${THAID_API_URL}?code=${code}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
         })
-        
+
         const responseText = await response.text()
-        console.log("Token exchange response:", responseText)
-        
+        console.log('Token exchange response:', responseText)
+
         if (!response.ok) {
           throw new Error(`Failed to exchange code for token: ${responseText}`)
         }
-        
+
         const data = JSON.parse(responseText)
-        
+
         if (data.token) {
           console.log('ThaiD login successful!')
-          
+
           // Store token in AsyncStorage
           await AsyncStorage.setItem('token', data.token)
-          console.log('[Auth] Token stored in AsyncStorage:', data.token.substring(0, 50) + '...')
-          
+          console.log(
+            '[Auth] Token stored in AsyncStorage:',
+            data.token.substring(0, 50) + '...'
+          )
+
           // Verify token was stored
           const storedToken = await AsyncStorage.getItem('token')
-          console.log('[Auth] Verified token in storage:', storedToken ? 'YES' : 'NO')
-          
+          console.log(
+            '[Auth] Verified token in storage:',
+            storedToken ? 'YES' : 'NO'
+          )
+
           // Load user data (loadUser will get userId from token automatically)
           dispatch(userActions.loadUser())
-          
+
           setIsLoggedIn(true)
           setThaiDState(null)
-          dispatch(uiActions.setFlashMessage('เข้าสู่ระบบเรียบร้อยแล้ว', 'success'))
+          dispatch(
+            uiActions.setFlashMessage('เข้าสู่ระบบเรียบร้อยแล้ว', 'success')
+          )
         } else {
           throw new Error('No token received')
         }
       } else if (result.type === 'cancel') {
-        console.log("User cancelled the login")
+        console.log('User cancelled the login')
       } else {
-        console.log("Unexpected result type:", result.type)
+        console.log('Unexpected result type:', result.type)
       }
-      
+
       setIsThaiDLoading(false)
     } catch (error: any) {
       console.error('ThaiD login error:', error)
       setIsThaiDLoading(false)
-      
+
       // Handle different error types with appropriate messages
-      let errorMessage = 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง'
-      
+      let errorMessage =
+        'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง'
+
       if (error.response) {
         const status = error.response.status
         if (status === 401) {
@@ -185,37 +205,38 @@ export default function AccountScreen() {
           errorMessage = 'ไม่พบรหัสยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
         }
       }
-      
+
       dispatch(uiActions.setFlashMessage(errorMessage, 'error'))
     }
-
   }
 
   // Handle deep link callback from ThaiD
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
-      console.log("Deep link received:", event.url)
+      console.log('Deep link received:', event.url)
       const url = event.url
-      
+
       // Check if this is a ThaiD callback
       if (url.includes('thaid/callback') || url.includes('thaid')) {
         try {
           setIsThaiDLoading(true)
-          
+
           // Parse URL to get code and state
-          const urlParams = new URL(url.replace('ocsclearningspace://', 'https://'))
+          const urlParams = new URL(
+            url.replace('ocsclearningspace://', 'https://')
+          )
           const code = urlParams.searchParams.get('code')
           const returnedState = urlParams.searchParams.get('state')
-          
+
           // Verify state matches (security check)
           if (thaiDState && returnedState !== thaiDState) {
             throw new Error('State mismatch - possible CSRF attack')
           }
-          
+
           if (!code) {
             throw new Error('No authorization code received')
           }
-          
+
           // Exchange code for token
           const response = await fetch(`${THAID_API_URL}?code=${code}`, {
             method: 'POST',
@@ -223,42 +244,51 @@ export default function AccountScreen() {
               'Content-Type': 'application/json',
             },
           })
-          
+
           if (!response.ok) {
             throw new Error('Failed to exchange code for token')
           }
-          
+
           const data = await response.json()
-          
+
           if (data.token) {
             // Store token in AsyncStorage
             await AsyncStorage.setItem('token', data.token)
-            console.log('[Auth] Token stored in AsyncStorage:', data.token.substring(0, 50) + '...')
-            
+            console.log(
+              '[Auth] Token stored in AsyncStorage:',
+              data.token.substring(0, 50) + '...'
+            )
+
             // Verify token was stored
             const storedToken = await AsyncStorage.getItem('token')
-            console.log('[Auth] Verified token in storage:', storedToken ? 'YES' : 'NO')
+            console.log(
+              '[Auth] Verified token in storage:',
+              storedToken ? 'YES' : 'NO'
+            )
             console.log('ThaiD login successful')
-            
+
             // Load user data (loadUser will get userId from token automatically)
             dispatch(userActions.loadUser())
-            
+
             // Set logged in state
             setIsLoggedIn(true)
             setThaiDState(null)
-            dispatch(uiActions.setFlashMessage('เข้าสู่ระบบเรียบร้อยแล้ว', 'success'))
+            dispatch(
+              uiActions.setFlashMessage('เข้าสู่ระบบเรียบร้อยแล้ว', 'success')
+            )
           } else {
             throw new Error('No token received')
           }
-          
+
           setIsThaiDLoading(false)
         } catch (error: any) {
           console.error('ThaiD callback error:', error)
           setIsThaiDLoading(false)
-          
+
           // Handle different error types with appropriate messages
-          let errorMessage = 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง'
-          
+          let errorMessage =
+            'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง'
+
           if (error.response) {
             const status = error.response.status
             if (status === 401) {
@@ -272,21 +302,21 @@ export default function AccountScreen() {
             }
           } else if (error.message) {
             if (error.message.includes('State mismatch')) {
-              errorMessage = 'เกิดข้อผิดพลาดด้านความปลอดภัย กรุณาลองใหม่อีกครั้ง'
+              errorMessage =
+                'เกิดข้อผิดพลาดด้านความปลอดภัย กรุณาลองใหม่อีกครั้ง'
             } else if (error.message.includes('No authorization code')) {
               errorMessage = 'ไม่พบรหัสยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
             }
           }
-          
+
           dispatch(uiActions.setFlashMessage(errorMessage, 'error'))
         }
-
       }
     }
 
     // Listen for deep links
     const subscription = Linking.addEventListener('url', handleDeepLink)
-    
+
     // Check if app was opened via deep link
     console.log('Setting up deep link listener...')
     Linking.getInitialURL().then((url) => {
@@ -301,13 +331,13 @@ export default function AccountScreen() {
     }
   }, [thaiDState, setIsLoggedIn])
 
-  // Load user data when logged in
+  // Load user data when logged in (only if not already cached)
   useEffect(() => {
-    if (isLoggedIn) {
-      // loadUser will automatically get token and userId from AsyncStorage
+    if (isLoggedIn && !user?.firstname) {
+      // Only load user data if not already in cache
       dispatch(userActions.loadUser())
     }
-  }, [isLoggedIn, dispatch])
+  }, [isLoggedIn, dispatch, user?.firstname])
 
   // Reset scroll position when component mounts or becomes visible
   React.useEffect(() => {
@@ -410,7 +440,7 @@ export default function AccountScreen() {
                   },
                 ]}
               >
-                แอปพลิเคชัน{"\n"}ThaiD
+                แอปพลิเคชัน{'\n'}ThaiD
               </ThemedText>
             </View>
           </TouchableOpacity>
@@ -467,7 +497,11 @@ export default function AccountScreen() {
               disabled={isThaiDLoading}
             >
               {isThaiDLoading ? (
-                <ActivityIndicator size="small" color="white" style={{ marginRight: 8 }} />
+                <ActivityIndicator
+                  size='small'
+                  color='white'
+                  style={{ marginRight: 8 }}
+                />
               ) : (
                 <Image
                   source={require('@/assets/images/thaid_logo.jpg')}
@@ -476,7 +510,9 @@ export default function AccountScreen() {
                 />
               )}
               <ThemedText style={styles.actionButtonText}>
-                {isThaiDLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วยแอปพลิเคชัน ThaiD'}
+                {isThaiDLoading
+                  ? 'กำลังเข้าสู่ระบบ...'
+                  : 'เข้าสู่ระบบด้วยแอปพลิเคชัน ThaiD'}
               </ThemedText>
             </TouchableOpacity>
           </ThemedView>
@@ -673,13 +709,19 @@ export default function AccountScreen() {
           </TouchableOpacity>
 
           <ThemedView style={styles.userInfo}>
-            <ThemedText type='title' style={styles.userName}>
-              {user.firstname
-                ? `${user.title || ''}${user.firstname} ${user.lastname}`
-                : 'คุณยังไม่ได้เข้าสู่ระบบ'}
-            </ThemedText>
+            {user?.firstname ? (
+              <ThemedText type='title' style={styles.userName}>
+                {`${user.title || ''}${user.firstname} ${user.lastname}`}
+              </ThemedText>
+            ) : (
+              <ActivityIndicator
+                size='small'
+                color={tintColor}
+                style={{ marginVertical: 8 }}
+              />
+            )}
             <ThemedText style={[styles.userRole, { color: tintColor }]}>
-              {user.id || ''}
+              {user?.id || ''}
             </ThemedText>
           </ThemedView>
         </ThemedView>
@@ -692,7 +734,7 @@ export default function AccountScreen() {
               type='title'
               style={[styles.statNumber, { color: tintColor }]}
             >
-              {user.completedCourses || 0}
+              {user?.completedCourses || 0}
             </ThemedText>
             <ThemedText style={styles.statLabel}>
               เนื้อหาที่เรียนจบแล้ว
@@ -710,7 +752,7 @@ export default function AccountScreen() {
               type='title'
               style={[styles.statNumber, { color: tintColor }]}
             >
-              {user.totalHours || 0}
+              {user?.totalHours || 0}
             </ThemedText>
             <ThemedText style={styles.statLabel}>คะแนนการเรียนรู้</ThemedText>
           </TouchableOpacity>

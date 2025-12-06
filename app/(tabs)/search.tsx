@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
+  ActivityIndicator,
   FlatList,
   Platform,
   ScrollView,
@@ -7,36 +8,35 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import CourseItem, {
-  type Course,
-  type RealCourse,
-} from '@/components/CourseItem'
-import CurriculumItem, {
-  type Curriculum,
-  type RealCurriculum,
-} from '@/components/CurriculumItem'
+import CourseItem, { type Course } from '@/components/CourseItem'
+import CurriculumItem, { type Curriculum } from '@/components/CurriculumItem'
 import StatusBarGradient from '@/components/StatusBarGradient'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { courseCategories } from '@/constants/CourseCategories'
-import { courses } from '@/constants/Courses'
-import { curriculums } from '@/constants/Curriculums'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as categoriesActions from '@/modules/categories/actions'
+import * as coursesActions from '@/modules/courses/actions'
+import * as curriculumsActions from '@/modules/curriculums/actions'
+import type { RootState } from '@/store/types'
 import { router } from 'expo-router'
 
-// Utility function to convert real course data to display format
-const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
-  const category = courseCategories.find(
+// Utility function to convert course data to display format
+const convertCourseToDisplayFormat = (
+  realCourse: any,
+  categories: any[]
+): Course => {
+  const category = categories.find(
     (cat) => cat.id === realCourse.courseCategoryId
   )
   const cleanDescription =
     realCourse.learningObjective
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      ?.replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/\n/g, ' ') // Replace newlines with spaces
       .trim()
-      .substring(0, 100) + '...' // Limit length
+      .substring(0, 100) + '...' || '' // Limit length
 
   return {
     id: realCourse.code, // Course code for display (e.g., "DS01")
@@ -51,16 +51,14 @@ const convertCourseToDisplayFormat = (realCourse: RealCourse): Course => {
   }
 }
 
-// Utility function to convert real curriculum data to display format
-const convertCurriculumToDisplayFormat = (
-  realCurriculum: RealCurriculum
-): Curriculum => {
+// Utility function to convert curriculum data to display format
+const convertCurriculumToDisplayFormat = (realCurriculum: any): Curriculum => {
   const cleanDescription =
     realCurriculum.learningObjective
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      ?.replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/\n/g, ' ') // Replace newlines with spaces
       .trim()
-      .substring(0, 80) + '...' // Limit length
+      .substring(0, 80) + '...' || '' // Limit length
 
   return {
     id: realCurriculum.code,
@@ -68,73 +66,117 @@ const convertCurriculumToDisplayFormat = (
     title: realCurriculum.name,
     description: cleanDescription,
     image: realCurriculum.thumbnail,
-    type: realCurriculum.code.includes('mini')
+    type: realCurriculum.code?.includes('mini')
       ? realCurriculum.code
       : 'หลักสูตร',
   }
 }
-
-// Convert real course data for search
-const mockCourses: Course[] = courses.map(convertCourseToDisplayFormat)
-
-// Convert real curriculum data for search
-const mockCurriculums: Curriculum[] = curriculums.map(
-  convertCurriculumToDisplayFormat
-)
 
 export default function SearchScreen() {
   const backgroundColor = useThemeColor({}, 'background')
   const tintColor = useThemeColor({}, 'tint')
   const iconColor = useThemeColor({}, 'icon')
 
-  const [searchQuery, setSearchQuery] = useState('')
+  const dispatch = useDispatch()
   const scrollViewRef = useRef<ScrollView>(null)
 
-  // Reset scroll position when component mounts or becomes visible
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: false })
-    }, 100) // Small delay to ensure component is mounted
+  // Redux state selectors
+  const { isLoading: isCoursesLoading, items: courses } = useSelector(
+    (state: RootState) => state.courses
+  )
+  const { isLoading: isCurriculumsLoading, items: curriculums } = useSelector(
+    (state: RootState) => state.curriculums
+  )
+  const { items: categories } = useSelector(
+    (state: RootState) => state.categories
+  )
 
-    return () => clearTimeout(timeout)
-  }, [])
+  const [searchQuery, setSearchQuery] = useState('')
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
   const [filteredCurriculums, setFilteredCurriculums] = useState<Curriculum[]>(
     []
   )
+  const [hasSearched, setHasSearched] = useState(false)
+
+  // Cache flag to prevent unnecessary reloads
+  const hasLoadedInitialData = useRef(false)
+
+  // Load initial data on mount (only if not already loaded)
+  useEffect(() => {
+    const hasData =
+      courses.length > 0 && curriculums.length > 0 && categories.length > 0
+
+    if (!hasLoadedInitialData.current && !hasData) {
+      console.log('SearchScreen: Loading initial data from API...')
+      dispatch(coursesActions.loadCourses() as any)
+      dispatch(curriculumsActions.loadCurriculums('') as any)
+      dispatch(categoriesActions.loadCategories() as any)
+      hasLoadedInitialData.current = true
+    } else if (hasData) {
+      console.log('SearchScreen: Using cached data')
+      hasLoadedInitialData.current = true
+    }
+  }, [dispatch, courses.length, curriculums.length, categories.length])
+
+  // Filter results when search query or data changes
+  useEffect(() => {
+    // When search query is empty, show all courses and curriculums
+    if (searchQuery.trim() === '') {
+      const allCourses = courses.map((course: any) =>
+        convertCourseToDisplayFormat(course, categories)
+      )
+      const allCurriculums = curriculums.map((curriculum: any) =>
+        convertCurriculumToDisplayFormat(curriculum)
+      )
+      setFilteredCourses(allCourses)
+      setFilteredCurriculums(allCurriculums)
+      setHasSearched(true)
+      return
+    }
+
+    const searchLower = searchQuery.toLowerCase()
+
+    // Filter courses by name and code (matching desktop behavior)
+    const courseResults = courses
+      .filter((course: any) => {
+        return (
+          course.name?.toLowerCase().includes(searchLower) ||
+          course.code?.toLowerCase().includes(searchLower)
+        )
+      })
+      .map((course: any) => convertCourseToDisplayFormat(course, categories))
+
+    // Filter curriculums by name and code (matching desktop behavior)
+    const curriculumResults = curriculums
+      .filter((curriculum: any) => {
+        return (
+          curriculum.name?.toLowerCase().includes(searchLower) ||
+          curriculum.code?.toLowerCase().includes(searchLower)
+        )
+      })
+      .map((curriculum: any) => convertCurriculumToDisplayFormat(curriculum))
+
+    setFilteredCourses(courseResults)
+    setFilteredCurriculums(curriculumResults)
+    setHasSearched(true)
+  }, [searchQuery, courses, curriculums, categories])
+
+  // Reset scroll position when component mounts
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false })
+    }, 100)
+
+    return () => clearTimeout(timeout)
+  }, [])
 
   // Search functionality
   const handleSearch = (query: string) => {
     setSearchQuery(query)
+  }
 
-    if (query.trim() === '') {
-      setFilteredCourses([])
-      setFilteredCurriculums([])
-      return
-    }
-
-    const searchLower = query.toLowerCase()
-
-    // Filter courses
-    const coursesResults = mockCourses.filter(
-      (course) =>
-        course.title.toLowerCase().includes(searchLower) ||
-        course.description.toLowerCase().includes(searchLower) ||
-        course.id.toLowerCase().includes(searchLower) ||
-        course.category.toLowerCase().includes(searchLower)
-    )
-
-    // Filter curriculums
-    const curriculumsResults = mockCurriculums.filter(
-      (curriculum) =>
-        curriculum.title.toLowerCase().includes(searchLower) ||
-        curriculum.description.toLowerCase().includes(searchLower) ||
-        curriculum.id.toLowerCase().includes(searchLower) ||
-        curriculum.type.toLowerCase().includes(searchLower)
-    )
-
-    setFilteredCourses(coursesResults)
-    setFilteredCurriculums(curriculumsResults)
+  const handleClearSearch = () => {
+    setSearchQuery('')
   }
 
   const renderCourseItem = ({ item }: { item: Course }) => (
@@ -147,13 +189,199 @@ export default function SearchScreen() {
   const renderCurriculumItem = ({ item }: { item: Curriculum }) => (
     <CurriculumItem
       item={item}
-      onPress={(curriculum) => console.log('Curriculum selected:', curriculum)}
+      onPress={(curriculum) =>
+        router.push({
+          pathname: '/curriculum-detail',
+          params: { id: curriculum.numericId.toString() },
+        })
+      }
     />
   )
 
+  const linkToCourses = () => {
+    router.push('/courses')
+  }
+
+  const linkToCurriculums = () => {
+    router.push('/curriculums')
+  }
+
+  const isLoading = isCoursesLoading || isCurriculumsLoading
   const hasResults =
     filteredCourses.length > 0 || filteredCurriculums.length > 0
-  const showNoResults = searchQuery.trim() !== '' && !hasResults
+  const showNoResults = hasSearched && !hasResults && !isLoading
+
+  // Render course search section
+  const renderCourseSection = () => {
+    if (isCoursesLoading && hasSearched) {
+      return (
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              {searchQuery ? 'รายวิชา' : 'รายวิชาทั้งหมด'}
+            </ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.loadingContainer}>
+            <ActivityIndicator size='large' color={tintColor} />
+            <ThemedText style={styles.loadingText}>
+              กำลังโหลดรายวิชา...
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+      )
+    }
+
+    if (filteredCourses.length === 0 && hasSearched && searchQuery) {
+      return (
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              {searchQuery ? 'รายวิชา' : 'รายวิชาทั้งหมด'}
+            </ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.noResultsSection}>
+            <ThemedText style={styles.noResultsSectionText}>
+              ไม่พบผลลัพธ์การค้นหา
+            </ThemedText>
+            <TouchableOpacity
+              style={[styles.viewAllButton, { backgroundColor: tintColor }]}
+              onPress={linkToCourses}
+            >
+              <ThemedText style={styles.viewAllButtonText}>
+                ดูรายวิชาทั้งหมด
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        </ThemedView>
+      )
+    }
+
+    if (filteredCourses.length > 0) {
+      return (
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              {searchQuery ? 'รายวิชา' : 'รายวิชาทั้งหมด'}
+            </ThemedText>
+            <ThemedText style={styles.resultsCount}>
+              {searchQuery
+                ? `ผลการค้นหา ${filteredCourses.length} รายการ`
+                : `${filteredCourses.length} รายการ`}
+            </ThemedText>
+          </ThemedView>
+          <FlatList
+            data={filteredCourses}
+            renderItem={renderCourseItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        </ThemedView>
+      )
+    }
+
+    return null
+  }
+
+  // Render curriculum search section
+  const renderCurriculumSection = () => {
+    if (isCurriculumsLoading && hasSearched) {
+      return (
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              {searchQuery ? 'หลักสูตร' : 'หลักสูตรทั้งหมด'}
+            </ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.loadingContainer}>
+            <ActivityIndicator size='large' color={tintColor} />
+            <ThemedText style={styles.loadingText}>
+              กำลังโหลดหลักสูตร...
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+      )
+    }
+
+    if (filteredCurriculums.length === 0 && hasSearched && searchQuery) {
+      return (
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              {searchQuery ? 'หลักสูตร' : 'หลักสูตรทั้งหมด'}
+            </ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.noResultsSection}>
+            <ThemedText style={styles.noResultsSectionText}>
+              ไม่พบผลลัพธ์การค้นหา
+            </ThemedText>
+            <TouchableOpacity
+              style={[styles.viewAllButton, { backgroundColor: tintColor }]}
+              onPress={linkToCurriculums}
+            >
+              <ThemedText style={styles.viewAllButtonText}>
+                ดูหลักสูตรทั้งหมด
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        </ThemedView>
+      )
+    }
+
+    if (filteredCurriculums.length > 0) {
+      return (
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedView style={styles.sectionHeader}>
+            <ThemedText type='subtitle' style={styles.sectionTitle}>
+              {searchQuery ? 'หลักสูตร' : 'หลักสูตรทั้งหมด'}
+            </ThemedText>
+            <ThemedText style={styles.resultsCount}>
+              {searchQuery
+                ? `ผลการค้นหา ${filteredCurriculums.length} รายการ`
+                : `${filteredCurriculums.length} รายการ`}
+            </ThemedText>
+          </ThemedView>
+          <FlatList
+            data={filteredCurriculums}
+            renderItem={renderCurriculumItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        </ThemedView>
+      )
+    }
+
+    return null
+  }
+
+  // Render search results with curriculum first if it has results (matching desktop behavior)
+  const renderSearchResults = () => {
+    if (!hasSearched) {
+      return null
+    }
+
+    // Show curriculum first if it has results, otherwise show courses first
+    if (filteredCurriculums.length === 0) {
+      return (
+        <>
+          {renderCourseSection()}
+          <ThemedView style={styles.divider} />
+          {renderCurriculumSection()}
+        </>
+      )
+    } else {
+      return (
+        <>
+          {renderCurriculumSection()}
+          <ThemedView style={styles.divider} />
+          {renderCourseSection()}
+        </>
+      )
+    }
+  }
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
@@ -179,7 +407,7 @@ export default function SearchScreen() {
             returnKeyType='search'
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => handleSearch('')}>
+            <TouchableOpacity onPress={handleClearSearch}>
               <IconSymbol
                 name='xmark.circle.fill'
                 size={20}
@@ -197,103 +425,21 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps='handled'
       >
-        {/* Show welcome message when no search */}
-        {searchQuery.trim() === '' && (
-          <ThemedView style={styles.welcomeContainer}>
-            <IconSymbol
-              name='magnifyingglass.circle'
-              size={80}
-              color={iconColor + '60'}
-            />
-            <ThemedText
-              type='subtitle'
-              style={[styles.welcomeTitle, { color: '#000000' }]}
-            >
-              ค้นหาหลักสูตรและรายวิชา
-            </ThemedText>
-            <ThemedText
-              style={[styles.welcomeDescription, { color: iconColor }]}
-            >
-              พิมพ์คำค้นหาในช่องด้านบน
-            </ThemedText>
-            <ThemedText
-              style={[styles.welcomeDescription, { color: iconColor }]}
-            >
-              เพื่อค้นหาหลักสูตรหรือรายวิชาที่คุณสนใจ
+        {/* Show loading state when initially loading data */}
+        {isLoading && (
+          <ThemedView style={styles.loadingContainer}>
+            <ActivityIndicator size='large' color={tintColor} />
+            <ThemedText style={styles.loadingText}>
+              กำลังโหลดข้อมูล...
             </ThemedText>
           </ThemedView>
         )}
 
-        {/* No Results */}
-        {showNoResults && (
-          <ThemedView style={styles.noResultsContainer}>
-            <IconSymbol
-              name='exclamationmark.circle'
-              size={80}
-              color={iconColor + '60'}
-            />
-            <ThemedText
-              type='subtitle'
-              style={[styles.noResultsTitle, { color: '#000000' }]}
-            >
-              ไม่พบผลการค้นหา
-            </ThemedText>
-            <ThemedText
-              style={[styles.noResultsDescription, { color: iconColor }]}
-            >
-              ลองค้นหาด้วยคำค้นหาอื่น
-            </ThemedText>
-            <ThemedText
-              style={[styles.noResultsDescription, { color: iconColor }]}
-            >
-              หรือตรวจสอบการสะกดคำ
-            </ThemedText>
-          </ThemedView>
-        )}
+        {/* Render search results */}
+        {!isLoading && renderSearchResults()}
 
-        {/* Courses Results */}
-        {filteredCourses.length > 0 && (
-          <ThemedView style={styles.sectionContainer}>
-            <ThemedView style={styles.sectionHeader}>
-              <ThemedText type='subtitle' style={styles.sectionTitle}>
-                รายวิชา
-              </ThemedText>
-              <ThemedText style={styles.resultsCount}>
-                ผลลัพธ์ {filteredCourses.length} รายการ
-              </ThemedText>
-            </ThemedView>
-            <FlatList
-              data={filteredCourses}
-              renderItem={renderCourseItem}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            />
-          </ThemedView>
-        )}
-
-        {/* Curriculums Results */}
-        {filteredCurriculums.length > 0 && (
-          <ThemedView style={styles.sectionContainer}>
-            <ThemedView style={styles.sectionHeader}>
-              <ThemedText type='subtitle' style={styles.sectionTitle}>
-                หลักสูตร
-              </ThemedText>
-              <ThemedText style={styles.resultsCount}>
-                ผลลัพธ์ {filteredCurriculums.length} รายการ
-              </ThemedText>
-            </ThemedView>
-            <FlatList
-              data={filteredCurriculums}
-              renderItem={renderCurriculumItem}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            />
-          </ThemedView>
-        )}
+        {/* Bottom padding */}
+        <ThemedView style={styles.bottomPadding} />
       </ScrollView>
       <StatusBarGradient />
     </ThemedView>
@@ -336,39 +482,17 @@ const styles = StyleSheet.create({
   resultsContainer: {
     flex: 1,
   },
-  welcomeContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  welcomeTitle: {
-    marginTop: 20,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  welcomeDescription: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
+  loadingContainer: {
     paddingHorizontal: 20,
-  },
-  noResultsContainer: {
-    flex: 1,
-    justifyContent: 'center',
+    paddingVertical: 40,
     alignItems: 'center',
-    paddingVertical: 60,
+    justifyContent: 'center',
   },
-  noResultsTitle: {
-    marginTop: 20,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  noResultsDescription: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 20,
+  loadingText: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
+    marginTop: 16,
   },
   sectionContainer: {
     marginBottom: 24,
@@ -381,15 +505,51 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: 'Prompt-SemiBold',
+    flex: 1,
+    lineHeight: 28,
   },
   resultsCount: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Prompt-Regular',
     color: '#666666',
+    marginLeft: 8,
   },
   horizontalList: {
     paddingLeft: 20,
+  },
+  noResultsSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noResultsSectionText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#666666',
+    marginBottom: 16,
+  },
+  viewAllButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 200,
+    alignItems: 'center',
+  },
+  viewAllButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
+    marginHorizontal: 20,
+    marginVertical: 24,
+  },
+  bottomPadding: {
+    height: 40,
   },
 })
