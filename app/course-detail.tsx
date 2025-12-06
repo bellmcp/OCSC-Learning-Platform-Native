@@ -1,7 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useContext, useEffect, useState } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import {
   ActivityIndicator,
   Platform,
@@ -18,11 +18,11 @@ import { ContentList } from '@/components/ContentList'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { courseRegistrations } from '@/constants/CourseRegistrations'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import * as categoriesActions from '@/modules/categories/actions'
 import * as coursesActions from '@/modules/courses/actions'
-import type { RootState } from '@/store/types'
+import * as registrationsActions from '@/modules/registrations/actions'
+import type { AppDispatch, RootState } from '@/store/types'
 import categoryColor from '@/utils/categoryColor'
 import isBetween from '@/utils/isBetween'
 
@@ -84,10 +84,10 @@ export default function CourseDetailScreen() {
 
   // Login context
   const { isLoggedIn: contextIsLoggedIn } = useContext(LoginContext)
-  
+
   // Local state to track login status independently
   const [isLoggedIn, setIsLoggedIn] = useState(contextIsLoggedIn)
-  
+
   // Check token directly on mount and when context changes
   useEffect(() => {
     const checkAuth = async () => {
@@ -116,7 +116,7 @@ export default function CourseDetailScreen() {
 
   const { width: contentWidth } = useWindowDimensions()
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   // Redux state selectors
   const {
@@ -129,6 +129,7 @@ export default function CourseDetailScreen() {
   const { items: categories } = useSelector(
     (state: RootState) => state.categories
   )
+  const { myCourses } = useSelector((state: RootState) => state.registrations)
 
   const course = currentCourse // Use currentCourse from reducer
 
@@ -142,6 +143,13 @@ export default function CourseDetailScreen() {
       dispatch(coursesActions.loadCourseHour(id) as any)
     }
   }, [dispatch, id])
+
+  // Load user's course registrations when logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      dispatch(registrationsActions.loadCourseRegistrations())
+    }
+  }, [dispatch, isLoggedIn])
 
   // Load categories if not already loaded
   useEffect(() => {
@@ -462,7 +470,7 @@ export default function CourseDetailScreen() {
                         )
 
                         // Check if user already registered for this round
-                        const isAlreadyRegistered = courseRegistrations.some(
+                        const isAlreadyRegistered = myCourses.some(
                           (reg: any) =>
                             reg.courseId === parseInt(id || '0') &&
                             reg.courseRoundId === round.id
@@ -563,7 +571,7 @@ export default function CourseDetailScreen() {
                               { backgroundColor: tintColor },
                               isRegisterButtonDisabled && { opacity: 0.6 },
                             ]}
-                            onPress={() => {
+                            onPress={async () => {
                               if (isRegisterButtonDisabled) return
                               console.log(
                                 'Register for course:',
@@ -573,12 +581,21 @@ export default function CourseDetailScreen() {
                               )
                               setIsRegisterButtonDisabled(true)
                               setRegisterButtonLabel('กำลังลงทะเบียน...')
-                              // TODO: Implement actual registration API call
-                              // For now, just reset after 3 seconds
-                              setTimeout(() => {
+                              // Dispatch register course action and await result
+                              const success = await dispatch(
+                                registrationsActions.registerCourse(
+                                  round.id,
+                                  parseInt(id || '0')
+                                )
+                              )
+                              // Navigate to learn page on success
+                              if (success) {
+                                router.replace('/(tabs)?tab=learn')
+                              } else {
+                                // Reset button state on failure
                                 setIsRegisterButtonDisabled(false)
                                 setRegisterButtonLabel('ลงทะเบียนเรียน')
-                              }, 3000)
+                              }
                             }}
                             disabled={isRegisterButtonDisabled}
                           >

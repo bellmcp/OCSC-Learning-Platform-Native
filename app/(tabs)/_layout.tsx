@@ -85,8 +85,10 @@ export default function TabLayout() {
   React.useEffect(() => {
     if (params.tab === 'account') {
       goToAccountTab()
+    } else if (params.tab === 'learn' && isLoggedIn) {
+      setIndex(2) // learn is at index 2 when logged in
     }
-  }, [params.tab, goToAccountTab])
+  }, [params.tab, goToAccountTab, isLoggedIn])
 
   // Define routes based on login state and support info
   const routes = React.useMemo(() => {

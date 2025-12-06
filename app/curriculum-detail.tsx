@@ -1,7 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useContext, useEffect, useState } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import {
   ActivityIndicator,
   Platform,
@@ -17,10 +17,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { curriculumRegistrations } from '@/constants/CurriculumRegistrations'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import * as curriculumsActions from '@/modules/curriculums/actions'
-import type { RootState } from '@/store/types'
+import * as registrationsActions from '@/modules/registrations/actions'
+import type { AppDispatch, RootState } from '@/store/types'
 
 import { LoginContext } from './(tabs)/_layout'
 
@@ -151,14 +151,20 @@ export default function CurriculumDetailScreen() {
 
   const { width: contentWidth } = useWindowDimensions()
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
+
+  // Register button state
+  const [isRegisterButtonDisabled, setIsRegisterButtonDisabled] =
+    useState(false)
+  const [registerButtonLabel, setRegisterButtonLabel] =
+    useState('ลงทะเบียนหลักสูตร')
 
   // Login context
   const { isLoggedIn: contextIsLoggedIn } = useContext(LoginContext)
-  
+
   // Local state to track login status independently
   const [isLoggedIn, setIsLoggedIn] = useState(contextIsLoggedIn)
-  
+
   // Check token directly on mount and when context changes
   useEffect(() => {
     const checkAuth = async () => {
@@ -182,6 +188,9 @@ export default function CurriculumDetailScreen() {
   const { isLoading, currentCurriculum: curriculum } = useSelector(
     (state: RootState) => state.curriculums
   )
+  const { myCurriculums } = useSelector(
+    (state: RootState) => state.registrations
+  )
 
   // Load curriculum data on mount
   useEffect(() => {
@@ -191,8 +200,15 @@ export default function CurriculumDetailScreen() {
     }
   }, [dispatch, id])
 
+  // Load curriculum registrations when logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      dispatch(registrationsActions.loadCurriculumRegistrations())
+    }
+  }, [dispatch, isLoggedIn])
+
   // Check if user is already registered for this curriculum
-  const isAlreadyRegistered = curriculumRegistrations.some(
+  const isAlreadyRegistered = myCurriculums.some(
     (reg: any) => reg.curriculumId === parseInt(id || '0')
   )
 
@@ -239,15 +255,34 @@ export default function CurriculumDetailScreen() {
 
     return (
       <TouchableOpacity
-        style={[styles.registerButton, { backgroundColor: tintColor }]}
-        onPress={() => {
+        style={[
+          styles.registerButton,
+          { backgroundColor: tintColor },
+          isRegisterButtonDisabled && { opacity: 0.6 },
+        ]}
+        onPress={async () => {
+          if (isRegisterButtonDisabled) return
           console.log('Register for curriculum:', id)
-          // TODO: Implement curriculum registration API call
+          setIsRegisterButtonDisabled(true)
+          setRegisterButtonLabel('กำลังลงทะเบียน...')
+          // Dispatch register curriculum action and await result
+          const success = await dispatch(
+            registrationsActions.registerCurriculum(parseInt(id || '0'))
+          )
+          // Navigate to learn page on success
+          if (success) {
+            router.replace('/(tabs)?tab=learn')
+          } else {
+            // Reset button state on failure
+            setIsRegisterButtonDisabled(false)
+            setRegisterButtonLabel('ลงทะเบียนหลักสูตร')
+          }
         }}
+        disabled={isRegisterButtonDisabled}
       >
         <IconSymbol name='arrow.right.square' size={20} color='white' />
         <ThemedText style={styles.registerButtonText}>
-          ลงทะเบียนหลักสูตร
+          {registerButtonLabel}
         </ThemedText>
       </TouchableOpacity>
     )

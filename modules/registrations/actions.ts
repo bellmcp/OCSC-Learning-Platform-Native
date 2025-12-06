@@ -45,6 +45,18 @@ export const COURSE_COMPLETE_SUCCESS =
   'learning-platform/registrations/COURSE_COMPLETE_SUCCESS'
 export const COURSE_COMPLETE_FAILURE =
   'learning-platform/registrations/COURSE_COMPLETE_FAILURE'
+export const COURSE_REGISTRATION_REQUEST =
+  'learning-platform/registrations/COURSE_REGISTRATION_REQUEST'
+export const COURSE_REGISTRATION_SUCCESS =
+  'learning-platform/registrations/COURSE_REGISTRATION_SUCCESS'
+export const COURSE_REGISTRATION_FAILURE =
+  'learning-platform/registrations/COURSE_REGISTRATION_FAILURE'
+export const CURRICULUM_REGISTRATION_REQUEST =
+  'learning-platform/registrations/CURRICULUM_REGISTRATION_REQUEST'
+export const CURRICULUM_REGISTRATION_SUCCESS =
+  'learning-platform/registrations/CURRICULUM_REGISTRATION_SUCCESS'
+export const CURRICULUM_REGISTRATION_FAILURE =
+  'learning-platform/registrations/CURRICULUM_REGISTRATION_FAILURE'
 export const CLEAR_REGISTRATIONS =
   'learning-platform/registrations/CLEAR_REGISTRATIONS'
 
@@ -321,6 +333,171 @@ export function completeCourse(registrationId: number) {
         err?.response?.data?.mesg || 'ขอสำเร็จการศึกษาไม่สำเร็จ กรุณาลองใหม่'
       dispatch({ type: COURSE_COMPLETE_FAILURE })
       dispatch(uiActions.setFlashMessage(mesg, 'error'))
+    }
+  }
+}
+
+export function registerCourse(courseRoundId: number, courseId: number) {
+  return async (dispatch: any): Promise<boolean> => {
+    const token = await AsyncStorage.getItem('token')
+    if (!token) {
+      dispatch(
+        uiActions.setFlashMessage('กรุณาเข้าสู่ระบบก่อนลงทะเบียน', 'error')
+      )
+      return false
+    }
+
+    const parsed = parseJwt(token)
+    const userId = parsed?.unique_name
+
+    if (!userId) {
+      dispatch(
+        uiActions.setFlashMessage(
+          'ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่',
+          'error'
+        )
+      )
+      return false
+    }
+
+    // First check registration conditions
+    try {
+      await axios.get(
+        `/Users/${userId}/RegistrationConditions?courseId=${courseId}`
+      )
+    } catch (err: any) {
+      const data = err?.response?.data
+      const { title, mesg } = data || {}
+      // Show error modal for registration conditions failure
+      dispatch(
+        uiActions.setFlashMessage(
+          mesg || title || 'ไม่มีสิทธิ์ลงทะเบียนตามเงื่อนไขที่กำหนด',
+          'error'
+        )
+      )
+      return false
+    }
+
+    // Proceed with registration
+    dispatch({ type: COURSE_REGISTRATION_REQUEST })
+    try {
+      const { data } = await axios.post(
+        `/Users/${userId}/CourseRegistrations`,
+        {
+          courseRoundId: courseRoundId,
+        }
+      )
+      dispatch({
+        type: COURSE_REGISTRATION_SUCCESS,
+        payload: { courseRegister: data },
+      })
+      dispatch(
+        uiActions.setFlashMessage('ลงทะเบียนรายวิชาเรียบร้อยแล้ว', 'success')
+      )
+      // Reload registrations to update the UI
+      dispatch(loadCourseRegistrations())
+      return true
+    } catch (err: any) {
+      dispatch({ type: COURSE_REGISTRATION_FAILURE })
+      if (err?.response?.status === 403) {
+        dispatch(
+          uiActions.setFlashMessage(
+            'คุณได้ลงทะเบียนรายวิชานี้แล้ว หรือไม่มีสิทธิ์ลงทะเบียนตามเงื่อนไขที่กำหนด',
+            'error'
+          )
+        )
+      } else {
+        dispatch(
+          uiActions.setFlashMessage(
+            `ลงทะเบียนรายวิชาไม่สำเร็จ เกิดข้อผิดพลาด ${err?.response?.status}`,
+            'error'
+          )
+        )
+      }
+      return false
+    }
+  }
+}
+
+export function registerCurriculum(curriculumId: number) {
+  return async (dispatch: any): Promise<boolean> => {
+    const token = await AsyncStorage.getItem('token')
+    if (!token) {
+      dispatch(
+        uiActions.setFlashMessage('กรุณาเข้าสู่ระบบก่อนลงทะเบียน', 'error')
+      )
+      return false
+    }
+
+    const parsed = parseJwt(token)
+    const userId = parsed?.unique_name
+
+    if (!userId) {
+      dispatch(
+        uiActions.setFlashMessage(
+          'ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่',
+          'error'
+        )
+      )
+      return false
+    }
+
+    // First check registration conditions
+    try {
+      await axios.get(
+        `/Users/${userId}/RegistrationConditions?curriculumId=${curriculumId}`
+      )
+    } catch (err: any) {
+      const data = err?.response?.data
+      const { title, mesg } = data || {}
+      // Show error modal for registration conditions failure
+      dispatch(
+        uiActions.setFlashMessage(
+          mesg || title || 'ไม่มีสิทธิ์ลงทะเบียนตามเงื่อนไขที่กำหนด',
+          'error'
+        )
+      )
+      return false
+    }
+
+    // Proceed with registration
+    dispatch({ type: CURRICULUM_REGISTRATION_REQUEST })
+    try {
+      const { data } = await axios.post(
+        `/Users/${userId}/CurriculumRegistrations`,
+        {
+          curriculumId: curriculumId,
+        }
+      )
+      dispatch({
+        type: CURRICULUM_REGISTRATION_SUCCESS,
+        payload: { curriculumRegister: data },
+      })
+      dispatch(
+        uiActions.setFlashMessage('ลงทะเบียนหลักสูตรเรียบร้อยแล้ว', 'success')
+      )
+      // Reload registrations to update the UI
+      dispatch(loadCurriculumRegistrations())
+      dispatch(loadCourseRegistrations())
+      return true
+    } catch (err: any) {
+      dispatch({ type: CURRICULUM_REGISTRATION_FAILURE })
+      if (err?.response?.status === 403) {
+        dispatch(
+          uiActions.setFlashMessage(
+            'คุณได้ลงทะเบียนหลักสูตร หรือรายวิชาในหลักสูตรนี้แล้ว หรือไม่มีสิทธิ์ลงทะเบียนตามเงื่อนไขที่กำหนด',
+            'error'
+          )
+        )
+      } else {
+        dispatch(
+          uiActions.setFlashMessage(
+            `ลงทะเบียนหลักสูตรไม่สำเร็จ เกิดข้อผิดพลาด ${err?.response?.status}`,
+            'error'
+          )
+        )
+      }
+      return false
     }
   }
 }
