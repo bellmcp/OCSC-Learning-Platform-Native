@@ -82,6 +82,7 @@ const MAPPING = {
   'play.circle': 'play-circle-filled',
   'play.circle.fill': 'play-circle-filled',
   ellipsis: 'more-horiz',
+  'arrow.clockwise': 'refresh',
 } as IconMapping
 
 /**

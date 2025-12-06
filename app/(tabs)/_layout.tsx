@@ -2,6 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useLocalSearchParams } from 'expo-router'
 import * as React from 'react'
 import { BottomNavigation, useTheme } from 'react-native-paper'
+import { useDispatch, useSelector } from 'react-redux'
+
+import * as uiActions from '@/modules/ui/actions'
+import type { AppDispatch, RootState } from '@/store/types'
 import AccountScreen from './account'
 import HomeScreen from './index'
 import LearnScreen from './learn'
@@ -17,15 +21,30 @@ export const LoginContext = React.createContext({
 
 export default function TabLayout() {
   const theme = useTheme()
+  const dispatch = useDispatch<AppDispatch>()
   const [index, setIndex] = React.useState(0)
   const [isLoggedIn, setIsLoggedIn] = React.useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = React.useState(true)
   const params = useLocalSearchParams<{ tab?: string }>()
 
+  // Get support info from Redux
+  const { supportInfo } = useSelector((state: RootState) => state.ui)
+
+  // Determine if support tab should be shown (logged in AND not hidden)
+  const showSupportTab = isLoggedIn && !supportInfo?.isHidden
+
   // Log state changes
   React.useEffect(() => {
     console.log('[TabLayout] isLoggedIn state changed to:', isLoggedIn)
   }, [isLoggedIn])
+
+  // Load support info when logged in
+  React.useEffect(() => {
+    if (isLoggedIn) {
+      console.log('[TabLayout] Loading support info...')
+      dispatch(uiActions.loadSupportInfo())
+    }
+  }, [isLoggedIn, dispatch])
 
   // Check for existing token on mount
   React.useEffect(() => {
@@ -48,18 +67,19 @@ export default function TabLayout() {
         console.log('[TabLayout] Auth check complete')
       }
     }
-    
+
     checkLoginStatus()
   }, [])
 
   // Function to navigate to account tab
   const goToAccountTab = React.useCallback(() => {
     if (isLoggedIn) {
-      setIndex(4) // account is at index 4 when logged in
+      // Account index depends on whether support tab is shown
+      setIndex(showSupportTab ? 4 : 3) // account is at index 4 with support, 3 without
     } else {
       setIndex(2) // account is at index 2 when not logged in
     }
-  }, [isLoggedIn])
+  }, [isLoggedIn, showSupportTab])
 
   // Handle tab parameter from URL
   React.useEffect(() => {
@@ -68,11 +88,16 @@ export default function TabLayout() {
     }
   }, [params.tab, goToAccountTab])
 
-  // Define routes based on login state
+  // Define routes based on login state and support info
   const routes = React.useMemo(() => {
-    console.log('[TabLayout] Rebuilding routes, isLoggedIn:', isLoggedIn)
+    console.log(
+      '[TabLayout] Rebuilding routes, isLoggedIn:',
+      isLoggedIn,
+      'showSupportTab:',
+      showSupportTab
+    )
     if (isLoggedIn) {
-      return [
+      const loggedInRoutes = [
         {
           key: 'home',
           title: 'หน้าหลัก',
@@ -91,19 +116,26 @@ export default function TabLayout() {
           focusedIcon: 'play',
           unfocusedIcon: 'play-outline',
         },
-        {
-          key: 'support',
-          title: 'ช่วยเหลือ',
-          focusedIcon: 'help-circle',
-          unfocusedIcon: 'help-circle-outline',
-        },
-        {
-          key: 'account',
-          title: 'บัญชี',
-          focusedIcon: 'account',
-          unfocusedIcon: 'account-outline',
-        },
       ]
+
+      // Add support tab only if not hidden
+      if (showSupportTab) {
+        loggedInRoutes.push({
+          key: 'support',
+          title: supportInfo?.text || 'ช่วยเหลือ',
+          focusedIcon: 'robot',
+          unfocusedIcon: 'robot-outline',
+        })
+      }
+
+      loggedInRoutes.push({
+        key: 'account',
+        title: 'บัญชี',
+        focusedIcon: 'account',
+        unfocusedIcon: 'account-outline',
+      })
+
+      return loggedInRoutes
     } else {
       return [
         {
@@ -126,7 +158,7 @@ export default function TabLayout() {
         },
       ]
     }
-  }, [isLoggedIn])
+  }, [isLoggedIn, showSupportTab, supportInfo?.text])
 
   // Ensure index is always valid for current routes
   const validIndex = Math.min(index, routes.length - 1)
@@ -173,7 +205,9 @@ export default function TabLayout() {
   console.log('[TabLayout] Rendering with isLoggedIn:', isLoggedIn)
 
   return (
-    <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn, goToAccountTab }}>
+    <LoginContext.Provider
+      value={{ isLoggedIn, setIsLoggedIn, goToAccountTab }}
+    >
       <BottomNavigation
         navigationState={{ index: validIndex, routes }}
         onIndexChange={setIndex}
