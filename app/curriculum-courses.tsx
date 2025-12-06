@@ -46,7 +46,8 @@ export default function CurriculumCoursesScreen() {
   }
 
   const handleCoursePress = (course: RegisteredCourse) => {
-    router.push(`/classroom?courseId=${course.id}`)
+    // Use courseId (actual course ID), not id (registration ID)
+    router.push(`/classroom?courseId=${course.courseId}`)
   }
 
   const renderCourseItem = ({

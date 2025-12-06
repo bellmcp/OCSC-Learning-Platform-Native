@@ -1,7 +1,13 @@
-import { router } from 'expo-router'
-import React, { useEffect, useRef, useState } from 'react'
-import { Alert, Dimensions, ScrollView, StyleSheet } from 'react-native'
+import { router, useLocalSearchParams } from 'expo-router'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useDispatch, useSelector } from 'react-redux'
 
 import {
   ClassroomContent,
@@ -16,86 +22,76 @@ import {
 } from '@/components'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { contentViews } from '@/constants/ContentViews'
-import { courseContents } from '@/constants/CourseContents'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as coursesActions from '@/modules/courses/actions'
+import * as learnActions from '@/modules/learn/actions'
+import * as registrationsActions from '@/modules/registrations/actions'
+import type { AppDispatch, RootState } from '@/store/types'
 
 const { width, height } = Dimensions.get('window')
 
-// ContentView interface for tracking user progress
-interface ContentViewData {
-  id: number
-  courseRegistrationId: number
-  courseContentId: number
-  isCompleted: boolean
-  completeDate?: string | null
-  contentSeconds?: number | null
-  testScore?: number | null
-  testTries?: number | null
-  no: number
+// Helper to get preferred registration when multiple exist
+const getPreferredRegistration = (registrations: any[]) => {
+  if (!registrations || registrations.length === 0) {
+    return null
+  }
+
+  // Separate standalone and curriculum registrations
+  const standaloneRegistrations = registrations.filter(
+    (reg) => !reg.curriculumRegistrationId || reg.curriculumRegistrationId === 0
+  )
+  const curriculumRegistrations = registrations.filter(
+    (reg) => reg.curriculumRegistrationId && reg.curriculumRegistrationId !== 0
+  )
+
+  // Prefer standalone registrations
+  if (standaloneRegistrations.length > 0) {
+    return standaloneRegistrations.sort(
+      (a, b) =>
+        new Date(b.registrationDate).getTime() -
+        new Date(a.registrationDate).getTime()
+    )[0]
+  }
+
+  // Fall back to curriculum registrations
+  if (curriculumRegistrations.length > 0) {
+    return curriculumRegistrations.sort(
+      (a, b) =>
+        new Date(b.registrationDate).getTime() -
+        new Date(a.registrationDate).getTime()
+    )[0]
+  }
+
+  return registrations[0]
 }
 
-// Demo data - hardcoded for demonstration purposes
-const createDemoData = (): CourseData => {
-  // Use course ID 1001 content from constants
-  const demoContents: ClassroomContent[] = courseContents
-    .filter((content) => content.courseId === 1001)
-    .map((content, index) => {
-      const view = contentViews.find(
-        (cv: ContentViewData) => cv.courseContentId === content.id
-      )
+// Helper to check if date is between start and end
+const isBetween = (start: string, end: string, current: string[]): boolean => {
+  if (!start || !end || !current || current.length < 3) return true
 
-      // Mock some completed content for demo purposes
-      const isCompleted = index < 3 // First 3 items are completed
-      const mockProgress = isCompleted
-        ? content.minutes
-        : Math.floor((content.minutes || 0) * Math.random())
+  const startDate = new Date(start)
+  const endDate = new Date(end)
+  const currentDate = new Date(
+    parseInt(current[0]),
+    parseInt(current[1]) - 1,
+    parseInt(current[2])
+  )
 
-      return {
-        id: content.id,
-        courseId: content.courseId,
-        no: content.no,
-        type: content.type as 'c' | 't' | 'e',
-        name: content.name,
-        content1: content.content1,
-        content2: content.content2,
-        minutes: content.minutes,
-        testId1: content.testId1,
-        testId2: content.testId2,
-        testId3: content.testId3,
-        evaluationId: content.evaluationId,
-        completed: isCompleted,
-        completeDate: isCompleted ? new Date().toISOString() : null,
-        contentSeconds:
-          mockProgress && content.minutes ? mockProgress * 60 : null,
-        testScore: content.type === 't' && isCompleted ? 85 : null,
-        testTries: content.type === 't' && isCompleted ? 1 : null,
-      }
-    })
-    .sort((a, b) => a.no - b.no)
-
-  return {
-    id: 1001,
-    code: 'NOF001',
-    name: 'การเป็นข้าราชการที่ดี',
-    courseCategoryId: 1,
-    learningObjective: 'เพื่อให้ผู้เรียนเข้าใจบทบาทและหน้าที่ของข้าราชการ',
-    instructor: 'ทีมผู้สอน ก.พ.',
-    learningTopic: 'การเป็นข้าราชการที่ดี ความรู้พื้นฐาน และจริยธรรม',
-    targetGroup: 'ข้าราชการบรรจุใหม่',
-    assessment: 'ทำแบบทดสอบหลังเรียนได้ตั้งแต่ 60% ขึ้นไป',
-    thumbnail:
-      'https://learningportal.ocsc.go.th/content/images/courses/ocsc/NOF001.jpg',
-    seqFlow: true,
-    contents: demoContents,
-  }
+  return currentDate >= startDate && currentDate <= endDate
 }
 
 export default function ClassroomScreen() {
+  const { courseId, contentId: initialContentId } = useLocalSearchParams<{
+    courseId: string
+    contentId?: string
+  }>()
+
   const backgroundColor = useThemeColor({}, 'background')
+  const tintColor = useThemeColor({}, 'tint')
+  const dispatch = useDispatch<AppDispatch>()
 
   const [selectedContentId, setSelectedContentId] = useState<number | null>(
-    null
+    initialContentId ? parseInt(initialContentId) : null
   )
   const [completedContents, setCompletedContents] = useState<Set<number>>(
     new Set()
@@ -105,21 +101,145 @@ export default function ClassroomScreen() {
   )
   const [courseRating, setCourseRating] = useState<number>(0)
   const [showCoinAnimation, setShowCoinAnimation] = useState(false)
+  const [accessible, setAccessible] = useState(true)
 
   const contentStartTime = useRef<number | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const accumulatedSecondsRef = useRef<number>(0)
 
-  // Use hardcoded demo data
-  const courseData = createDemoData()
+  // Redux state selectors
+  const {
+    currentCourse,
+    contents: courseContents,
+    isLoading: isCourseLoading,
+  } = useSelector((state: RootState) => state.courses)
+  const { myCourses, localDateTime } = useSelector(
+    (state: RootState) => state.registrations
+  )
+  const { contentViews, session, isContentViewsLoading } = useSelector(
+    (state: RootState) => state.learn
+  )
 
+  // Get course registrations for this course
+  const allCourseRegistrations = useMemo(
+    () =>
+      myCourses.filter(
+        (myCourse: any) => myCourse.courseId === parseInt(courseId || '0')
+      ),
+    [myCourses, courseId]
+  )
+
+  const preferredRegistration = useMemo(
+    () => getPreferredRegistration(allCourseRegistrations),
+    [allCourseRegistrations]
+  )
+
+  const courseRegistrationId = preferredRegistration?.id
+  const isCourseCompleted = preferredRegistration?.isCompleted
+
+  // Check course accessibility based on start/end dates
+  useEffect(() => {
+    const courseStart = preferredRegistration?.courseStart
+    const courseEnd = preferredRegistration?.courseEnd
+    if (courseStart && courseEnd && localDateTime.length >= 3) {
+      const check = isBetween(courseStart, courseEnd, localDateTime)
+      setAccessible(check)
+    }
+  }, [preferredRegistration, localDateTime])
+
+  // Load initial data
+  useEffect(() => {
+    if (courseId) {
+      console.log('[Classroom] Loading course data for:', courseId)
+      dispatch(coursesActions.loadCourse(courseId))
+      dispatch(coursesActions.loadCourseContents(courseId))
+      dispatch(registrationsActions.loadCourseRegistrations())
+      dispatch(registrationsActions.loadLocalDateTime())
+      dispatch(learnActions.loadConfig())
+    }
+
+    return () => {
+      // Cleanup on unmount
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+      }
+    }
+  }, [dispatch, courseId])
+
+  // Create session and load content views when registration is available
+  useEffect(() => {
+    if (courseRegistrationId) {
+      console.log(
+        '[Classroom] Creating session for registration:',
+        courseRegistrationId
+      )
+      dispatch(learnActions.createSession())
+      dispatch(learnActions.loadContentViews(courseRegistrationId))
+    }
+  }, [dispatch, courseRegistrationId])
+
+  // Build course data from Redux state
+  const courseData: CourseData | null = useMemo(() => {
+    if (!currentCourse || courseContents.length === 0) return null
+
+    const contents: ClassroomContent[] = courseContents
+      .map((content: any) => {
+        // Find the corresponding content view for this content
+        const view = contentViews.find(
+          (cv: any) => cv.courseContentId === content.id
+        )
+
+        return {
+          id: content.id,
+          courseId: content.courseId,
+          no: content.no,
+          type: content.type as 'c' | 't' | 'e',
+          name: content.name,
+          content1: content.content1,
+          content2: content.content2,
+          minutes: content.minutes,
+          testId1: content.testId1,
+          testId2: content.testId2,
+          testId3: content.testId3,
+          evaluationId: content.evaluationId,
+          completed: view?.isCompleted || false,
+          completeDate: view?.completeDate || null,
+          contentSeconds: view?.contentSeconds || null,
+          testScore: view?.testScore || null,
+          testTries: view?.testTries || null,
+          contentViewId: view?.id || null,
+        }
+      })
+      .sort((a: any, b: any) => a.no - b.no)
+
+    return {
+      id: currentCourse.id,
+      code: currentCourse.code,
+      name: currentCourse.name,
+      courseCategoryId: currentCourse.courseCategoryId,
+      learningObjective: currentCourse.learningObjective,
+      instructor: currentCourse.instructor,
+      learningTopic: currentCourse.learningTopic,
+      targetGroup: currentCourse.targetGroup,
+      assessment: currentCourse.assessment,
+      thumbnail: currentCourse.thumbnail,
+      seqFlow: currentCourse.seqFlow,
+      contents,
+    }
+  }, [currentCourse, courseContents, contentViews])
+
+  // Initialize selected content and completed contents when data is loaded
   useEffect(() => {
     if (courseData && courseData.contents.length > 0) {
-      // Set initial selected content to first uncompleted item or first item
-      const firstUncompleted = courseData.contents.find((c) => !c.completed)
-      const initialContentId = firstUncompleted
-        ? firstUncompleted.id
-        : courseData.contents[0].id
-      setSelectedContentId(initialContentId)
+      // Set initial selected content if not already set
+      if (!selectedContentId) {
+        const firstUncompleted = courseData.contents.find((c) => !c.completed)
+        const initialId = firstUncompleted
+          ? firstUncompleted.id
+          : courseData.contents[0].id
+        setSelectedContentId(initialId)
+      }
 
       // Initialize completed contents from data
       const completedIds = new Set(
@@ -140,127 +260,182 @@ export default function ClassroomScreen() {
       })
       setContentProgress(progressMap)
     }
-  }, [])
+  }, [courseData])
 
-  // Demo data is always available, no loading needed
+  // Loading state
+  const isLoading = isCourseLoading || isContentViewsLoading
 
-  const selectedContent = selectedContentId
-    ? courseData.contents.find((content) => content.id === selectedContentId) ||
+  const selectedContent = useMemo(() => {
+    if (!selectedContentId || !courseData) return null
+    return (
+      courseData.contents.find((content) => content.id === selectedContentId) ||
       null
-    : null
+    )
+  }, [selectedContentId, courseData])
+
+  // Start timer when content is selected
+  useEffect(() => {
+    // Clear previous timer
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+    }
+
+    // Only track time for content type 'c' (video/content)
+    if (
+      selectedContent?.type === 'c' &&
+      courseRegistrationId &&
+      selectedContent.contentViewId &&
+      session
+    ) {
+      console.log('[Classroom] Starting timer for content:', selectedContent.id)
+      contentStartTime.current = Date.now()
+      accumulatedSecondsRef.current = selectedContent.contentSeconds || 0
+
+      // Update every 60 seconds
+      timerIntervalRef.current = setInterval(() => {
+        const currentSeconds = accumulatedSecondsRef.current + 60
+
+        // Update content view via API
+        dispatch(
+          learnActions.updateContentView(
+            courseRegistrationId,
+            selectedContent.contentViewId!,
+            currentSeconds,
+            true // Show flash message
+          )
+        )
+
+        accumulatedSecondsRef.current = currentSeconds
+
+        // Update local progress
+        if (selectedContent.minutes) {
+          const progress = Math.min(
+            currentSeconds / (selectedContent.minutes * 60),
+            1
+          )
+          setContentProgress((prev) => {
+            const newMap = new Map(prev)
+            newMap.set(selectedContent.id, progress)
+            return newMap
+          })
+        }
+
+        // Show coin animation
+        setShowCoinAnimation(true)
+      }, 60000) // Every 60 seconds
+    }
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+      }
+    }
+  }, [selectedContent, courseRegistrationId, session, dispatch])
 
   const handleContentSelect = (contentId: number) => {
-    // Track time spent on previous content
-    if (selectedContentId && contentStartTime.current) {
+    // Save progress for previous content before switching
+    if (
+      selectedContent?.type === 'c' &&
+      contentStartTime.current &&
+      courseRegistrationId &&
+      selectedContent.contentViewId
+    ) {
       const timeSpent = Math.floor(
         (Date.now() - contentStartTime.current) / 1000
       )
-      setContentProgress((prev) => {
-        const newMap = new Map(prev)
-        const content = courseData.contents.find(
-          (c) => c.id === selectedContentId
-        )
-        if (content && content.minutes) {
-          const totalSeconds = content.minutes * 60
-          const currentSeconds =
-            (prev.get(selectedContentId) || 0) * totalSeconds
-          const newSeconds = Math.min(currentSeconds + timeSpent, totalSeconds)
-          const newProgress = newSeconds / totalSeconds
-          newMap.set(selectedContentId, newProgress)
+      const currentSeconds = accumulatedSecondsRef.current + timeSpent
 
-          // Auto-complete if watched more than 80%
-          if (newProgress >= 0.8 && !completedContents.has(selectedContentId)) {
-            setCompletedContents(
-              (prevCompleted) => new Set([...prevCompleted, selectedContentId])
-            )
-          }
-        }
-        return newMap
-      })
+      // Update via API (don't show flash message on content switch)
+      dispatch(
+        learnActions.updateContentView(
+          courseRegistrationId,
+          selectedContent.contentViewId,
+          currentSeconds,
+          false
+        )
+      )
+
+      // Update local progress
+      if (selectedContent.minutes) {
+        const progress = Math.min(
+          currentSeconds / (selectedContent.minutes * 60),
+          1
+        )
+        setContentProgress((prev) => {
+          const newMap = new Map(prev)
+          newMap.set(selectedContent.id, progress)
+          return newMap
+        })
+      }
     }
 
     setSelectedContentId(contentId)
     contentStartTime.current = Date.now()
+    accumulatedSecondsRef.current = 0
+
+    // Get the new content's accumulated seconds
+    const newContent = courseData?.contents.find((c) => c.id === contentId)
+    if (newContent?.contentSeconds) {
+      accumulatedSecondsRef.current = newContent.contentSeconds
+    }
   }
 
   const handleMarkComplete = (contentId: number) => {
-    const content = courseData.contents.find((c) => c.id === contentId)
+    const content = courseData?.contents.find((c) => c.id === contentId)
     if (!content) return
 
     if (content.type === 't') {
-      // Handle test content
-      Alert.alert('แบบทดสอบ', 'คุณต้องการเริ่มทำแบบทดสอบหรือไม่?', [
-        { text: 'ยกเลิก', style: 'cancel' },
-        {
-          text: 'เริ่มทำ',
-          onPress: () => {
-            // Mock test completion
-            setCompletedContents((prev) => new Set([...prev, contentId]))
-            Alert.alert('สำเร็จ', 'คุณได้คะแนน 85% ผ่านแบบทดสอบแล้ว')
-          },
-        },
-      ])
+      // Navigate to test page
+      handleOpenTest()
       return
     }
 
     if (content.type === 'e') {
-      // Handle evaluation content
-      Alert.alert('แบบประเมิน', 'คุณต้องการทำแบบประเมินหรือไม่?', [
-        { text: 'ยกเลิก', style: 'cancel' },
-        {
-          text: 'ทำแบบประเมิน',
-          onPress: () => {
-            setCompletedContents((prev) => new Set([...prev, contentId]))
-            Alert.alert('สำเร็จ', 'บันทึกแบบประเมินเรียบร้อยแล้ว')
-          },
-        },
-      ])
+      // Navigate to evaluation page
+      handleOpenEvaluation()
       return
     }
 
-    // Regular content completion toggle
-    setCompletedContents((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(contentId)) {
-        newSet.delete(contentId)
-      } else {
-        newSet.add(contentId)
-        // Set progress to 100% when manually marked complete
-        setContentProgress((prevProgress) => {
-          const newMap = new Map(prevProgress)
-          newMap.set(contentId, 1)
-          return newMap
-        })
-      }
-      return newSet
-    })
+    // For regular content, the completion is handled by the timer
+    // Users can't manually mark content as complete
   }
 
   const handleTestStart = (contentId: number) => {
-    // Mock test completion for demo
-    setCompletedContents((prev) => new Set([...prev, contentId]))
-    Alert.alert('สำเร็จ', 'คุณได้คะแนน 85% ผ่านแบบทดสอบแล้ว')
+    const content = courseData?.contents.find((c) => c.id === contentId)
+    if (!content || !courseRegistrationId || !content.contentViewId) return
+
+    // Update test tries via API
+    dispatch(
+      learnActions.updateTestTries(courseRegistrationId, content.contentViewId)
+    )
   }
 
   const handleOpenTest = () => {
-    if (selectedContent) {
+    if (selectedContent && courseData) {
       router.push({
         pathname: '/test',
         params: {
           contentId: selectedContent.id.toString(),
+          courseId: courseData.id.toString(),
           courseName: courseData.name,
+          registrationId: courseRegistrationId?.toString() || '',
+          contentViewId: selectedContent.contentViewId?.toString() || '',
         },
       })
     }
   }
 
   const handleOpenEvaluation = () => {
-    if (selectedContent) {
+    if (selectedContent && courseData) {
       router.push({
         pathname: '/evaluation',
         params: {
           contentId: selectedContent.id.toString(),
+          courseId: courseData.id.toString(),
           courseName: courseData.name,
+          registrationId: courseRegistrationId?.toString() || '',
+          contentViewId: selectedContent.contentViewId?.toString() || '',
+          evaluationId: selectedContent.evaluationId?.toString() || '',
         },
       })
     }
@@ -278,6 +453,7 @@ export default function ClassroomScreen() {
 
   const handleCourseRatingChange = (rating: number) => {
     setCourseRating(rating)
+    // TODO: Send rating to API if needed
   }
 
   const handleMinuteComplete = () => {
@@ -286,6 +462,38 @@ export default function ClassroomScreen() {
 
   const handleCoinAnimationComplete = () => {
     setShowCoinAnimation(false)
+  }
+
+  // Loading state
+  if (isLoading || !courseData) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+        <ClassroomHeader courseName='กำลังโหลด...' showCelebration={false} />
+        <ThemedView style={styles.loadingContainer}>
+          <ActivityIndicator size='large' color={tintColor} />
+          <ThemedText style={styles.loadingText}>
+            กำลังโหลดข้อมูลรายวิชา...
+          </ThemedText>
+        </ThemedView>
+      </SafeAreaView>
+    )
+  }
+
+  // Course not accessible
+  if (!accessible) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+        <ClassroomHeader courseName={courseData.name} showCelebration={false} />
+        <ThemedView style={styles.loadingContainer}>
+          <ThemedText style={styles.lockedTitle}>
+            ไม่สามารถเข้าสู่บทเรียนได้
+          </ThemedText>
+          <ThemedText style={styles.lockedText}>
+            รายวิชานี้ยังไม่เปิดให้เรียน หรือหมดเวลาเรียนแล้ว
+          </ThemedText>
+        </ThemedView>
+      </SafeAreaView>
+    )
   }
 
   return (
@@ -393,5 +601,32 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     marginBottom: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    opacity: 0.6,
+    textAlign: 'center',
+  },
+  lockedTitle: {
+    fontSize: 18,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#6B7280',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  lockedText: {
+    fontSize: 14,
+    fontFamily: 'Prompt-Regular',
+    color: '#9CA3AF',
+    textAlign: 'center',
+    lineHeight: 22,
   },
 })

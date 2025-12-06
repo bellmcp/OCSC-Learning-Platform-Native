@@ -4,6 +4,7 @@ export interface RootState {
   categories: CategoriesState
   courses: CoursesState
   curriculums: CurriculumsState
+  learn: LearnState
   me: MeState
   press: PressState
   registrations: RegistrationsState
@@ -36,6 +37,23 @@ export interface CurriculumsState {
   isLoading: boolean
   items: any[]
   child: any[]
+}
+
+export interface LearnState {
+  isLoading: boolean
+  isContentViewsLoading: boolean
+  isSessionLoading: boolean
+  session: {
+    id?: string
+    key?: string
+  } | null
+  contentViews: any[]
+  contentSeconds: any
+  evaluation: any
+  evaluationItems: any[]
+  test: any
+  testItems: any[]
+  config: any
 }
 
 export interface MeState {

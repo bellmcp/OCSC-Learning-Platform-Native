@@ -16,6 +16,7 @@ export interface ClassroomContent {
   contentSeconds?: number | null
   testScore?: number | null
   testTries?: number | null
+  contentViewId?: number | null // ID of the ContentView record for API updates
 }
 
 export interface CourseData {
