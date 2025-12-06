@@ -6,11 +6,12 @@ import * as Sharing from 'expo-sharing'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
-  Alert,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native'
 import { captureRef } from 'react-native-view-shot'
@@ -25,6 +26,7 @@ import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import * as meActions from '@/modules/me/actions'
+import * as uiActions from '@/modules/ui/actions'
 import type { AppDispatch, RootState } from '@/store/types'
 
 // Helper to format date in Thai Buddhist calendar (full format)
@@ -66,6 +68,21 @@ export default function CertificateScreen() {
 
   const [loadingImage, setLoadingImage] = useState(false)
   const [loadingPDF, setLoadingPDF] = useState(false)
+
+  // Modal state (for errors only)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [modalTitle, setModalTitle] = useState('')
+  const [modalMessage, setModalMessage] = useState('')
+
+  const showModal = (title: string, message: string) => {
+    setModalTitle(title)
+    setModalMessage(message)
+    setModalVisible(true)
+  }
+
+  const handleModalClose = () => {
+    setModalVisible(false)
+  }
 
   // Redux state selectors
   const {
@@ -138,7 +155,7 @@ export default function CertificateScreen() {
   // Save as image
   const handleSaveAsImage = async () => {
     if (!certificateRef.current?.containerRef?.current) {
-      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถบันทึกรูปภาพได้')
+      showModal('ข้อผิดพลาด', 'ไม่สามารถบันทึกรูปภาพได้')
       return
     }
 
@@ -148,7 +165,7 @@ export default function CertificateScreen() {
       // Request media library permission
       const { status } = await MediaLibrary.requestPermissionsAsync()
       if (status !== 'granted') {
-        Alert.alert(
+        showModal(
           'ต้องการสิทธิ์',
           'กรุณาอนุญาตให้แอปเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตร'
         )
@@ -173,20 +190,23 @@ export default function CertificateScreen() {
         // Album creation might fail if album exists, that's ok
       }
 
-      Alert.alert('สำเร็จ', 'บันทึกประกาศนียบัตรเป็นไฟล์รูปภาพเรียบร้อยแล้ว', [
-        { text: 'ตกลง' },
-        {
-          text: 'แชร์',
-          onPress: async () => {
-            if (await Sharing.isAvailableAsync()) {
-              await Sharing.shareAsync(uri)
-            }
-          },
-        },
-      ])
+      // Show success snackbar
+      dispatch(
+        uiActions.setFlashMessage(
+          'บันทึกประกาศนียบัตรเป็นไฟล์รูปภาพเรียบร้อยแล้ว',
+          'success'
+        )
+      )
+
+      // Optionally share
+      if (await Sharing.isAvailableAsync()) {
+        setTimeout(async () => {
+          await Sharing.shareAsync(uri)
+        }, 500)
+      }
     } catch (error) {
       console.error('Error saving image:', error)
-      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถบันทึกรูปภาพได้ กรุณาลองใหม่อีกครั้ง')
+      showModal('ข้อผิดพลาด', 'ไม่สามารถบันทึกรูปภาพได้ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setLoadingImage(false)
     }
@@ -196,7 +216,7 @@ export default function CertificateScreen() {
   const handleSaveAsPDF = async () => {
     const html = certificateRef.current?.getPrintHTML()
     if (!html) {
-      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถสร้างไฟล์ PDF ได้')
+      showModal('ข้อผิดพลาด', 'ไม่สามารถสร้างไฟล์ PDF ได้')
       return
     }
 
@@ -219,22 +239,27 @@ export default function CertificateScreen() {
         to: fileUri,
       })
 
-      // Share or save the PDF
+      // Show success snackbar
+      dispatch(
+        uiActions.setFlashMessage(
+          'บันทึกประกาศนียบัตรเป็นไฟล์ PDF เรียบร้อยแล้ว',
+          'success'
+        )
+      )
+
+      // Share the PDF
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri, {
-          mimeType: 'application/pdf',
-          dialogTitle: 'บันทึกประกาศนียบัตร PDF',
-          UTI: 'com.adobe.pdf',
-        })
-      } else {
-        Alert.alert('สำเร็จ', 'บันทึกประกาศนียบัตรเป็นไฟล์ PDF เรียบร้อยแล้ว')
+        setTimeout(async () => {
+          await Sharing.shareAsync(fileUri, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'บันทึกประกาศนียบัตร PDF',
+            UTI: 'com.adobe.pdf',
+          })
+        }, 500)
       }
     } catch (error) {
       console.error('Error saving PDF:', error)
-      Alert.alert(
-        'ข้อผิดพลาด',
-        'ไม่สามารถสร้างไฟล์ PDF ได้ กรุณาลองใหม่อีกครั้ง'
-      )
+      showModal('ข้อผิดพลาด', 'ไม่สามารถสร้างไฟล์ PDF ได้ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setLoadingPDF(false)
     }
@@ -429,6 +454,33 @@ export default function CertificateScreen() {
       </ScrollView>
 
       <StatusBarGradient />
+
+      {/* Custom Modal (for errors) */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={handleModalClose}
+      >
+        <TouchableWithoutFeedback onPress={handleModalClose}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContainer}>
+                <ThemedText style={styles.modalTitle}>{modalTitle}</ThemedText>
+                <ThemedText style={styles.modalMessage}>
+                  {modalMessage}
+                </ThemedText>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={handleModalClose}
+                >
+                  <ThemedText style={styles.modalButtonText}>ตกลง</ThemedText>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </ThemedView>
   )
 }
@@ -572,5 +624,55 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Prompt-SemiBold',
     marginLeft: 8,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    maxWidth: 400,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#4B5563',
+    lineHeight: 24,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  modalButton: {
+    backgroundColor: '#183A7C',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: 'white',
   },
 })
