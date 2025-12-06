@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useLocalSearchParams } from 'expo-router'
 import * as React from 'react'
 import { BottomNavigation, useTheme } from 'react-native-paper'
@@ -18,7 +19,38 @@ export default function TabLayout() {
   const theme = useTheme()
   const [index, setIndex] = React.useState(0)
   const [isLoggedIn, setIsLoggedIn] = React.useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true)
   const params = useLocalSearchParams<{ tab?: string }>()
+
+  // Log state changes
+  React.useEffect(() => {
+    console.log('[TabLayout] isLoggedIn state changed to:', isLoggedIn)
+  }, [isLoggedIn])
+
+  // Check for existing token on mount
+  React.useEffect(() => {
+    const checkLoginStatus = async () => {
+      console.log('[TabLayout] Checking for stored token...')
+      try {
+        const token = await AsyncStorage.getItem('token')
+        if (token) {
+          console.log('[TabLayout] ✅ Token found! Setting isLoggedIn to TRUE')
+          setIsLoggedIn(true)
+        } else {
+          console.log('[TabLayout] ❌ No token found, user is NOT logged in')
+          setIsLoggedIn(false)
+        }
+      } catch (error) {
+        console.error('[TabLayout] Error checking login status:', error)
+        setIsLoggedIn(false)
+      } finally {
+        setIsCheckingAuth(false)
+        console.log('[TabLayout] Auth check complete')
+      }
+    }
+    
+    checkLoginStatus()
+  }, [])
 
   // Function to navigate to account tab
   const goToAccountTab = React.useCallback(() => {
@@ -38,6 +70,7 @@ export default function TabLayout() {
 
   // Define routes based on login state
   const routes = React.useMemo(() => {
+    console.log('[TabLayout] Rebuilding routes, isLoggedIn:', isLoggedIn)
     if (isLoggedIn) {
       return [
         {
@@ -130,6 +163,14 @@ export default function TabLayout() {
       setIndex(0) // Reset to home tab when logged out
     }
   }, [isLoggedIn, index])
+
+  // Show loading while checking auth
+  if (isCheckingAuth) {
+    console.log('[TabLayout] Still checking auth, showing loading...')
+    return null // or a loading spinner
+  }
+
+  console.log('[TabLayout] Rendering with isLoggedIn:', isLoggedIn)
 
   return (
     <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn, goToAccountTab }}>

@@ -1,6 +1,7 @@
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useContext, useEffect, useState } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import {
   ActivityIndicator,
   Platform,
@@ -82,7 +83,30 @@ export default function CourseDetailScreen() {
   const tintColor = useThemeColor({}, 'tint')
 
   // Login context
-  const { isLoggedIn } = useContext(LoginContext)
+  const { isLoggedIn: contextIsLoggedIn } = useContext(LoginContext)
+  
+  // Local state to track login status independently
+  const [isLoggedIn, setIsLoggedIn] = useState(contextIsLoggedIn)
+  
+  // Check token directly on mount and when context changes
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token')
+        const hasToken = !!token
+        console.log('[CourseDetail] Direct token check:', hasToken)
+        console.log('[CourseDetail] Context isLoggedIn:', contextIsLoggedIn)
+        // Use whichever is true (token exists OR context says logged in)
+        const loggedIn = hasToken || contextIsLoggedIn
+        setIsLoggedIn(loggedIn)
+        console.log('[CourseDetail] Final isLoggedIn set to:', loggedIn)
+      } catch (error) {
+        console.error('[CourseDetail] Error checking auth:', error)
+        setIsLoggedIn(contextIsLoggedIn)
+      }
+    }
+    checkAuth()
+  }, [contextIsLoggedIn])
 
   // Registration button state
   const [isRegisterButtonDisabled, setIsRegisterButtonDisabled] =

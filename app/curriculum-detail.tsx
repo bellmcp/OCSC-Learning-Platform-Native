@@ -1,6 +1,7 @@
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import {
   ActivityIndicator,
   Platform,
@@ -153,8 +154,30 @@ export default function CurriculumDetailScreen() {
   const dispatch = useDispatch()
 
   // Login context
-  const { isLoggedIn } = useContext(LoginContext)
-
+  const { isLoggedIn: contextIsLoggedIn } = useContext(LoginContext)
+  
+  // Local state to track login status independently
+  const [isLoggedIn, setIsLoggedIn] = useState(contextIsLoggedIn)
+  
+  // Check token directly on mount and when context changes
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token')
+        const hasToken = !!token
+        console.log('[CurriculumDetail] Direct token check:', hasToken)
+        console.log('[CurriculumDetail] Context isLoggedIn:', contextIsLoggedIn)
+        // Use whichever is true (token exists OR context says logged in)
+        const loggedIn = hasToken || contextIsLoggedIn
+        setIsLoggedIn(loggedIn)
+        console.log('[CurriculumDetail] Final isLoggedIn set to:', loggedIn)
+      } catch (error) {
+        console.error('[CurriculumDetail] Error checking auth:', error)
+        setIsLoggedIn(contextIsLoggedIn)
+      }
+    }
+    checkAuth()
+  }, [contextIsLoggedIn])
   // Redux state selectors
   const { isLoading, currentCurriculum: curriculum } = useSelector(
     (state: RootState) => state.curriculums
@@ -488,6 +511,7 @@ export default function CurriculumDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 40,
   },
   header: {
     paddingTop: Platform.OS === 'ios' ? 70 : 50,
