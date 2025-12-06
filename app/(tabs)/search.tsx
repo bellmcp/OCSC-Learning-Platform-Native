@@ -98,25 +98,32 @@ export default function SearchScreen() {
   )
   const [hasSearched, setHasSearched] = useState(false)
 
-  // Cache flag to prevent unnecessary reloads
-  const hasLoadedInitialData = useRef(false)
-
-  // Load initial data on mount (only if not already loaded)
+  // Load initial data only if not already present in Redux (from home page)
   useEffect(() => {
-    const hasData =
-      courses.length > 0 && curriculums.length > 0 && categories.length > 0
-
-    if (!hasLoadedInitialData.current && !hasData) {
-      console.log('SearchScreen: Loading initial data from API...')
+    // Only load courses if not already in Redux
+    if (courses.length === 0 && !isCoursesLoading) {
+      console.log('SearchScreen: Loading courses from API...')
       dispatch(coursesActions.loadCourses() as any)
-      dispatch(curriculumsActions.loadCurriculums('') as any)
-      dispatch(categoriesActions.loadCategories() as any)
-      hasLoadedInitialData.current = true
-    } else if (hasData) {
-      console.log('SearchScreen: Using cached data')
-      hasLoadedInitialData.current = true
+    } else if (courses.length > 0) {
+      console.log('SearchScreen: Using cached courses from Redux')
     }
-  }, [dispatch, courses.length, curriculums.length, categories.length])
+
+    // Only load curriculums if not already in Redux
+    if (curriculums.length === 0 && !isCurriculumsLoading) {
+      console.log('SearchScreen: Loading curriculums from API...')
+      dispatch(curriculumsActions.loadCurriculums('') as any)
+    } else if (curriculums.length > 0) {
+      console.log('SearchScreen: Using cached curriculums from Redux')
+    }
+
+    // Only load categories if not already in Redux
+    if (categories.length === 0) {
+      console.log('SearchScreen: Loading categories from API...')
+      dispatch(categoriesActions.loadCategories() as any)
+    } else {
+      console.log('SearchScreen: Using cached categories from Redux')
+    }
+  }, []) // Empty dependency - only run once on mount
 
   // Filter results when search query or data changes
   useEffect(() => {
