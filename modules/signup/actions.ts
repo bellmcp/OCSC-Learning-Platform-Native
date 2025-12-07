@@ -1,4 +1,9 @@
+import { PORTAL_API_URL } from '@env'
 import axios from 'axios'
+
+// Portal API base URL (learningportalapi) for signup-related endpoints
+const portalApiBaseUrl =
+  PORTAL_API_URL || 'https://learningportal.ocsc.go.th/learningportalapi/'
 
 // Action Types
 const LOAD_EDUCATIONS_REQUEST =
@@ -96,7 +101,9 @@ function loadEducations() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_EDUCATIONS_REQUEST })
     try {
-      const { data } = await axios.get('/Educations')
+      const { data } = await axios.get('/Educations', {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: LOAD_EDUCATIONS_SUCCESS,
         payload: { educations: data },
@@ -111,7 +118,9 @@ function loadJobTypes1() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_JOBTYPES1_REQUEST })
     try {
-      const { data } = await axios.get('/JobTypes1')
+      const { data } = await axios.get('/JobTypes1', {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: LOAD_JOBTYPES1_SUCCESS,
         payload: { jobTypes1: data },
@@ -126,7 +135,9 @@ function loadJobTypes2() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_JOBTYPES2_REQUEST })
     try {
-      const { data } = await axios.get('/JobTypes2/Genuine')
+      const { data } = await axios.get('/JobTypes2/Genuine', {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: LOAD_JOBTYPES2_SUCCESS,
         payload: { jobTypes2: data },
@@ -156,7 +167,9 @@ function loadJobLevels() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_JOBLEVELS_REQUEST })
     try {
-      const { data } = await axios.get('/JobLevels')
+      const { data } = await axios.get('/JobLevels', {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: LOAD_JOBLEVELS_SUCCESS,
         payload: { jobLevels: data },
@@ -171,7 +184,9 @@ function loadMinistries() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_MINISTRIES_REQUEST })
     try {
-      const { data } = await axios.get('/Ministries/Genuine')
+      const { data } = await axios.get('/Ministries/Genuine', {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: LOAD_MINISTRIES_SUCCESS,
         payload: { ministries: data },
@@ -186,7 +201,12 @@ function loadDepartments(ministryId: number) {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_DEPARTMENTS_REQUEST })
     try {
-      const { data } = await axios.get(`/Ministries/${ministryId}/Departments`)
+      const { data } = await axios.get(
+        `/Ministries/${ministryId}/Departments`,
+        {
+          baseURL: portalApiBaseUrl,
+        }
+      )
       dispatch({
         type: LOAD_DEPARTMENTS_SUCCESS,
         payload: { departments: data },
@@ -201,7 +221,9 @@ function loadStateEnterprises() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_STATE_ENTERPRISES_REQUEST })
     try {
-      const { data } = await axios.get('/StateEnterprises/Genuine')
+      const { data } = await axios.get('/StateEnterprises/Genuine', {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: LOAD_STATE_ENTERPRISES_SUCCESS,
         payload: { stateEnterprises: data },
@@ -216,7 +238,9 @@ function loadOccupations() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_OCCUPATIONS_REQUEST })
     try {
-      const { data } = await axios.get('/Occupations')
+      const { data } = await axios.get('/Occupations', {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: LOAD_OCCUPATIONS_SUCCESS,
         payload: { occupations: data },
@@ -231,7 +255,9 @@ function loadPositions() {
   return async (dispatch: any) => {
     dispatch({ type: LOAD_POSITIONS_REQUEST })
     try {
-      const { data } = await axios.get('/constants/position')
+      const { data } = await axios.get('/constants/position', {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: LOAD_POSITIONS_SUCCESS,
         payload: { positions: data },
@@ -246,7 +272,9 @@ function checkPresence(nationalId: string) {
   return async (dispatch: any) => {
     dispatch({ type: CHECK_PRESENCE_REQUEST })
     try {
-      const { data } = await axios.get(`/Users/${nationalId}/Presence`)
+      const { data } = await axios.get(`/Users/${nationalId}/Presence`, {
+        baseURL: portalApiBaseUrl,
+      })
       dispatch({
         type: CHECK_PRESENCE_SUCCESS,
         payload: {
@@ -315,6 +343,7 @@ function submitSignup(memberData: MemberData) {
     dispatch({ type: SUBMIT_SIGNUP_REQUEST })
     try {
       const { data } = await axios.post('/Members', memberData, {
+        baseURL: portalApiBaseUrl,
         headers: {
           'Content-Type': 'application/json',
         },

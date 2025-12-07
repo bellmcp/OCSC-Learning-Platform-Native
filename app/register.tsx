@@ -620,7 +620,7 @@ export default function RegisterScreen() {
           <View style={styles.pickerModalContent}>
             <View style={styles.pickerModalHeader}>
               <TouchableOpacity onPress={() => setShowPickerModal(null)}>
-                <ThemedText style={styles.pickerModalCancel}>ยกเลิก</ThemedText>
+                <ThemedText style={styles.pickerModalCancel}>ปิด</ThemedText>
               </TouchableOpacity>
               <ThemedText style={styles.pickerModalTitle}>{title}</ThemedText>
               <TouchableOpacity
@@ -2147,7 +2147,7 @@ const styles = StyleSheet.create({
   pickerModalCancel: {
     fontSize: 16,
     fontFamily: 'Prompt-Regular',
-    color: '#999',
+    color: '#333',
   },
   pickerModalDone: {
     fontSize: 16,
