@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "OCSCLearningSpace.app"
-               BlueprintName = "OCSCLearningSpace"
-               ReferencedContainer = "container:OCSCLearningSpace.xcodeproj">
+               BuildableName = "LearningSpace.app"
+               BlueprintName = "LearningSpace"
+               ReferencedContainer = "container:LearningSpace.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "OCSCLearningSpaceTests.xctest"
-               BlueprintName = "OCSCLearningSpaceTests"
-               ReferencedContainer = "container:OCSCLearningSpace.xcodeproj">
+               BuildableName = "LearningSpaceTests.xctest"
+               BlueprintName = "LearningSpaceTests"
+               ReferencedContainer = "container:LearningSpace.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "OCSCLearningSpace.app"
-            BlueprintName = "OCSCLearningSpace"
-            ReferencedContainer = "container:OCSCLearningSpace.xcodeproj">
+            BuildableName = "LearningSpace.app"
+            BlueprintName = "LearningSpace"
+            ReferencedContainer = "container:LearningSpace.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "OCSCLearningSpace.app"
-            BlueprintName = "OCSCLearningSpace"
-            ReferencedContainer = "container:OCSCLearningSpace.xcodeproj">
+            BuildableName = "LearningSpace.app"
+            BlueprintName = "LearningSpace"
+            ReferencedContainer = "container:LearningSpace.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
