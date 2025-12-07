@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useLocalSearchParams } from 'expo-router'
 import * as React from 'react'
+import { StyleSheet, View } from 'react-native'
 import { BottomNavigation, useTheme } from 'react-native-paper'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -11,6 +12,44 @@ import HomeScreen from './index'
 import LearnScreen from './learn'
 import SearchScreen from './search'
 import SupportScreen from './support'
+
+// Scene wrapper that keeps scenes mounted but hidden when not active
+// Uses position absolute + opacity instead of display:none to prevent image reloading
+const SceneWrapper = React.memo(
+  ({
+    children,
+    isActive,
+    shouldRender,
+  }: {
+    children: React.ReactNode
+    isActive: boolean
+    shouldRender: boolean
+  }) => {
+    if (!shouldRender) return null
+    return (
+      <View
+        style={[sceneStyles.scene, !isActive && sceneStyles.hidden]}
+        pointerEvents={isActive ? 'auto' : 'none'}
+      >
+        {children}
+      </View>
+    )
+  }
+)
+
+const sceneStyles = StyleSheet.create({
+  scene: {
+    flex: 1,
+  },
+  hidden: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0,
+  },
+})
 
 // Create a context for sharing login state and tab navigation
 export const LoginContext = React.createContext({
@@ -165,24 +204,63 @@ export default function TabLayout() {
   // Ensure index is always valid for current routes
   const validIndex = Math.min(index, routes.length - 1)
 
-  const renderScene = ({ route, jumpTo }: any) => {
-    switch (route.key) {
-      case 'home':
-        return <HomeScreen key={`home-${validIndex}`} />
-      case 'search':
-        return <SearchScreen key={`search-${validIndex}`} />
-      case 'learn':
-        return isLoggedIn ? <LearnScreen key={`learn-${validIndex}`} /> : null
-      case 'support':
-        return isLoggedIn ? (
-          <SupportScreen key={`support-${validIndex}`} />
-        ) : null
-      case 'account':
-        return <AccountScreen key={`account-${validIndex}`} />
-      default:
-        return null
+  // Track which scenes have been visited (for lazy loading while preserving state)
+  const [visitedScenes, setVisitedScenes] = React.useState<Set<string>>(
+    new Set(['home'])
+  )
+
+  // Update visited scenes when index changes
+  React.useEffect(() => {
+    const currentRoute = routes[validIndex]
+    if (currentRoute && !visitedScenes.has(currentRoute.key)) {
+      setVisitedScenes((prev) => new Set([...prev, currentRoute.key]))
     }
-  }
+  }, [validIndex, routes, visitedScenes])
+
+  // Custom render scene that keeps all visited scenes mounted
+  const renderScene = React.useCallback(
+    ({ route }: any) => {
+      const currentRouteKey = routes[validIndex]?.key
+      const isActive = route.key === currentRouteKey
+      const shouldRender = visitedScenes.has(route.key)
+
+      switch (route.key) {
+        case 'home':
+          return (
+            <SceneWrapper isActive={isActive} shouldRender={shouldRender}>
+              <HomeScreen />
+            </SceneWrapper>
+          )
+        case 'search':
+          return (
+            <SceneWrapper isActive={isActive} shouldRender={shouldRender}>
+              <SearchScreen />
+            </SceneWrapper>
+          )
+        case 'learn':
+          return isLoggedIn ? (
+            <SceneWrapper isActive={isActive} shouldRender={shouldRender}>
+              <LearnScreen />
+            </SceneWrapper>
+          ) : null
+        case 'support':
+          return isLoggedIn ? (
+            <SceneWrapper isActive={isActive} shouldRender={shouldRender}>
+              <SupportScreen />
+            </SceneWrapper>
+          ) : null
+        case 'account':
+          return (
+            <SceneWrapper isActive={isActive} shouldRender={shouldRender}>
+              <AccountScreen />
+            </SceneWrapper>
+          )
+        default:
+          return null
+      }
+    },
+    [isLoggedIn, validIndex, routes, visitedScenes]
+  )
 
   // Reset index when login state changes to prevent invalid indices
   React.useEffect(() => {
@@ -214,6 +292,8 @@ export default function TabLayout() {
         navigationState={{ index: validIndex, routes }}
         onIndexChange={setIndex}
         renderScene={renderScene}
+        sceneAnimationEnabled={false}
+        sceneAnimationType='shifting'
         activeColor={theme.colors.primary}
         inactiveColor={theme.colors.onSurfaceVariant}
         labelMaxFontSizeMultiplier={1}
