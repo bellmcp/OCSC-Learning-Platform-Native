@@ -5,7 +5,6 @@ import {
   ActivityIndicator,
   Dimensions,
   FlatList,
-  Linking,
   Platform,
   RefreshControl,
   ScrollView,
@@ -314,12 +313,16 @@ export default function HomeScreen() {
     }
   }, [bannerData.length])
 
-  // Pause auto-scroll when user manually scrolls
-  const handleBannerPress = (targetUrl: string) => {
+  // Handle banner press - open in WebView
+  const handleBannerPress = (targetUrl: string, title?: string) => {
     if (targetUrl) {
-      Linking.openURL(targetUrl).catch((err: any) =>
-        console.error('Failed to open URL:', err)
-      )
+      router.push({
+        pathname: '/portal-webview',
+        params: {
+          url: targetUrl,
+          title: title || 'ข่าวสาร',
+        },
+      })
     }
   }
 
@@ -394,7 +397,7 @@ export default function HomeScreen() {
     <View style={styles.bannerItemWrapper}>
       <TouchableOpacity
         style={styles.bannerItem}
-        onPress={() => handleBannerPress(item.targetUrl)}
+        onPress={() => handleBannerPress(item.targetUrl, item.title)}
         activeOpacity={0.8}
       >
         <View style={styles.bannerImageContainer}>
