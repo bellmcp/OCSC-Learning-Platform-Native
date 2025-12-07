@@ -15,7 +15,7 @@ interface ContentViewProps {
   selectedContent: ClassroomContent | null
   courseName: string
   onTestStart: (contentId: number) => void
-  onContentLoadStart: () => void
+  onContentLoadStart?: () => void
   onOpenTest: () => void
   onOpenEvaluation: () => void
 }

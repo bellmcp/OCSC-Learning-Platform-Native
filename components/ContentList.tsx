@@ -14,6 +14,7 @@ interface ContentListProps {
   onContentSelect: (contentId: number) => void
   onScrollToTop?: () => void
   hideHeader?: boolean
+  isSeqFlow?: boolean // Sequential flow - items must be completed in order
 }
 
 const formatDuration = (minutes?: number | null): string => {
@@ -46,7 +47,17 @@ export function ContentList({
   onContentSelect,
   onScrollToTop,
   hideHeader,
+  isSeqFlow = false,
 }: ContentListProps) {
+  // Sequential flow logic - disable items if previous item is not completed
+  // This matches the desktop behavior in ContentList.tsx
+  const isItemDisabled = (index: number): boolean => {
+    if (!isSeqFlow || index === 0) return false
+    // Check if previous item is completed
+    const previousItem = contents[index - 1]
+    return previousItem ? !completedContents.has(previousItem.id) : false
+  }
+
   const renderContentItem = ({
     item,
     index,
@@ -56,6 +67,7 @@ export function ContentList({
   }) => {
     const isCompleted = completedContents.has(item.id)
     const isSelected = selectedContentId === item.id
+    const isDisabled = isItemDisabled(index)
 
     return (
       <TouchableOpacity
@@ -67,20 +79,30 @@ export function ContentList({
             (isCompleted
               ? styles.selectedCompletedContentItem
               : styles.selectedContentItem),
+          isDisabled && styles.disabledContentItem,
         ]}
         onPress={() => {
-          onContentSelect(item.id)
-          onScrollToTop?.()
+          if (!isDisabled) {
+            onContentSelect(item.id)
+            onScrollToTop?.()
+          }
         }}
+        disabled={isDisabled}
       >
         <View style={styles.contentItemContainer}>
           <ThemedView style={styles.iconContainer}>
             <IconSymbol
-              name={item.type === 't' ? 'doc.text.fill' : 'play.circle.fill'}
+              name={
+                isDisabled
+                  ? 'lock.fill'
+                  : item.type === 't'
+                  ? 'doc.text.fill'
+                  : 'play.circle.fill'
+              }
               size={32}
-              color='#6B7280'
+              color={isDisabled ? '#9CA3AF' : '#6B7280'}
             />
-            {isCompleted && (
+            {isCompleted && !isDisabled && (
               <ThemedView style={styles.completedBadge}>
                 <IconSymbol
                   name='checkmark.circle.fill'
@@ -179,6 +201,9 @@ const styles = StyleSheet.create({
   selectedContentItem: {
     backgroundColor: '#F0F7FF',
     borderLeftColor: '#183A7C',
+  },
+  disabledContentItem: {
+    opacity: 0.5,
   },
   contentItemContainer: {
     flexDirection: 'row',

@@ -236,7 +236,7 @@ export default function CoinsScreen() {
               <IconSymbol
                 name='checkmark.circle.fill'
                 size={20}
-                color='#10B981'
+                color='#2e7d32'
               />
               <ThemedText style={styles.infoText}>
                 เรียนจบหลักสูตรหรือบทเรียน
@@ -246,7 +246,7 @@ export default function CoinsScreen() {
               <IconSymbol
                 name='checkmark.circle.fill'
                 size={20}
-                color='#10B981'
+                color='#2e7d32'
               />
               <ThemedText style={styles.infoText}>
                 ทำแบบทดสอบผ่านเกณฑ์ที่กำหนด
@@ -256,7 +256,7 @@ export default function CoinsScreen() {
               <IconSymbol
                 name='checkmark.circle.fill'
                 size={20}
-                color='#10B981'
+                color='#2e7d32'
               />
               <ThemedText style={styles.infoText}>
                 เข้าร่วมกิจกรรมพิเศษ

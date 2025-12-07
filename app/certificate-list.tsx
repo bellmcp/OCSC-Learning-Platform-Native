@@ -131,7 +131,7 @@ export default function CertificateListScreen() {
                   {type === 'course' ? 'รายวิชา' : 'หลักสูตร'} {code}
                 </ThemedText>
                 <ThemedText
-                  style={[styles.certificateStatus, { color: '#10B981' }]}
+                  style={[styles.certificateStatus, { color: '#2e7d32' }]}
                   numberOfLines={1}
                 >
                   ผ่านเกณฑ์แล้ว

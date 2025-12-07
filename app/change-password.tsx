@@ -160,7 +160,7 @@ export default function ChangePasswordScreen() {
               <IconSymbol
                 name='checkmark.circle.fill'
                 size={16}
-                color='#10B981'
+                color='#2e7d32'
               />
               <ThemedText style={styles.requirementText}>
                 ความยาวอย่างน้อย 8 ตัวอักษร
@@ -170,7 +170,7 @@ export default function ChangePasswordScreen() {
               <IconSymbol
                 name='checkmark.circle.fill'
                 size={16}
-                color='#10B981'
+                color='#2e7d32'
               />
               <ThemedText style={styles.requirementText}>
                 ประกอบด้วยตัวอักษรและตัวเลข
@@ -180,7 +180,7 @@ export default function ChangePasswordScreen() {
               <IconSymbol
                 name='checkmark.circle.fill'
                 size={16}
-                color='#10B981'
+                color='#2e7d32'
               />
               <ThemedText style={styles.requirementText}>
                 มีตัวพิมพ์ใหญ่และตัวพิมพ์เล็ก

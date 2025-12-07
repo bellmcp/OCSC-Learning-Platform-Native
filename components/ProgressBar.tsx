@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Platform, StyleSheet, View } from 'react-native'
 import {
   ProgressBar as PaperProgressBar,
   Text,
   useTheme,
 } from 'react-native-paper'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { ThemedText } from '@/components/ThemedText'
+import { IconSymbol } from '@/components/ui/IconSymbol'
+import * as learnActions from '@/modules/learn/actions'
+import * as uiActions from '@/modules/ui/actions'
+import type { AppDispatch, RootState } from '@/store/types'
 
 import { ClassroomContent } from './types'
 
@@ -17,6 +22,8 @@ interface ProgressBarProps {
   contentProgress: Map<number, number>
   backgroundColor: string
   onMinuteComplete?: () => void
+  onContentComplete?: (contentId: number) => void
+  courseRegistrationId?: number
 }
 
 export function ProgressBar({
@@ -26,61 +33,173 @@ export function ProgressBar({
   contentProgress,
   backgroundColor,
   onMinuteComplete,
+  onContentComplete,
+  courseRegistrationId,
 }: ProgressBarProps) {
   const theme = useTheme()
-  const [seconds, setSeconds] = useState(0) // Count seconds
-  const [accumulatedMinutes, setAccumulatedMinutes] = useState(0) // Accumulated learning minutes
-  const totalRequiredMinutes = 2 // Total required minutes for this content
-  const [isActive, setIsActive] = useState(true)
+  const dispatch = useDispatch<AppDispatch>()
+  const { isContentViewsLoading } = useSelector(
+    (state: RootState) => state.learn
+  )
 
-  // Reset timer when selected content changes
+  const [seconds, setSeconds] = useState(0) // Count seconds (0-59)
+  const [accumulatedMinutes, setAccumulatedMinutes] = useState(0) // Accumulated learning minutes
+  const [isCompleted, setIsCompleted] = useState(false)
+
+  // Ref to track accumulated minutes for interval callback (avoids stale closure)
+  const accumulatedMinutesRef = useRef(accumulatedMinutes)
+
+  // Get the total required minutes from the selected content
+  const totalRequiredMinutes = selectedContent?.minutes || 0
+  const contentViewId = selectedContent?.contentViewId
+
+  // Check if current content is completed (from props or local state)
+  const isContentCompleted = selectedContent
+    ? completedContents.has(selectedContent.id) || isCompleted
+    : false
+
+  // Reset timer and state when selected content changes
   useEffect(() => {
     if (selectedContent) {
       setSeconds(0)
-      setAccumulatedMinutes(0)
-      setIsActive(true)
+      // Initialize with existing content seconds (converted to minutes)
+      const existingMinutes = selectedContent.contentSeconds
+        ? Math.round(selectedContent.contentSeconds / 60)
+        : 0
+      setAccumulatedMinutes(existingMinutes)
+      accumulatedMinutesRef.current = existingMinutes
+      // Reset completed state based on completedContents
+      setIsCompleted(completedContents.has(selectedContent.id))
     }
-  }, [selectedContent?.id])
+  }, [selectedContent?.id, completedContents])
 
-  // Count seconds and convert to minutes
+  // Show "เริ่มจับเวลาเข้าเรียนแล้ว" when starting to track (matching desktop Timer.tsx)
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null
+    if (
+      selectedContent?.type === 'c' &&
+      !isContentViewsLoading &&
+      !isContentCompleted
+    ) {
+      dispatch(uiActions.setFlashMessage('เริ่มจับเวลาเข้าเรียนแล้ว', 'info'))
+    }
+  }, [selectedContent?.id, isContentViewsLoading, isContentCompleted])
 
-    if (isActive) {
-      interval = setInterval(() => {
-        setSeconds((prevSeconds) => {
-          const newSeconds = prevSeconds + 1
+  // CLOCK - Count seconds (matching desktop Timer.tsx lines 70-85)
+  useEffect(() => {
+    let clockInterval: ReturnType<typeof setInterval> | null = null
 
-          // When reaching 60 seconds, increment accumulated minutes
-          if (newSeconds >= 60) {
-            setAccumulatedMinutes((prevMinutes) => {
-              const newMinutes = prevMinutes + 1
-              // Stop accumulating if we reach the total required minutes
-              if (newMinutes >= totalRequiredMinutes) {
-                setIsActive(false)
-                return totalRequiredMinutes
-              }
-              // Call the callback when a minute is completed
-              if (onMinuteComplete) {
-                onMinuteComplete()
-              }
-              return newMinutes
-            })
-            return 0 // Reset seconds to 0
-          }
-
-          return newSeconds
-        })
+    // Only run for content type 'c' and if not completed and not loading
+    if (
+      selectedContent?.type === 'c' &&
+      !isContentCompleted &&
+      !isContentViewsLoading
+    ) {
+      clockInterval = setInterval(() => {
+        setSeconds((prevSeconds) => (prevSeconds >= 59 ? 0 : prevSeconds + 1))
       }, 1000)
     }
 
     return () => {
-      if (interval) clearInterval(interval)
+      if (clockInterval) clearInterval(clockInterval)
     }
-  }, [isActive, totalRequiredMinutes])
+  }, [selectedContent?.id, isContentCompleted, isContentViewsLoading])
+
+  // MINUTE PROGRESS - Update API every 60 seconds (matching desktop Timer.tsx lines 88-144)
+  useEffect(() => {
+    let minuteInterval: ReturnType<typeof setInterval> | null = null
+
+    // Only run for content type 'c' and if not completed and not loading
+    if (
+      selectedContent?.type === 'c' &&
+      !isContentCompleted &&
+      !isContentViewsLoading &&
+      courseRegistrationId &&
+      contentViewId
+    ) {
+      minuteInterval = setInterval(() => {
+        // Use ref to get current value (avoids stale closure)
+        const newMinutes = accumulatedMinutesRef.current + 1
+
+        // Update both ref and state
+        accumulatedMinutesRef.current = newMinutes
+        setAccumulatedMinutes(newMinutes)
+
+        // Check if this minute will complete the content
+        const isGoingToComplete =
+          newMinutes >= totalRequiredMinutes && totalRequiredMinutes > 0
+
+        // Update content view via API (matching desktop Timer.tsx lines 98-104)
+        dispatch(
+          learnActions.updateContentView(
+            courseRegistrationId,
+            contentViewId,
+            60, // Always send 60 seconds increment (matching desktop)
+            !isGoingToComplete // Don't show flash if completing
+          )
+        )
+
+        // If completed, show success message and update state
+        if (isGoingToComplete) {
+          dispatch(
+            uiActions.setFlashMessage(
+              'คุณเรียนเนื้อหานี้ครบเวลาที่กำหนดแล้ว',
+              'success'
+            )
+          )
+          setIsCompleted(true)
+          // Notify parent component - use setTimeout to avoid updating parent during render
+          if (onContentComplete && selectedContent) {
+            setTimeout(() => onContentComplete(selectedContent.id), 0)
+          }
+        } else {
+          // Call the callback when a minute is completed
+          if (onMinuteComplete) {
+            setTimeout(() => onMinuteComplete(), 0)
+          }
+        }
+      }, 60000) // Every 60 seconds
+    }
+
+    return () => {
+      if (minuteInterval) clearInterval(minuteInterval)
+    }
+  }, [
+    selectedContent?.id,
+    selectedContent?.type,
+    isContentCompleted,
+    isContentViewsLoading,
+    courseRegistrationId,
+    contentViewId,
+    totalRequiredMinutes,
+    dispatch,
+    onMinuteComplete,
+    onContentComplete,
+  ])
 
   // Calculate progress percentage
-  const progressPercentage = (accumulatedMinutes / totalRequiredMinutes) * 100
+  const progressPercentage =
+    totalRequiredMinutes > 0
+      ? Math.min((accumulatedMinutes / totalRequiredMinutes) * 100, 100)
+      : 0
+
+  // Don't show progress bar for non-content types (test/evaluation)
+  if (selectedContent?.type !== 'c') {
+    return null
+  }
+
+  // Show completion message when content is completed
+  if (isContentCompleted) {
+    return (
+      <View style={[styles.fixedBottomContainer, { backgroundColor }]}>
+        <View style={styles.completedContainer}>
+          <IconSymbol name='checkmark.circle.fill' size={24} color='#2e7d32' />
+          <ThemedText style={styles.completedText}>
+            คุณสะสมเวลาเรียนในหัวข้อนี้ครบตามที่กำหนดแล้ว
+          </ThemedText>
+        </View>
+      </View>
+    )
+  }
 
   return (
     <View style={[styles.fixedBottomContainer, { backgroundColor }]}>
@@ -146,7 +265,7 @@ export function ProgressBar({
         {/* Center: Accumulated Learning Time */}
         <View style={styles.timeProgress}>
           <Text variant='bodyMedium' style={styles.timeProgressText}>
-            {accumulatedMinutes}/{totalRequiredMinutes} นาที
+            เวลาเรียนสะสม {accumulatedMinutes}/{totalRequiredMinutes} นาที
           </Text>
         </View>
 
@@ -182,6 +301,18 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
     backgroundColor: '#FFFFFF',
+  },
+  completedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  completedText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Medium',
+    color: '#1F2937',
+    lineHeight: 24,
   },
   progressBar: {
     flexDirection: 'row',

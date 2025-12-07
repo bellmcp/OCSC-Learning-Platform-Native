@@ -12,7 +12,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   ClassroomContent,
   ClassroomHeader,
-  CoinAnimation,
   ContentHeader,
   ContentList,
   ContentView,
@@ -103,10 +102,7 @@ export default function ClassroomScreen() {
   const [showCoinAnimation, setShowCoinAnimation] = useState(false)
   const [accessible, setAccessible] = useState(true)
 
-  const contentStartTime = useRef<number | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
-  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const accumulatedSecondsRef = useRef<number>(0)
 
   // Redux state selectors
   const {
@@ -158,28 +154,27 @@ export default function ClassroomScreen() {
       dispatch(registrationsActions.loadLocalDateTime())
       dispatch(learnActions.loadConfig())
     }
-
-    return () => {
-      // Cleanup on unmount
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current)
-      }
-    }
   }, [dispatch, courseId])
 
-  // Create session and load content views when registration is available
+  // Create session when registration is available
   useEffect(() => {
     if (courseRegistrationId) {
-      console.log(
-        '[Classroom] Creating session for registration:',
-        courseRegistrationId
-      )
       dispatch(learnActions.createSession())
-      dispatch(learnActions.loadContentViews(courseRegistrationId))
     }
   }, [dispatch, courseRegistrationId])
 
+  // Load content views when registration is available or when switching content
+  // This matches desktop behavior (Learn.tsx line 189-195) where contentViews are
+  // refetched when contentId changes to get the latest progress
+  useEffect(() => {
+    if (courseRegistrationId) {
+      dispatch(learnActions.loadContentViews(courseRegistrationId))
+    }
+  }, [dispatch, courseRegistrationId, selectedContentId])
+
   // Build course data from Redux state
+  // IMPORTANT: When course is completed (isCourseCompleted), mark ALL contents as completed
+  // This matches the desktop behavior in ContentList.tsx
   const courseData: CourseData | null = useMemo(() => {
     if (!currentCourse || courseContents.length === 0) return null
 
@@ -189,6 +184,11 @@ export default function ClassroomScreen() {
         const view = contentViews.find(
           (cv: any) => cv.courseContentId === content.id
         )
+
+        // When course is completed, mark all content as completed (matching desktop logic)
+        const isContentCompleted = isCourseCompleted
+          ? true
+          : view?.isCompleted || false
 
         return {
           id: content.id,
@@ -203,7 +203,7 @@ export default function ClassroomScreen() {
           testId2: content.testId2,
           testId3: content.testId3,
           evaluationId: content.evaluationId,
-          completed: view?.isCompleted || false,
+          completed: isContentCompleted,
           completeDate: view?.completeDate || null,
           contentSeconds: view?.contentSeconds || null,
           testScore: view?.testScore || null,
@@ -227,7 +227,7 @@ export default function ClassroomScreen() {
       seqFlow: currentCourse.seqFlow,
       contents,
     }
-  }, [currentCourse, courseContents, contentViews])
+  }, [currentCourse, courseContents, contentViews, isCourseCompleted])
 
   // Initialize selected content and completed contents when data is loaded
   useEffect(() => {
@@ -273,111 +273,14 @@ export default function ClassroomScreen() {
     )
   }, [selectedContentId, courseData])
 
-  // Start timer when content is selected
-  useEffect(() => {
-    // Clear previous timer
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current)
-    }
-
-    // Only track time for content type 'c' (video/content)
-    if (
-      selectedContent?.type === 'c' &&
-      courseRegistrationId &&
-      selectedContent.contentViewId &&
-      session
-    ) {
-      console.log('[Classroom] Starting timer for content:', selectedContent.id)
-      contentStartTime.current = Date.now()
-      accumulatedSecondsRef.current = selectedContent.contentSeconds || 0
-
-      // Update every 60 seconds
-      timerIntervalRef.current = setInterval(() => {
-        const currentSeconds = accumulatedSecondsRef.current + 60
-
-        // Update content view via API
-        dispatch(
-          learnActions.updateContentView(
-            courseRegistrationId,
-            selectedContent.contentViewId!,
-            currentSeconds,
-            true // Show flash message
-          )
-        )
-
-        accumulatedSecondsRef.current = currentSeconds
-
-        // Update local progress
-        if (selectedContent.minutes) {
-          const progress = Math.min(
-            currentSeconds / (selectedContent.minutes * 60),
-            1
-          )
-          setContentProgress((prev) => {
-            const newMap = new Map(prev)
-            newMap.set(selectedContent.id, progress)
-            return newMap
-          })
-        }
-
-        // Show coin animation
-        setShowCoinAnimation(true)
-      }, 60000) // Every 60 seconds
-    }
-
-    return () => {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current)
-      }
-    }
-  }, [selectedContent, courseRegistrationId, session, dispatch])
+  // Handle content completion callback from ProgressBar
+  const handleContentComplete = (contentId: number) => {
+    setCompletedContents((prev) => new Set([...prev, contentId]))
+    setShowCoinAnimation(true)
+  }
 
   const handleContentSelect = (contentId: number) => {
-    // Save progress for previous content before switching
-    if (
-      selectedContent?.type === 'c' &&
-      contentStartTime.current &&
-      courseRegistrationId &&
-      selectedContent.contentViewId
-    ) {
-      const timeSpent = Math.floor(
-        (Date.now() - contentStartTime.current) / 1000
-      )
-      const currentSeconds = accumulatedSecondsRef.current + timeSpent
-
-      // Update via API (don't show flash message on content switch)
-      dispatch(
-        learnActions.updateContentView(
-          courseRegistrationId,
-          selectedContent.contentViewId,
-          currentSeconds,
-          false
-        )
-      )
-
-      // Update local progress
-      if (selectedContent.minutes) {
-        const progress = Math.min(
-          currentSeconds / (selectedContent.minutes * 60),
-          1
-        )
-        setContentProgress((prev) => {
-          const newMap = new Map(prev)
-          newMap.set(selectedContent.id, progress)
-          return newMap
-        })
-      }
-    }
-
     setSelectedContentId(contentId)
-    contentStartTime.current = Date.now()
-    accumulatedSecondsRef.current = 0
-
-    // Get the new content's accumulated seconds
-    const newContent = courseData?.contents.find((c) => c.id === contentId)
-    if (newContent?.contentSeconds) {
-      accumulatedSecondsRef.current = newContent.contentSeconds
-    }
   }
 
   const handleMarkComplete = (contentId: number) => {
@@ -438,12 +341,6 @@ export default function ClassroomScreen() {
           evaluationId: selectedContent.evaluationId?.toString() || '',
         },
       })
-    }
-  }
-
-  const handleContentLoadStart = () => {
-    if (!contentStartTime.current) {
-      contentStartTime.current = Date.now()
     }
   }
 
@@ -523,7 +420,6 @@ export default function ClassroomScreen() {
               selectedContent={selectedContent}
               courseName={courseData.name}
               onTestStart={handleTestStart}
-              onContentLoadStart={handleContentLoadStart}
               onOpenTest={handleOpenTest}
               onOpenEvaluation={handleOpenEvaluation}
             />
@@ -537,6 +433,7 @@ export default function ClassroomScreen() {
           completedContents={completedContents}
           onContentSelect={handleContentSelect}
           onScrollToTop={scrollToTop}
+          isSeqFlow={courseData.seqFlow}
         />
 
         {/* Star Rating Section */}
@@ -559,12 +456,8 @@ export default function ClassroomScreen() {
         contentProgress={contentProgress}
         backgroundColor={backgroundColor}
         onMinuteComplete={handleMinuteComplete}
-      />
-
-      {/* Coin Animation Overlay */}
-      <CoinAnimation
-        isVisible={showCoinAnimation}
-        onAnimationComplete={handleCoinAnimationComplete}
+        onContentComplete={handleContentComplete}
+        courseRegistrationId={courseRegistrationId}
       />
     </SafeAreaView>
   )
