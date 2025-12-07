@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useLocalSearchParams } from 'expo-router'
 import * as React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Animated, StyleSheet } from 'react-native'
 import { BottomNavigation, useTheme } from 'react-native-paper'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -13,8 +13,11 @@ import LearnScreen from './learn'
 import SearchScreen from './search'
 import SupportScreen from './support'
 
+// Animation duration in milliseconds
+const ANIMATION_DURATION = 400
+
 // Scene wrapper that keeps scenes mounted but hidden when not active
-// Uses position absolute + opacity instead of display:none to prevent image reloading
+// Uses animated opacity for smooth transitions
 const SceneWrapper = React.memo(
   ({
     children,
@@ -25,14 +28,37 @@ const SceneWrapper = React.memo(
     isActive: boolean
     shouldRender: boolean
   }) => {
+    const opacity = React.useRef(new Animated.Value(isActive ? 1 : 0)).current
+    const isFirstRender = React.useRef(true)
+
+    React.useEffect(() => {
+      // Skip animation on first render
+      if (isFirstRender.current) {
+        isFirstRender.current = false
+        opacity.setValue(isActive ? 1 : 0)
+        return
+      }
+
+      Animated.timing(opacity, {
+        toValue: isActive ? 1 : 0,
+        duration: ANIMATION_DURATION,
+        useNativeDriver: true,
+      }).start()
+    }, [isActive, opacity])
+
     if (!shouldRender) return null
+
     return (
-      <View
-        style={[sceneStyles.scene, !isActive && sceneStyles.hidden]}
+      <Animated.View
+        style={[
+          sceneStyles.scene,
+          !isActive && sceneStyles.hidden,
+          { opacity },
+        ]}
         pointerEvents={isActive ? 'auto' : 'none'}
       >
         {children}
-      </View>
+      </Animated.View>
     )
   }
 )
@@ -47,7 +73,6 @@ const sceneStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    opacity: 0,
   },
 })
 
