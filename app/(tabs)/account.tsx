@@ -873,15 +873,7 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() =>
-              router.push({
-                pathname: '/portal-webview',
-                params: {
-                  url: `${PORTAL_URL}reset`,
-                  title: 'ตั้งรหัสผ่านใหม่',
-                },
-              })
-            }
+            onPress={() => router.push('/reset-password')}
           >
             <IconSymbol name='lock' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>

@@ -9,6 +9,7 @@ export interface RootState {
   otp: OTPState
   press: PressState
   registrations: RegistrationsState
+  resetPassword: ResetPasswordState
   ui: UIState
 }
 
@@ -18,6 +19,11 @@ export interface OTPState {
     info?: string
     qr?: string
   } | null
+}
+
+export interface ResetPasswordState {
+  isLoading: boolean
+  success: boolean
 }
 
 export interface UserState {
