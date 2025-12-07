@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.ocsc.learningplatformnative'
+    namespace 'com.ocsc.learningspace'
     defaultConfig {
-        applicationId 'com.ocsc.learningplatformnative'
+        applicationId 'com.ocsc.learningspace'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

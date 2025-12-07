@@ -1,4 +1,4 @@
-package com.ocsc.learningplatformnative
+package com.ocsc.learningspace
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

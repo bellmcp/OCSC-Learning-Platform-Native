@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>ocsclearningspace</string>
-          <string>com.ocsc.learningplatformnative</string>
+          <string>com.ocsc.learningspace</string>
         </array>
       </dict>
     </array>

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "OCSC Learning Space",
-    "slug": "OCSC-Learning-Platform-Native",
+    "slug": "ocsc-learning-space",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ocsc.learningplatformnative",
+      "bundleIdentifier": "com.ocsc.learningspace",
       "displayName": "Learning Space",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "แอปต้องการเข้าถึงคลังรูปภาพเพื่อบันทึกประกาศนียบัตรของคุณ",
@@ -18,7 +18,7 @@
       }
     },
     "android": {
-      "package": "com.ocsc.learningplatformnative",
+      "package": "com.ocsc.learningspace",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

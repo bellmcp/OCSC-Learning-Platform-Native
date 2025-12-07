@@ -1,4 +1,4 @@
-package com.ocsc.learningplatformnative
+package com.ocsc.learningspace
 
 import android.app.Application
 import android.content.res.Configuration
