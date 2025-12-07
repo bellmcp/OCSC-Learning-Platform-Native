@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Platform, StyleSheet, View } from 'react-native'
+import { AnimatedCircularProgress } from 'react-native-circular-progress'
 import {
   ProgressBar as PaperProgressBar,
   Text,
@@ -201,71 +202,37 @@ export function ProgressBar({
     )
   }
 
+  // Calculate seconds progress (0-100% based on 60 seconds)
+  // Matching desktop: value={props.value * (100 / 60)}
+  const secondsProgress = (seconds / 60) * 100
+
   return (
     <View style={[styles.fixedBottomContainer, { backgroundColor }]}>
       <View style={styles.progressBar}>
         {/* Left: Circular Progress for Seconds */}
-        <View style={{ width: 100 }}>
-          <View style={styles.circularProgress}>
-            <View style={styles.circularContent}>
+        <View style={styles.circularContainer}>
+          <AnimatedCircularProgress
+            size={50}
+            width={4}
+            fill={secondsProgress}
+            tintColor='#183A7C'
+            backgroundColor='#E5E7EB'
+            rotation={0}
+            lineCap='round'
+          >
+            {() => (
               <ThemedText style={styles.secondsText}>{seconds} วิ</ThemedText>
-            </View>
-
-            {/* Circular progress ring with segments */}
-            <View style={styles.circularProgressRing}>
-              {/* Progress segments based on percentage */}
-              {progressPercentage > 0 && (
-                <View
-                  style={[
-                    styles.progressSegment,
-                    {
-                      transform: [{ rotate: '0deg' }],
-                      opacity: progressPercentage > 0 ? 1 : 0,
-                    },
-                  ]}
-                />
-              )}
-              {progressPercentage > 25 && (
-                <View
-                  style={[
-                    styles.progressSegment,
-                    {
-                      transform: [{ rotate: '90deg' }],
-                      opacity: progressPercentage > 25 ? 1 : 0,
-                    },
-                  ]}
-                />
-              )}
-              {progressPercentage > 50 && (
-                <View
-                  style={[
-                    styles.progressSegment,
-                    {
-                      transform: [{ rotate: '180deg' }],
-                      opacity: progressPercentage > 50 ? 1 : 0,
-                    },
-                  ]}
-                />
-              )}
-              {progressPercentage > 75 && (
-                <View
-                  style={[
-                    styles.progressSegment,
-                    {
-                      transform: [{ rotate: '270deg' }],
-                      opacity: progressPercentage > 75 ? 1 : 0,
-                    },
-                  ]}
-                />
-              )}
-            </View>
-          </View>
+            )}
+          </AnimatedCircularProgress>
         </View>
 
         {/* Center: Accumulated Learning Time */}
         <View style={styles.timeProgress}>
+          <Text variant='bodySmall' style={styles.timeProgressLabel}>
+            เวลาเรียนสะสม
+          </Text>
           <Text variant='bodyMedium' style={styles.timeProgressText}>
-            เวลาเรียนสะสม {accumulatedMinutes}/{totalRequiredMinutes} นาที
+            {accumulatedMinutes}/{totalRequiredMinutes} นาที
           </Text>
         </View>
 
@@ -309,7 +276,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   completedText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Prompt-Medium',
     color: '#1F2937',
     lineHeight: 24,
@@ -319,74 +286,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  circularProgress: {
+  circularContainer: {
     width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#F3F4F6',
     alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  circularContent: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '100%',
   },
   secondsText: {
     fontSize: 12,
     fontFamily: 'Prompt-Medium',
     color: '#1F2937',
   },
-  minutesContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  overline: {
-    width: 10,
-    height: 1,
-    backgroundColor: '#1F2937',
-    marginHorizontal: 4,
-  },
-  minutesText: {
-    fontSize: 12,
-    fontFamily: 'Prompt-Medium',
-    color: '#1F2937',
-  },
-  circularProgressRing: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    transformOrigin: 'center',
-  },
-
-  progressSegment: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#183A7C',
-    borderTopColor: 'transparent',
-    borderRightColor: 'transparent',
-    transformOrigin: 'center',
-  },
 
   timeProgress: {
     flex: 1,
     alignItems: 'center',
   },
+  timeProgressLabel: {
+    fontSize: 12,
+    fontFamily: 'Prompt-Regular',
+    color: '#6B7280',
+    textAlign: 'center',
+  },
   timeProgressText: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Prompt-Medium',
     color: '#374151',
     textAlign: 'center',

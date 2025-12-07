@@ -134,6 +134,13 @@ export default function ClassroomScreen() {
   const courseRegistrationId = preferredRegistration?.id
   const isCourseCompleted = preferredRegistration?.isCompleted
 
+  // Initialize course rating from registration's satisfactionScore
+  useEffect(() => {
+    if (preferredRegistration?.satisfactionScore) {
+      setCourseRating(preferredRegistration.satisfactionScore)
+    }
+  }, [preferredRegistration?.satisfactionScore])
+
   // Check course accessibility based on start/end dates
   useEffect(() => {
     const courseStart = preferredRegistration?.courseStart
@@ -156,6 +163,9 @@ export default function ClassroomScreen() {
     }
   }, [dispatch, courseId])
 
+  // Track if initial load is done (to use silent refresh on content switch)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
+
   // Create session when registration is available
   useEffect(() => {
     if (courseRegistrationId) {
@@ -163,14 +173,22 @@ export default function ClassroomScreen() {
     }
   }, [dispatch, courseRegistrationId])
 
-  // Load content views when registration is available or when switching content
+  // Load content views when registration is available (initial load with spinner)
+  useEffect(() => {
+    if (courseRegistrationId && !initialLoadDone) {
+      dispatch(learnActions.loadContentViews(courseRegistrationId, false))
+      setInitialLoadDone(true)
+    }
+  }, [dispatch, courseRegistrationId, initialLoadDone])
+
+  // Silently refresh content views when switching content
   // This matches desktop behavior (Learn.tsx line 189-195) where contentViews are
   // refetched when contentId changes to get the latest progress
   useEffect(() => {
-    if (courseRegistrationId) {
-      dispatch(learnActions.loadContentViews(courseRegistrationId))
+    if (courseRegistrationId && initialLoadDone && selectedContentId) {
+      dispatch(learnActions.loadContentViews(courseRegistrationId, true)) // silent = true
     }
-  }, [dispatch, courseRegistrationId, selectedContentId])
+  }, [dispatch, courseRegistrationId, selectedContentId, initialLoadDone])
 
   // Build course data from Redux state
   // IMPORTANT: When course is completed (isCourseCompleted), mark ALL contents as completed
@@ -350,7 +368,14 @@ export default function ClassroomScreen() {
 
   const handleCourseRatingChange = (rating: number) => {
     setCourseRating(rating)
-    // TODO: Send rating to API if needed
+    if (courseRegistrationId) {
+      dispatch(
+        registrationsActions.updateCourseSatisfactionScore(
+          courseRegistrationId,
+          rating
+        )
+      )
+    }
   }
 
   const handleMinuteComplete = () => {
@@ -439,7 +464,7 @@ export default function ClassroomScreen() {
         {/* Star Rating Section */}
         <ThemedView style={styles.ratingSection}>
           <ThemedText style={styles.ratingLabel}>
-            โปรดให้คะแนนหลักสูตร
+            โปรดให้คะแนนรายวิชา
           </ThemedText>
           <StarRating
             rating={courseRating}

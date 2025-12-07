@@ -39,6 +39,12 @@ export const UPDATE_CURRICULUM_SATISFACTION_SCORE_SUCCESS =
   'learning-platform/registrations/UPDATE_CURRICULUM_SATISFACTION_SCORE_SUCCESS'
 export const UPDATE_CURRICULUM_SATISFACTION_SCORE_FAILURE =
   'learning-platform/registrations/UPDATE_CURRICULUM_SATISFACTION_SCORE_FAILURE'
+export const UPDATE_COURSE_SATISFACTION_SCORE_REQUEST =
+  'learning-platform/registrations/UPDATE_COURSE_SATISFACTION_SCORE_REQUEST'
+export const UPDATE_COURSE_SATISFACTION_SCORE_SUCCESS =
+  'learning-platform/registrations/UPDATE_COURSE_SATISFACTION_SCORE_SUCCESS'
+export const UPDATE_COURSE_SATISFACTION_SCORE_FAILURE =
+  'learning-platform/registrations/UPDATE_COURSE_SATISFACTION_SCORE_FAILURE'
 export const COURSE_COMPLETE_REQUEST =
   'learning-platform/registrations/COURSE_COMPLETE_REQUEST'
 export const COURSE_COMPLETE_SUCCESS =
@@ -291,6 +297,45 @@ export function updateCurriculumSatisfactionScore(
       )
     } catch (err: any) {
       dispatch({ type: UPDATE_CURRICULUM_SATISFACTION_SCORE_FAILURE })
+      dispatch(
+        uiActions.setFlashMessage(
+          `บันทึกข้อมูลไม่สำเร็จ เกิดข้อผิดพลาด ${err?.response?.status}`,
+          'error'
+        )
+      )
+    }
+  }
+}
+
+export function updateCourseSatisfactionScore(
+  registrationId: number,
+  satisfactionScore: number
+) {
+  return async (dispatch: any) => {
+    const token = await AsyncStorage.getItem('token')
+    if (!token) return
+
+    const parsed = parseJwt(token)
+    const userId = parsed?.unique_name
+
+    dispatch({ type: UPDATE_COURSE_SATISFACTION_SCORE_REQUEST })
+    try {
+      const { data } = await axios.put(
+        `/Users/${userId}/CourseRegistrations/${registrationId}/SatisfactionScore`,
+        { satisfactionScore }
+      )
+      dispatch({
+        type: UPDATE_COURSE_SATISFACTION_SCORE_SUCCESS,
+        payload: { satisfactionScoreUpdate: data },
+      })
+      dispatch(
+        uiActions.setFlashMessage(
+          'บันทึกข้อมูลเรียบร้อย ขอบคุณที่ให้คะแนน',
+          'success'
+        )
+      )
+    } catch (err: any) {
+      dispatch({ type: UPDATE_COURSE_SATISFACTION_SCORE_FAILURE })
       dispatch(
         uiActions.setFlashMessage(
           `บันทึกข้อมูลไม่สำเร็จ เกิดข้อผิดพลาด ${err?.response?.status}`,

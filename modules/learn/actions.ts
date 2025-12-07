@@ -116,11 +116,13 @@ export function createSession() {
   }
 }
 
-export function loadContentViews(registrationId: number) {
+export function loadContentViews(
+  registrationId: number,
+  silent: boolean = false
+) {
   return async (dispatch: any) => {
     const token = await AsyncStorage.getItem('token')
     if (!token) {
-      console.log('[Learn] No token found, skipping content views load')
       return
     }
 
@@ -128,16 +130,17 @@ export function loadContentViews(registrationId: number) {
     const userId = parsed?.unique_name
 
     if (!userId) {
-      console.log('[Learn] No userId found in token')
       return
     }
 
-    dispatch({ type: LOAD_CONTENT_VIEWS_REQUEST })
+    // Only dispatch loading request if not silent (to avoid showing spinner on content switch)
+    if (!silent) {
+      dispatch({ type: LOAD_CONTENT_VIEWS_REQUEST })
+    }
     try {
       const { data } = await axios.get(
         `/Users/${userId}/CourseRegistrations/${registrationId}/ContentViews`
       )
-      console.log('[Learn] Content views loaded:', data?.length || 0, 'items')
       dispatch({
         type: LOAD_CONTENT_VIEWS_SUCCESS,
         payload: {
@@ -145,14 +148,15 @@ export function loadContentViews(registrationId: number) {
         },
       })
     } catch (err: any) {
-      console.error('[Learn] Failed to load content views:', err.message)
-      dispatch({ type: LOAD_CONTENT_VIEWS_FAILURE })
-      dispatch(
-        uiActions.setFlashMessage(
-          `โหลดข้อมูลการเข้าเรียนไม่สำเร็จ เกิดข้อผิดพลาด ${err?.response?.status}`,
-          'error'
+      if (!silent) {
+        dispatch({ type: LOAD_CONTENT_VIEWS_FAILURE })
+        dispatch(
+          uiActions.setFlashMessage(
+            `โหลดข้อมูลการเข้าเรียนไม่สำเร็จ เกิดข้อผิดพลาด ${err?.response?.status}`,
+            'error'
+          )
         )
-      )
+      }
     }
   }
 }
