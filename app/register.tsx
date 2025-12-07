@@ -152,6 +152,18 @@ export default function RegisterScreen() {
   // Form validation errors
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Helper function to clear a specific error
+  const clearError = useCallback((fieldName: string) => {
+    setErrors((prev) => {
+      if (prev[fieldName]) {
+        const newErrors = { ...prev }
+        delete newErrors[fieldName]
+        return newErrors
+      }
+      return prev
+    })
+  }, [])
+
   // Exit confirmation modal state
   const [exitModalVisible, setExitModalVisible] = useState(false)
 
@@ -626,6 +638,10 @@ export default function RegisterScreen() {
               <TouchableOpacity
                 onPress={() => {
                   const valueToSet = tempPickerValue ?? currentValue
+                  // Clear error when value is selected
+                  if (valueToSet && showPickerModal) {
+                    clearError(showPickerModal)
+                  }
                   switch (showPickerModal) {
                     case 'gender':
                       setGender(valueToSet)
@@ -714,6 +730,7 @@ export default function RegisterScreen() {
     occupations,
     selectedUserTypeObj,
     yearOptions,
+    clearError,
   ])
 
   // Get display text for a picker
@@ -770,7 +787,8 @@ export default function RegisterScreen() {
     label: string,
     value: Date | null,
     onChange: (date: Date | null) => void,
-    error?: string
+    error?: string,
+    errorFieldName?: string
   ) => (
     <ThemedView style={styles.inputContainer}>
       <ThemedText style={styles.inputLabel}>
@@ -810,6 +828,9 @@ export default function RegisterScreen() {
             setShowDatePicker(Platform.OS === 'ios')
             if (selectedDate) {
               onChange(selectedDate)
+              if (errorFieldName) {
+                clearError(errorFieldName)
+              }
             }
           }}
           maximumDate={new Date()}
@@ -829,7 +850,8 @@ export default function RegisterScreen() {
         'วันที่รับราชการ',
         jobStartDate,
         setJobStartDate,
-        errors.jobStartDate
+        errors.jobStartDate,
+        'jobStartDate'
       )}
 
       {renderPickerField(
@@ -916,7 +938,8 @@ export default function RegisterScreen() {
         'วันที่รับราชการ',
         jobStartDate,
         setJobStartDate,
-        errors.jobStartDate
+        errors.jobStartDate,
+        'jobStartDate'
       )}
 
       {renderPickerField(
@@ -979,7 +1002,10 @@ export default function RegisterScreen() {
           <TextInput
             style={styles.textInput}
             value={jobTitle}
-            onChangeText={setJobTitle}
+            onChangeText={(text) => {
+              setJobTitle(text)
+              clearError('jobTitle')
+            }}
             placeholder='กรอกตำแหน่ง'
             placeholderTextColor='#999'
           />
@@ -1015,7 +1041,8 @@ export default function RegisterScreen() {
         'วันที่รับราชการ',
         jobStartDate,
         setJobStartDate,
-        errors.jobStartDate
+        errors.jobStartDate,
+        'jobStartDate'
       )}
 
       {renderPickerField(
@@ -1078,7 +1105,10 @@ export default function RegisterScreen() {
           <TextInput
             style={styles.textInput}
             value={jobTitle}
-            onChangeText={setJobTitle}
+            onChangeText={(text) => {
+              setJobTitle(text)
+              clearError('jobTitle')
+            }}
             placeholder='กรอกตำแหน่ง'
             placeholderTextColor='#999'
           />
@@ -1126,7 +1156,8 @@ export default function RegisterScreen() {
         'วันที่เริ่มทำงาน',
         jobStartDate,
         setJobStartDate,
-        errors.jobStartDate
+        errors.jobStartDate,
+        'jobStartDate'
       )}
 
       <ThemedView style={styles.inputContainer}>
@@ -1135,7 +1166,10 @@ export default function RegisterScreen() {
           <TextInput
             style={styles.textInput}
             value={jobTitle}
-            onChangeText={setJobTitle}
+            onChangeText={(text) => {
+              setJobTitle(text)
+              clearError('jobTitle')
+            }}
             placeholder='กรอกตำแหน่ง'
             placeholderTextColor='#999'
           />
@@ -1169,7 +1203,10 @@ export default function RegisterScreen() {
           <TextInput
             style={styles.textInput}
             value={jobTitle}
-            onChangeText={setJobTitle}
+            onChangeText={(text) => {
+              setJobTitle(text)
+              clearError('jobTitle')
+            }}
             placeholder='กรอกตำแหน่ง'
             placeholderTextColor='#999'
           />
@@ -1387,6 +1424,7 @@ export default function RegisterScreen() {
                       value={nationalId}
                       onChangeText={(text) => {
                         setNationalId(text.replace(/[^0-9]/g, ''))
+                        clearError('nationalId')
                         dispatch(signupActions.clearPresenceCheck() as any)
                       }}
                       placeholder='เลขประจำตัวประชาชน 13 หลัก'
@@ -1434,7 +1472,10 @@ export default function RegisterScreen() {
                     <TextInput
                       style={styles.textInput}
                       value={password}
-                      onChangeText={setPassword}
+                      onChangeText={(text) => {
+                        setPassword(text)
+                        clearError('password')
+                      }}
                       placeholder='กรอกรหัสผ่าน (อย่างน้อย 6 ตัวอักษร)'
                       placeholderTextColor='#999'
                       secureTextEntry={!showPassword}
@@ -1478,7 +1519,10 @@ export default function RegisterScreen() {
                     <TextInput
                       style={styles.textInput}
                       value={confirmPassword}
-                      onChangeText={setConfirmPassword}
+                      onChangeText={(text) => {
+                        setConfirmPassword(text)
+                        clearError('confirmPassword')
+                      }}
                       placeholder='ยืนยันรหัสผ่าน'
                       placeholderTextColor='#999'
                       secureTextEntry={!showConfirmPassword}
@@ -1544,7 +1588,10 @@ export default function RegisterScreen() {
                     <TextInput
                       style={styles.textInput}
                       value={title}
-                      onChangeText={setTitle}
+                      onChangeText={(text) => {
+                        setTitle(text)
+                        clearError('title')
+                      }}
                       placeholder='เช่น นาย, นาง, นางสาว'
                       placeholderTextColor='#999'
                     />
@@ -1576,7 +1623,10 @@ export default function RegisterScreen() {
                     <TextInput
                       style={styles.textInput}
                       value={firstName}
-                      onChangeText={setFirstName}
+                      onChangeText={(text) => {
+                        setFirstName(text)
+                        clearError('firstName')
+                      }}
                       placeholder='ชื่อจริง'
                       placeholderTextColor='#999'
                     />
@@ -1608,7 +1658,10 @@ export default function RegisterScreen() {
                     <TextInput
                       style={styles.textInput}
                       value={lastName}
-                      onChangeText={setLastName}
+                      onChangeText={(text) => {
+                        setLastName(text)
+                        clearError('lastName')
+                      }}
                       placeholder='นามสกุล'
                       placeholderTextColor='#999'
                     />
