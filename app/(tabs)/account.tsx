@@ -345,7 +345,11 @@ export default function AccountScreen() {
           <ThemedText type='default' style={styles.regularText}>
             โปรด{' '}
           </ThemedText>
-          <ThemedText type='link' style={styles.highlightedText}>
+          <ThemedText
+            type='link'
+            style={styles.highlightedText}
+            onPress={() => router.push('/register' as any)}
+          >
             สมัครสมาชิก
           </ThemedText>
           <ThemedText type='default' style={styles.regularText}>
@@ -588,25 +592,25 @@ export default function AccountScreen() {
           </ThemedView>
         )}
 
-        {/* Registration Link */}
+        {/* Registration Button */}
         <ThemedView style={styles.registrationContainer}>
           <ThemedText style={styles.registrationText}>
             ยังไม่มีบัญชีใช่ไหม?
           </ThemedText>
           <TouchableOpacity
-            style={styles.registrationLink}
+            style={[styles.registerButton, { borderColor: tintColor }]}
             onPress={() => router.push('/register' as any)}
           >
             <ThemedText
-              style={[styles.registrationLinkText, { color: tintColor }]}
+              style={[styles.registerButtonText, { color: tintColor }]}
             >
               สมัครสมาชิก
             </ThemedText>
             <IconSymbol
               name='chevron.right'
-              size={16}
+              size={14}
               color={tintColor}
-              style={styles.arrowIcon}
+              style={styles.registerButtonIcon}
             />
           </TouchableOpacity>
         </ThemedView>
@@ -988,7 +992,7 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 14,
-    fontFamily: 'Prompt-Regular',
+    fontFamily: 'Prompt-Medium',
     marginRight: 4,
   },
 
@@ -1009,14 +1013,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  registrationLink: {
+  registerButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
   },
-  registrationLinkText: {
+  registerButtonText: {
     fontSize: 14,
-    fontWeight: '600',
-    marginRight: 4,
+    fontFamily: 'Prompt-Medium',
+  },
+  registerButtonIcon: {
+    marginLeft: 4,
   },
   arrowIcon: {
     marginLeft: 2,
