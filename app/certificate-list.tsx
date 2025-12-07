@@ -236,7 +236,7 @@ export default function CertificateListScreen() {
             ประกาศนียบัตรของคุณ
           </ThemedText>
           <ThemedText style={styles.infoSubtitle}>
-            ดูและจัดการประกาศนียบัตรทั้งหมดที่คุณได้รับจากการเรียนจบหลักสูตรและรายวิชาต่างๆ
+            ดูประกาศนียบัตรทั้งหมดที่คุณได้รับจากการเรียนจบหลักสูตรและรายวิชาต่างๆ
           </ThemedText>
         </ThemedView>
 

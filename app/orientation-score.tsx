@@ -286,11 +286,21 @@ export default function OrientationScoreScreen() {
         </View>
       </ThemedView>
 
-      {/* Scrollable Content */}
+      {/* Scrollable Content - zoom disabled */}
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        pinchGestureEnabled={false}
+        maximumZoomScale={1}
+        minimumZoomScale={1}
+        zoomScale={1}
+        bouncesZoom={false}
+        bounces={false}
+        scrollsToTop={false}
+        directionalLockEnabled={true}
+        scrollEventThrottle={16}
       >
         {/* Title Section */}
         <ThemedView style={styles.titleContainer}>
