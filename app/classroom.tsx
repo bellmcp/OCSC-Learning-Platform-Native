@@ -345,12 +345,10 @@ export default function ClassroomScreen() {
       router.push({
         pathname: '/evaluation',
         params: {
-          contentId: selectedContent.id.toString(),
-          courseId: courseData.id.toString(),
-          courseName: courseData.name,
-          registrationId: courseRegistrationId?.toString() || '',
-          contentViewId: selectedContent.contentViewId?.toString() || '',
           evaluationId: selectedContent.evaluationId?.toString() || '',
+          contentViewId: selectedContent.contentViewId?.toString() || '',
+          courseRegistrationId: courseRegistrationId?.toString() || '',
+          isCompleted: selectedContent.completed ? 'true' : 'false',
         },
       })
     }

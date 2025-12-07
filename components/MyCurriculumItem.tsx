@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   },
   completionText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#2e7d32',
     marginLeft: 6,
     textAlign: 'center',
   },

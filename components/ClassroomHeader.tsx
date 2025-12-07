@@ -68,13 +68,13 @@ export function ClassroomHeader({
         </ThemedText>
       </ThemedView>
       <TouchableOpacity style={styles.menuButton}>
-        <Animated.View
+        {/* <Animated.View
           style={{
             transform: [{ scale: scaleAnim }, { rotate: spin }],
           }}
         >
           <IconSymbol name='star.circle' size={26} color={textColor} />
-        </Animated.View>
+        </Animated.View> */}
       </TouchableOpacity>
     </ThemedView>
   )
