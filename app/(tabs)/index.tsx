@@ -391,28 +391,32 @@ export default function HomeScreen() {
   }
 
   const renderBannerItem = ({ item }: { item: BannerItem }) => (
-    <TouchableOpacity
-      style={styles.bannerItem}
-      onPress={() => handleBannerPress(item.targetUrl)}
-      activeOpacity={0.8}
-    >
-      <Image
-        source={{ uri: item.image }}
-        style={styles.bannerImage}
-        contentFit='cover'
-        placeholder='Loading...'
-        transition={200}
-      />
-      {item.title && item.title.trim() !== '' && (
-        <View style={styles.bannerPillContainer}>
-          <View style={styles.bannerPill}>
-            <ThemedText style={styles.bannerPillText} numberOfLines={1}>
-              {item.title}
-            </ThemedText>
-          </View>
+    <View style={styles.bannerItemWrapper}>
+      <TouchableOpacity
+        style={styles.bannerItem}
+        onPress={() => handleBannerPress(item.targetUrl)}
+        activeOpacity={0.8}
+      >
+        <View style={styles.bannerImageContainer}>
+          <Image
+            source={{ uri: item.image }}
+            style={styles.bannerImage}
+            contentFit='cover'
+            placeholder='Loading...'
+            transition={200}
+          />
         </View>
-      )}
-    </TouchableOpacity>
+        {item.title && item.title.trim() !== '' && (
+          <View style={styles.bannerPillContainer}>
+            <View style={styles.bannerPill}>
+              <ThemedText style={styles.bannerPillText} numberOfLines={1}>
+                {item.title}
+              </ThemedText>
+            </View>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
   )
 
   const renderCourseItem = ({ item }: { item: Course }) => (
@@ -459,6 +463,11 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <ThemedView style={styles.header}>
+          <Image
+            source={require('@/assets/images/logo.png')}
+            style={styles.logo}
+            contentFit='contain'
+          />
           <ThemedText type='title' style={styles.headerTitle}>
             {users?.firstname
               ? `สวัสดี คุณ${users.firstname}`
@@ -496,6 +505,7 @@ export default function HomeScreen() {
               onMomentumScrollEnd={handleBannerScroll}
               onScrollEndDrag={handleBannerScroll}
               contentContainerStyle={styles.carouselContainer}
+              style={styles.bannerFlatList}
               getItemLayout={(data, index) => ({
                 length: screenWidth - 40 + 16,
                 offset: (screenWidth - 40 + 16) * index,
@@ -725,6 +735,13 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     backgroundColor: 'transparent', // Allow RefreshControl spinner to be visible
   },
+  logo: {
+    width: 200,
+    height: 60,
+    alignSelf: 'center',
+    marginBottom: 8,
+    marginTop: 16,
+  },
   headerTitle: {
     fontSize: 28,
     textAlign: 'center',
@@ -737,7 +754,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Regular',
     textAlign: 'center',
     marginTop: 8,
-    marginBottom: 16,
     opacity: 0.7,
   },
   heroSection: {
@@ -782,6 +798,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 32,
+    overflow: 'visible',
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -811,26 +828,44 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     paddingLeft: 20,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
 
   // Banner styles
-  bannerItem: {
+  bannerFlatList: {
+    overflow: 'visible',
+    paddingVertical: 8,
+  },
+  bannerItemWrapper: {
     width: screenWidth - 40,
     height: 250,
     marginRight: 16,
-    borderRadius: 16,
-    overflow: 'hidden',
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: '#F8F9FA',
+    marginVertical: 8,
+    // Modern soft shadow for iOS
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 0,
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    // Modern shadow for Android
+    elevation: 8,
+  },
+  bannerItem: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    position: 'relative',
+  },
+  bannerImageContainer: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   bannerImage: {
     width: '100%',
@@ -863,7 +898,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 0,
     gap: 10,
   },
   dot: {
