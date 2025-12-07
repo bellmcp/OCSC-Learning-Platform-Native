@@ -9,6 +9,7 @@ import otp from './otp/reducer'
 import press from './press/reducer'
 import registrations from './registrations/reducer'
 import resetPassword from './reset-password/reducer'
+import signup from './signup/reducer'
 import ui from './ui/reducer'
 import user from './user/reducer'
 
@@ -24,5 +25,6 @@ export default () =>
     press,
     registrations,
     resetPassword,
+    signup,
     ui,
   })

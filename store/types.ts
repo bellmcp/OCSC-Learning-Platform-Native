@@ -10,6 +10,7 @@ export interface RootState {
   press: PressState
   registrations: RegistrationsState
   resetPassword: ResetPasswordState
+  signup: SignupState
   ui: UIState
 }
 
@@ -119,6 +120,47 @@ export interface UIState {
     url: string
   }
   isChatbotLoading: boolean
+}
+
+export interface SignupState {
+  isEducationsLoading: boolean
+  isJobTypes1Loading: boolean
+  isJobTypes2Loading: boolean
+  isJobTypes3Loading: boolean
+  isJobLevelsLoading: boolean
+  isMinistriesLoading: boolean
+  isDepartmentsLoading: boolean
+  isStateEnterprisesLoading: boolean
+  isOccupationsLoading: boolean
+  isPositionsLoading: boolean
+  isCheckingPresence: boolean
+  isSubmitting: boolean
+  educations: Array<{ id: number; name: string }>
+  jobTypes1: Array<{ id: number; name: string }>
+  jobTypes2: Array<{ id: number; name: string }>
+  jobTypes3: Array<{ id: number; name: string }>
+  jobLevels: Array<{ id: number; name: string }>
+  ministries: Array<{ id: number; name: string }>
+  departments: Array<{ id: number; name: string }>
+  stateEnterprises: Array<{ id: number; name: string }>
+  occupations: Array<{ id: number; name: string }>
+  positions: Array<{
+    id: number
+    name: string
+    ministryId: number
+    departmentId: number
+  }>
+  presenceCheck: {
+    checked: boolean
+    presence: boolean
+    message: string
+    isValid: boolean
+  } | null
+  submitResult: {
+    success: boolean
+    message: string
+    data?: any
+  } | null
 }
 
 // AppDispatch type for Redux Thunk support
