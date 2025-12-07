@@ -4,12 +4,14 @@ import { router } from 'expo-router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
+  BackHandler,
   Modal,
   Platform,
   ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -150,6 +152,9 @@ export default function RegisterScreen() {
   // Form validation errors
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Exit confirmation modal state
+  const [exitModalVisible, setExitModalVisible] = useState(false)
+
   // Year options memoized
   const yearOptions = useMemo(() => generateYearOptions(), [])
 
@@ -269,6 +274,101 @@ export default function RegisterScreen() {
     dispatch(signupActions.clearPresenceCheck() as any)
     dispatch(signupActions.clearDepartments() as any)
   }
+
+  // Check if user has entered any form data
+  const hasFormData = useCallback(() => {
+    // Check if in step 1 with no selection
+    if (currentStep === 1 && !selectedUserType) {
+      return false
+    }
+    // Check if in step 2 with any data
+    if (currentStep === 2) {
+      return !!(
+        nationalId ||
+        password ||
+        confirmPassword ||
+        title ||
+        firstName ||
+        lastName ||
+        birthYear ||
+        gender ||
+        educationId ||
+        email ||
+        jobTypeId ||
+        jobLevelId ||
+        jobLevel ||
+        ministryId ||
+        departmentId ||
+        division ||
+        jobTitle ||
+        jobStartDate ||
+        stateEnterpriseId ||
+        occupationId ||
+        workplace
+      )
+    }
+    return !!selectedUserType
+  }, [
+    currentStep,
+    selectedUserType,
+    nationalId,
+    password,
+    confirmPassword,
+    title,
+    firstName,
+    lastName,
+    birthYear,
+    gender,
+    educationId,
+    email,
+    jobTypeId,
+    jobLevelId,
+    jobLevel,
+    ministryId,
+    departmentId,
+    division,
+    jobTitle,
+    jobStartDate,
+    stateEnterpriseId,
+    occupationId,
+    workplace,
+  ])
+
+  // Handle back button press
+  const handleBackPress = useCallback(() => {
+    if (hasFormData()) {
+      setExitModalVisible(true)
+    } else {
+      router.back()
+    }
+  }, [hasFormData])
+
+  // Handle exit modal cancel
+  const handleExitCancel = () => {
+    setExitModalVisible(false)
+  }
+
+  // Handle exit modal confirm
+  const handleExitConfirm = () => {
+    setExitModalVisible(false)
+    dispatch(signupActions.clearSignupState() as any)
+    router.back()
+  }
+
+  // Handle Android hardware back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (hasFormData()) {
+          setExitModalVisible(true)
+          return true
+        }
+        return false
+      }
+    )
+    return () => backHandler.remove()
+  }, [hasFormData])
 
   const handleCheckNationalId = () => {
     if (!nationalId || nationalId.length !== 13) {
@@ -1115,10 +1215,7 @@ export default function RegisterScreen() {
       {/* Fixed Header */}
       <ThemedView style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/(tabs)/account')}>
@@ -1648,6 +1745,48 @@ export default function RegisterScreen() {
 
       {/* Picker Modal */}
       {renderPickerModal()}
+
+      {/* Exit Confirmation Modal */}
+      <Modal
+        visible={exitModalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={handleExitCancel}
+      >
+        <TouchableWithoutFeedback onPress={handleExitCancel}>
+          <View style={styles.exitModalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.exitModalContainer}>
+                <ThemedText style={styles.exitModalTitle}>
+                  ออกจากหน้าสมัครสมาชิก?
+                </ThemedText>
+                <ThemedText style={styles.exitModalMessage}>
+                  คุณแน่ใจหรือไม่ว่าต้องการออกจากหน้านี้?{'\n'}
+                  ข้อมูลที่กรอกไว้จะสูญหาย
+                </ThemedText>
+                <View style={styles.exitModalButtonRow}>
+                  <TouchableOpacity
+                    style={styles.exitModalButtonCancel}
+                    onPress={handleExitCancel}
+                  >
+                    <ThemedText style={styles.exitModalButtonCancelText}>
+                      ยกเลิก
+                    </ThemedText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.exitModalButtonConfirm}
+                    onPress={handleExitConfirm}
+                  >
+                    <ThemedText style={styles.exitModalButtonConfirmText}>
+                      ออก
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </ThemedView>
   )
 }
@@ -2016,5 +2155,72 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 200,
+  },
+  // Exit modal styles
+  exitModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  exitModalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 340,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  exitModalTitle: {
+    fontSize: 20,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginBottom: 8,
+    marginTop: 10,
+  },
+  exitModalMessage: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#4B5563',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 24,
+  },
+  exitModalButtonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  exitModalButtonCancel: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  exitModalButtonCancelText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+  },
+  exitModalButtonConfirm: {
+    flex: 1,
+    backgroundColor: '#f44336',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  exitModalButtonConfirmText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: 'white',
   },
 })
