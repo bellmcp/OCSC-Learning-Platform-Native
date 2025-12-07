@@ -1,6 +1,12 @@
 import { Image } from 'expo-image'
 import React, { useState } from 'react'
-import { Animated, Modal, StyleSheet, TouchableOpacity } from 'react-native'
+import {
+  Animated,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import { useDispatch } from 'react-redux'
 
 import { StarRating } from '@/components/StarRating'
@@ -143,171 +149,220 @@ export default function MyCurriculumItem({
   }
 
   return (
-    <TouchableOpacity
-      style={styles.curriculumCard}
-      onPress={handleCardPress}
-      activeOpacity={0.95}
-    >
-      {/* Main content area */}
-      <ThemedView style={styles.mainContent}>
-        <ThemedView style={styles.imageContainer}>
-          <ThemedView
-            style={[
-              styles.statusBorder,
-              {
-                backgroundColor: registeredCurriculum.isCompleted
-                  ? '#2e7d32'
-                  : '#F59E0B',
-              },
-            ]}
-          />
-          <Image
-            source={{ uri: registeredCurriculum.thumbnail }}
-            style={styles.curriculumImage}
-            contentFit='cover'
-            transition={200}
-          />
-        </ThemedView>
-
-        <ThemedView style={styles.curriculumContent}>
-          <ThemedView style={styles.contentHeader}>
-            <ThemedView style={styles.titleSection}>
-              <ThemedText style={styles.curriculumLabel}>หลักสูตร</ThemedText>
-              <ThemedText
-                type='defaultSemiBold'
-                style={styles.curriculumTitle}
-                numberOfLines={2}
-              >
-                {registeredCurriculum.name}
-              </ThemedText>
-              <ThemedText style={styles.curriculumCode} numberOfLines={1}>
-                {registeredCurriculum.code}
-              </ThemedText>
-              <ThemedText style={styles.dateLabel} numberOfLines={1}>
-                <ThemedText style={styles.dateLabelBold}>ลงทะเบียน </ThemedText>
-                {formatThaiDate(registeredCurriculum.registrationDate)}
-              </ThemedText>
-            </ThemedView>
-
-            <ThemedView style={styles.actionSection}>
-              <TouchableOpacity
-                style={styles.menuButton}
-                onPress={showBottomSheet}
-              >
-                <IconSymbol
-                  name='ellipsis'
-                  size={20}
-                  color='#6B7280'
-                  style={{ transform: [{ rotate: '90deg' }] }}
-                />
-              </TouchableOpacity>
-            </ThemedView>
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
-
-      {/* Divider */}
-      <ThemedView style={styles.divider} />
-
-      {/* Course count indicator */}
-      <ThemedView style={styles.courseIndicatorContainer}>
-        <IconSymbol name='book.closed' size={16} color='#6B7280' />
-        <ThemedText style={styles.courseIndicatorText}>
-          {childCourses.length} รายวิชาในหลักสูตร • ดูทั้งหมด
-        </ThemedText>
-        <IconSymbol name='chevron.right' size={16} color='#6B7280' />
-      </ThemedView>
-
-      {/* Rating and completion section */}
-      <ThemedView style={styles.ratingSection}>
-        <ThemedText style={styles.ratingLabel}>โปรดให้คะแนนหลักสูตร</ThemedText>
-        <StarRating
-          rating={satisfactionScore}
-          onRatingChange={handleSatisfactionScoreChange}
-        />
-
-        {registeredCurriculum.isCompleted && (
-          <ThemedView style={styles.completionInfo}>
-            <IconSymbol
-              name='checkmark.circle.fill'
-              size={16}
-              color='#2e7d32'
-            />
-            <ThemedText style={styles.completionText}>
-              <ThemedText style={styles.completionTextBold}>
-                สำเร็จการศึกษา{' '}
-              </ThemedText>
-              {registeredCurriculum.completeDate
-                ? formatThaiDate(registeredCurriculum.completeDate)
-                : 'ไม่มีข้อมูล'}
-            </ThemedText>
-          </ThemedView>
-        )}
-      </ThemedView>
-
-      {/* Bottom Sheet */}
-      <Modal
-        visible={showMenu}
-        transparent={true}
-        animationType='none'
-        onRequestClose={hideBottomSheet}
+    <View style={styles.stackWrapper}>
+      {/* Stack layer 3 (bottom) */}
+      <View style={[styles.stackLayer, styles.stackLayer3]} />
+      {/* Stack layer 2 (middle) */}
+      <View style={[styles.stackLayer, styles.stackLayer2]} />
+      {/* Main card */}
+      <TouchableOpacity
+        style={styles.curriculumCard}
+        onPress={handleCardPress}
+        activeOpacity={0.95}
       >
-        <Animated.View
-          style={[
-            styles.bottomSheetOverlay,
-            {
-              opacity: overlayOpacity,
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={styles.bottomSheetBackdrop}
-            activeOpacity={1}
-            onPress={hideBottomSheet}
+        {/* Main content area */}
+        <ThemedView style={styles.mainContent}>
+          <ThemedView style={styles.imageContainer}>
+            <ThemedView
+              style={[
+                styles.statusBorder,
+                {
+                  backgroundColor: registeredCurriculum.isCompleted
+                    ? '#2e7d32'
+                    : '#F59E0B',
+                },
+              ]}
+            />
+            <Image
+              source={{ uri: registeredCurriculum.thumbnail }}
+              style={styles.curriculumImage}
+              contentFit='cover'
+              transition={200}
+            />
+          </ThemedView>
+
+          <ThemedView style={styles.curriculumContent}>
+            <ThemedView style={styles.contentHeader}>
+              <ThemedView style={styles.titleSection}>
+                <ThemedText style={styles.curriculumLabel}>หลักสูตร</ThemedText>
+                <ThemedText
+                  type='defaultSemiBold'
+                  style={styles.curriculumTitle}
+                  numberOfLines={2}
+                >
+                  {registeredCurriculum.name}
+                </ThemedText>
+                <ThemedText style={styles.curriculumCode} numberOfLines={1}>
+                  {registeredCurriculum.code}
+                </ThemedText>
+                <ThemedText style={styles.dateLabel} numberOfLines={1}>
+                  <ThemedText style={styles.dateLabelBold}>
+                    ลงทะเบียน{' '}
+                  </ThemedText>
+                  {formatThaiDate(registeredCurriculum.registrationDate)}
+                </ThemedText>
+              </ThemedView>
+
+              <ThemedView style={styles.actionSection}>
+                <TouchableOpacity
+                  style={styles.menuButton}
+                  onPress={showBottomSheet}
+                >
+                  <IconSymbol
+                    name='ellipsis'
+                    size={20}
+                    color='#6B7280'
+                    style={{ transform: [{ rotate: '90deg' }] }}
+                  />
+                </TouchableOpacity>
+              </ThemedView>
+            </ThemedView>
+          </ThemedView>
+        </ThemedView>
+
+        {/* Divider */}
+        <ThemedView style={styles.divider} />
+
+        {/* Course count indicator */}
+        <ThemedView style={styles.courseIndicatorContainer}>
+          <IconSymbol name='book.closed' size={16} color='#6B7280' />
+          <ThemedText style={styles.courseIndicatorText}>
+            {childCourses.length} รายวิชาในหลักสูตร • ดูทั้งหมด
+          </ThemedText>
+          <IconSymbol name='chevron.right' size={16} color='#6B7280' />
+        </ThemedView>
+
+        {/* Rating and completion section */}
+        <ThemedView style={styles.ratingSection}>
+          <ThemedText style={styles.ratingLabel}>
+            โปรดให้คะแนนหลักสูตร
+          </ThemedText>
+          <StarRating
+            rating={satisfactionScore}
+            onRatingChange={handleSatisfactionScoreChange}
           />
+
+          {registeredCurriculum.isCompleted && (
+            <ThemedView style={styles.completionInfo}>
+              <IconSymbol
+                name='checkmark.circle.fill'
+                size={16}
+                color='#2e7d32'
+              />
+              <ThemedText style={styles.completionText}>
+                <ThemedText style={styles.completionTextBold}>
+                  สำเร็จการศึกษา{' '}
+                </ThemedText>
+                {registeredCurriculum.completeDate
+                  ? formatThaiDate(registeredCurriculum.completeDate)
+                  : 'ไม่มีข้อมูล'}
+              </ThemedText>
+            </ThemedView>
+          )}
+        </ThemedView>
+
+        {/* Bottom Sheet */}
+        <Modal
+          visible={showMenu}
+          transparent={true}
+          animationType='none'
+          onRequestClose={hideBottomSheet}
+        >
           <Animated.View
             style={[
-              styles.bottomSheetContainer,
+              styles.bottomSheetOverlay,
               {
-                transform: [{ translateY: slideAnim }],
+                opacity: overlayOpacity,
               },
             ]}
           >
-            {/* Handle Bar */}
-            <ThemedView style={styles.bottomSheetHandle} />
+            <TouchableOpacity
+              style={styles.bottomSheetBackdrop}
+              activeOpacity={1}
+              onPress={hideBottomSheet}
+            />
+            <Animated.View
+              style={[
+                styles.bottomSheetContainer,
+                {
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+            >
+              {/* Handle Bar */}
+              <ThemedView style={styles.bottomSheetHandle} />
 
-            {/* Menu Items */}
-            <ThemedView style={styles.bottomSheetContent}>
-              <TouchableOpacity
-                style={styles.bottomSheetItem}
-                onPress={handleShowDetails}
-              >
-                <IconSymbol name='info.circle' size={20} color='#6B7280' />
-                <ThemedText style={styles.bottomSheetItemText}>
-                  ข้อมูลหลักสูตร
-                </ThemedText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.bottomSheetItem}
-                onPress={handleUnregister}
-              >
-                <IconSymbol name='trash' size={20} color='#EF4444' />
-                <ThemedText
-                  style={[styles.bottomSheetItemText, { color: '#EF4444' }]}
+              {/* Menu Items */}
+              <ThemedView style={styles.bottomSheetContent}>
+                <TouchableOpacity
+                  style={styles.bottomSheetItem}
+                  onPress={handleShowDetails}
                 >
-                  ยกเลิกการลงทะเบียนหลักสูตร
-                </ThemedText>
-              </TouchableOpacity>
-            </ThemedView>
+                  <IconSymbol name='info.circle' size={20} color='#6B7280' />
+                  <ThemedText style={styles.bottomSheetItemText}>
+                    ข้อมูลหลักสูตร
+                  </ThemedText>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.bottomSheetItem}
+                  onPress={handleUnregister}
+                >
+                  <IconSymbol name='trash' size={20} color='#EF4444' />
+                  <ThemedText
+                    style={[styles.bottomSheetItemText, { color: '#EF4444' }]}
+                  >
+                    ยกเลิกการลงทะเบียนหลักสูตร
+                  </ThemedText>
+                </TouchableOpacity>
+              </ThemedView>
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
-      </Modal>
-    </TouchableOpacity>
+        </Modal>
+      </TouchableOpacity>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  // Stack wrapper to contain all layers
+  stackWrapper: {
+    width: '100%',
+    marginTop: 8, // Space for stack layers above
+    marginBottom: 8, // Extra space for shadow
+  },
+  // Stack layers (cards behind the main card)
+  stackLayer: {
+    position: 'absolute',
+    left: 4,
+    right: 4,
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  stackLayer2: {
+    top: -6,
+    height: 12,
+    backgroundColor: '#F5F5F5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  stackLayer3: {
+    top: -12,
+    left: 8,
+    right: 8,
+    height: 12,
+    backgroundColor: '#EFEFEF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 1,
+    elevation: 1,
+  },
   curriculumCard: {
     width: '100%',
     backgroundColor: 'white',
@@ -315,15 +370,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F0F0F0',
     overflow: 'hidden',
-    // Shadow effect similar to the sample stackHide/stack classes
+    // Shadow effect for main card
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 4,
+    elevation: 3,
   },
   mainContent: {
     flexDirection: 'row',
@@ -430,7 +485,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
   },
   completionText: {
     fontSize: 12,

@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     paddingLeft: 20,
-    paddingTop: 12,
+    paddingTop: 20, // Extra space for stacked card effect
     paddingBottom: 12,
   },
 

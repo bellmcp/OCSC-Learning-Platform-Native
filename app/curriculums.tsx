@@ -253,6 +253,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   curriculumsGrid: {
+    paddingTop: 16, // Space for stacked card effect
     paddingBottom: 20,
   },
   curriculumItemWrapper: {

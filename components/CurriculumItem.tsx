@@ -42,67 +42,138 @@ export default function CurriculumItem({
   const isFullWidth = variant === 'fullWidth'
 
   return (
-    <TouchableOpacity
-      style={[
-        styles.curriculumCard,
-        isFullWidth && styles.curriculumCardFullWidth,
-      ]}
-      onPress={() => onPress?.(item)}
+    <View
+      style={[styles.stackWrapper, isFullWidth && styles.stackWrapperFullWidth]}
     >
+      {/* Stack layer 3 (bottom) */}
       <View
         style={[
-          styles.imageContainer,
-          isFullWidth && styles.imageContainerFullWidth,
+          styles.stackLayer,
+          styles.stackLayer3,
+          isFullWidth && styles.stackLayerFullWidth,
         ]}
-      >
-        <Image
-          source={{ uri: item.image }}
-          style={[
-            styles.curriculumImage,
-            isFullWidth && styles.curriculumImageFullWidth,
-          ]}
-          contentFit='cover'
-          transition={200}
-        />
-      </View>
-      <ThemedView
+      />
+      {/* Stack layer 2 (middle) */}
+      <View
         style={[
-          styles.curriculumContent,
-          isFullWidth && styles.curriculumContentFullWidth,
+          styles.stackLayer,
+          styles.stackLayer2,
+          isFullWidth && styles.stackLayerFullWidth,
         ]}
+      />
+      {/* Main card */}
+      <TouchableOpacity
+        style={[
+          styles.curriculumCard,
+          isFullWidth && styles.curriculumCardFullWidth,
+        ]}
+        onPress={() => onPress?.(item)}
+        activeOpacity={0.9}
       >
-        <ThemedText style={styles.curriculumType}>หลักสูตร</ThemedText>
-        <ThemedText
-          type='defaultSemiBold'
-          style={styles.curriculumTitle}
-          numberOfLines={1}
+        <View
+          style={[
+            styles.imageContainer,
+            isFullWidth && styles.imageContainerFullWidth,
+          ]}
         >
-          {item.title}
-        </ThemedText>
-        <ThemedText style={styles.curriculumId} numberOfLines={1}>
-          {item.id}
-        </ThemedText>
-        <ThemedText style={styles.curriculumDescription} numberOfLines={2}>
-          {item.description}
-        </ThemedText>
-      </ThemedView>
-    </TouchableOpacity>
+          <Image
+            source={{ uri: item.image }}
+            style={[
+              styles.curriculumImage,
+              isFullWidth && styles.curriculumImageFullWidth,
+            ]}
+            contentFit='cover'
+            transition={200}
+          />
+        </View>
+        <ThemedView
+          style={[
+            styles.curriculumContent,
+            isFullWidth && styles.curriculumContentFullWidth,
+          ]}
+        >
+          <ThemedText style={styles.curriculumType}>หลักสูตร</ThemedText>
+          <ThemedText
+            type='defaultSemiBold'
+            style={styles.curriculumTitle}
+            numberOfLines={1}
+          >
+            {item.title}
+          </ThemedText>
+          <ThemedText style={styles.curriculumId} numberOfLines={1}>
+            {item.id}
+          </ThemedText>
+          <ThemedText style={styles.curriculumDescription} numberOfLines={2}>
+            {item.description}
+          </ThemedText>
+        </ThemedView>
+      </TouchableOpacity>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  curriculumCard: {
+  // Stack wrapper to contain all layers
+  stackWrapper: {
     width: 225,
     marginRight: 16,
+    marginTop: 8, // Space for stack layers above
+    marginBottom: 8, // Extra space for shadow
+  },
+  stackWrapperFullWidth: {
+    width: '100%',
+    marginRight: 0,
+  },
+  // Stack layers (cards behind the main card)
+  stackLayer: {
+    position: 'absolute',
+    left: 4,
+    right: 4,
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  stackLayer2: {
+    top: -6,
+    height: 12,
+    backgroundColor: '#F5F5F5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  stackLayer3: {
+    top: -12,
+    left: 8,
+    right: 8,
+    height: 12,
+    backgroundColor: '#EFEFEF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  stackLayerFullWidth: {
+    left: 4,
+    right: 4,
+  },
+  curriculumCard: {
     backgroundColor: 'white',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#F0F0F0',
     overflow: 'hidden',
+    // Shadow for main card
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   curriculumCardFullWidth: {
-    width: '100%',
-    marginRight: 0,
     flexDirection: 'row',
     height: 140,
   },
