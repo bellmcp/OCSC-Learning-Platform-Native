@@ -4,6 +4,7 @@ import { router } from 'expo-router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
+  Animated,
   BackHandler,
   Modal,
   Platform,
@@ -149,6 +150,10 @@ export default function RegisterScreen() {
   const [showPickerModal, setShowPickerModal] = useState<string | null>(null)
   const [tempPickerValue, setTempPickerValue] = useState<any>(null)
 
+  // Picker modal animations
+  const [pickerOverlayOpacity] = useState(new Animated.Value(0))
+  const [pickerSlideAnim] = useState(new Animated.Value(300))
+
   // Form validation errors
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -243,6 +248,43 @@ export default function RegisterScreen() {
       dispatch(signupActions.clearSignupState() as any)
     }
   }, [dispatch])
+
+  // Animate picker modal when shown
+  useEffect(() => {
+    if (showPickerModal) {
+      Animated.parallel([
+        Animated.timing(pickerOverlayOpacity, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pickerSlideAnim, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start()
+    }
+  }, [showPickerModal, pickerOverlayOpacity, pickerSlideAnim])
+
+  // Close picker modal with animation
+  const closePickerModal = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(pickerOverlayOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(pickerSlideAnim, {
+        toValue: 300,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowPickerModal(null)
+      setTempPickerValue(null)
+    })
+  }, [pickerOverlayOpacity, pickerSlideAnim])
 
   const handleUserTypeSelect = (userTypeId: string) => {
     setSelectedUserType(userTypeId)
@@ -621,64 +663,88 @@ export default function RegisterScreen() {
         break
     }
 
+    const handleSelect = () => {
+      const valueToSet = tempPickerValue ?? currentValue
+      // Clear error when value is selected
+      if (valueToSet && showPickerModal) {
+        clearError(showPickerModal)
+      }
+      switch (showPickerModal) {
+        case 'gender':
+          setGender(valueToSet)
+          break
+        case 'birthYear':
+          setBirthYear(valueToSet)
+          break
+        case 'educationId':
+          setEducationId(valueToSet)
+          break
+        case 'ministryId':
+          setMinistryId(valueToSet)
+          break
+        case 'departmentId':
+          setDepartmentId(valueToSet)
+          break
+        case 'jobTypeId':
+          setJobTypeId(valueToSet)
+          setJobLevelId(null) // Reset job level when job type changes
+          break
+        case 'jobLevelId':
+          setJobLevelId(valueToSet)
+          break
+        case 'jobTitle':
+          setJobTitle(valueToSet)
+          break
+        case 'stateEnterpriseId':
+          setStateEnterpriseId(valueToSet)
+          break
+        case 'occupationId':
+          setOccupationId(valueToSet)
+          break
+      }
+      closePickerModal()
+    }
+
     return (
       <Modal
         visible={!!showPickerModal}
         transparent
-        animationType='slide'
-        onRequestClose={() => setShowPickerModal(null)}
+        animationType='none'
+        onRequestClose={closePickerModal}
       >
-        <View style={styles.pickerModalOverlay}>
-          <View style={styles.pickerModalContent}>
+        <Animated.View
+          style={[
+            styles.pickerModalOverlay,
+            {
+              opacity: pickerOverlayOpacity,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.pickerModalBackdrop}
+            activeOpacity={1}
+            onPress={closePickerModal}
+          />
+          <Animated.View
+            style={[
+              styles.pickerModalContent,
+              {
+                transform: [{ translateY: pickerSlideAnim }],
+              },
+            ]}
+          >
+            {/* Handle Bar */}
+            <View style={styles.pickerModalHandle} />
             <View style={styles.pickerModalHeader}>
-              <TouchableOpacity onPress={() => setShowPickerModal(null)}>
-                <ThemedText style={styles.pickerModalCancel}>ปิด</ThemedText>
+              <TouchableOpacity onPress={closePickerModal}>
+                <ThemedText
+                  style={[styles.pickerModalCancel, { color: tintColor }]}
+                >
+                  ปิด
+                </ThemedText>
               </TouchableOpacity>
               <ThemedText style={styles.pickerModalTitle}>{title}</ThemedText>
-              <TouchableOpacity
-                onPress={() => {
-                  const valueToSet = tempPickerValue ?? currentValue
-                  // Clear error when value is selected
-                  if (valueToSet && showPickerModal) {
-                    clearError(showPickerModal)
-                  }
-                  switch (showPickerModal) {
-                    case 'gender':
-                      setGender(valueToSet)
-                      break
-                    case 'birthYear':
-                      setBirthYear(valueToSet)
-                      break
-                    case 'educationId':
-                      setEducationId(valueToSet)
-                      break
-                    case 'ministryId':
-                      setMinistryId(valueToSet)
-                      break
-                    case 'departmentId':
-                      setDepartmentId(valueToSet)
-                      break
-                    case 'jobTypeId':
-                      setJobTypeId(valueToSet)
-                      setJobLevelId(null) // Reset job level when job type changes
-                      break
-                    case 'jobLevelId':
-                      setJobLevelId(valueToSet)
-                      break
-                    case 'jobTitle':
-                      setJobTitle(valueToSet)
-                      break
-                    case 'stateEnterpriseId':
-                      setStateEnterpriseId(valueToSet)
-                      break
-                    case 'occupationId':
-                      setOccupationId(valueToSet)
-                      break
-                  }
-                  setTempPickerValue(null)
-                  setShowPickerModal(null)
-                }}
-              >
+              <TouchableOpacity onPress={handleSelect}>
                 <ThemedText
                   style={[styles.pickerModalDone, { color: tintColor }]}
                 >
@@ -700,8 +766,8 @@ export default function RegisterScreen() {
                 />
               ))}
             </Picker>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       </Modal>
     )
   }, [
@@ -731,6 +797,9 @@ export default function RegisterScreen() {
     selectedUserTypeObj,
     yearOptions,
     clearError,
+    closePickerModal,
+    pickerOverlayOpacity,
+    pickerSlideAnim,
   ])
 
   // Get display text for a picker
@@ -2177,11 +2246,31 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
+  pickerModalBackdrop: {
+    flex: 1,
+  },
   pickerModalContent: {
     backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 10,
+  },
+  pickerModalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginTop: 12,
+    marginBottom: 8,
   },
   pickerModalHeader: {
     flexDirection: 'row',
@@ -2199,8 +2288,8 @@ const styles = StyleSheet.create({
   },
   pickerModalCancel: {
     fontSize: 16,
-    fontFamily: 'Prompt-Regular',
-    color: '#333',
+    minWidth: 30,
+    fontFamily: 'Prompt-Medium',
   },
   pickerModalDone: {
     fontSize: 16,
