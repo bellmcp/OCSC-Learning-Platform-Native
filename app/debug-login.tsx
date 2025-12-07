@@ -387,20 +387,12 @@ export default function DebugLoginScreen() {
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
-            Debug Login
+            Helpdesk
           </ThemedText>
           <TouchableOpacity style={styles.backButton} onPress={handleReload}>
             <IconSymbol name='arrow.clockwise' size={20} color={iconColor} />
           </TouchableOpacity>
         </View>
-      </ThemedView>
-
-      {/* Info Banner */}
-      <ThemedView style={styles.infoBanner}>
-        <IconSymbol name='exclamationmark.triangle' size={16} color='#F59E0B' />
-        <ThemedText style={styles.infoText}>
-          เข้าสู่ระบบเพื่อดีบัก - Token จะถูกบันทึกอัตโนมัติ
-        </ThemedText>
       </ThemedView>
 
       {/* WebView */}

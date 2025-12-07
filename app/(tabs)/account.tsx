@@ -20,6 +20,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import * as learnActions from '@/modules/learn/actions'
 import * as meActions from '@/modules/me/actions'
 import * as registrationsActions from '@/modules/registrations/actions'
 import * as uiActions from '@/modules/ui/actions'
@@ -398,6 +399,7 @@ export default function AccountScreen() {
           dispatch(userActions.clearUser())
           dispatch(registrationsActions.clearRegistrations())
           dispatch(meActions.clearAllCertificates())
+          dispatch(learnActions.clearLearnState())
           console.log('[Auth] Redux state cleared')
 
           setIsLoggedIn(false)
@@ -733,16 +735,16 @@ export default function AccountScreen() {
           </ThemedView>
 
           {/* Notification Bell Icon */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.notificationBell}
             onPress={() => router.push('/notifications' as any)}
           >
             <IconSymbol name='bell' size={24} color={iconColor} />
-            {/* Notification Badge */}
+           
             <ThemedView style={styles.notificationBadge}>
               <ThemedText style={styles.notificationBadgeText}>2</ThemedText>
             </ThemedView>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <ThemedView style={styles.userInfo}>
             {user?.firstname ? (

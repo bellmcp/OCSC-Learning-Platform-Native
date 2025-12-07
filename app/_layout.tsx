@@ -13,6 +13,7 @@ import {
 import 'react-native-reanimated'
 import { Provider } from 'react-redux'
 
+import AuthHandler from '@/components/AuthHandler'
 import GlobalModal from '@/components/GlobalModal'
 import ToastNotification from '@/components/ToastNotification'
 import { useColorScheme } from '@/hooks/useColorScheme'
@@ -276,8 +277,14 @@ export default function RootLayout() {
                 name='orientation-score'
                 options={{ headerShown: false }}
               />
+              <Stack.Screen
+                name='debug-login'
+                options={{ headerShown: false }}
+              />
             </Stack>
             <StatusBar style='dark' backgroundColor='transparent' translucent />
+            {/* Auth Handler - Handles global 401 errors */}
+            <AuthHandler />
             {/* Toast Notification Component - Listens to Redux for flash messages */}
             <ToastNotification />
             <GlobalModal />

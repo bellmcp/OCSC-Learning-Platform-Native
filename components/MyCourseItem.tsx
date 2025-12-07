@@ -150,9 +150,16 @@ export default function MyCourseItem({
     <ThemedView style={styles.courseCard}>
       {/* Main content area */}
       <ThemedView style={styles.mainContent}>
+        {/* Green border indicator for completed courses */}
+        {registeredCourse.isCompleted && (
+          <ThemedView style={styles.completedBorder} />
+        )}
         <Image
           source={{ uri: registeredCourse.thumbnail }}
-          style={styles.courseImage}
+          style={[
+            styles.courseImage,
+            registeredCourse.isCompleted && styles.courseImageCompleted,
+          ]}
           contentFit='cover'
           transition={200}
         />
@@ -221,6 +228,23 @@ export default function MyCourseItem({
           <IconSymbol name='play.fill' size={16} color='#183A7C' />
           <ThemedText style={styles.studyButtonText}>เข้าเรียน</ThemedText>
         </TouchableOpacity>
+        {registeredCourse.isCompleted && (
+          <ThemedView style={styles.completionInfo}>
+            <IconSymbol
+              name='checkmark.circle.fill'
+              size={16}
+              color='#2e7d32'
+            />
+            <ThemedText style={styles.completionText}>
+              <ThemedText style={styles.completionTextBold}>
+                สำเร็จการศึกษา{' '}
+              </ThemedText>
+              {registeredCourse.completeDate
+                ? formatThaiDate(registeredCourse.completeDate)
+                : 'ไม่มีข้อมูล'}
+            </ThemedText>
+          </ThemedView>
+        )}
       </ThemedView>
 
       {/* Bottom Sheet */}
@@ -309,11 +333,24 @@ const styles = StyleSheet.create({
   mainContent: {
     flexDirection: 'row',
     minHeight: 140,
+    position: 'relative',
+  },
+  completedBorder: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
+    backgroundColor: '#2e7d32',
+    zIndex: 1,
   },
   courseImage: {
     width: 140,
     height: '100%',
     flexShrink: 0,
+  },
+  courseImageCompleted: {
+    marginLeft: 0, // Image stays in place, border is absolute positioned
   },
   courseContent: {
     padding: 16,
@@ -388,6 +425,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-Medium',
     color: '#183A7C',
     marginLeft: 8,
+  },
+  completionInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  completionText: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginLeft: 6,
+    textAlign: 'center',
+  },
+  completionTextBold: {
+    fontSize: 12,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#2e7d32',
   },
   bottomSheetOverlay: {
     flex: 1,

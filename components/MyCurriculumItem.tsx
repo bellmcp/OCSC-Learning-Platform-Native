@@ -156,7 +156,7 @@ export default function MyCurriculumItem({
               styles.statusBorder,
               {
                 backgroundColor: registeredCurriculum.isCompleted
-                  ? '#22C55E'
+                  ? '#2e7d32'
                   : '#F59E0B',
               },
             ]}
@@ -231,7 +231,7 @@ export default function MyCurriculumItem({
             <IconSymbol
               name='checkmark.circle.fill'
               size={16}
-              color='#22C55E'
+              color='#2e7d32'
             />
             <ThemedText style={styles.completionText}>
               <ThemedText style={styles.completionTextBold}>
@@ -408,6 +408,7 @@ const styles = StyleSheet.create({
   },
   ratingSection: {
     paddingTop: 16,
+    paddingBottom: 16,
     alignItems: 'center',
   },
   ratingLabel: {
@@ -429,6 +430,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 12,
   },
   completionText: {
     fontSize: 12,
@@ -439,7 +441,7 @@ const styles = StyleSheet.create({
   completionTextBold: {
     fontSize: 12,
     fontFamily: 'Prompt-SemiBold',
-    color: '#22C55E',
+    color: '#2e7d32',
   },
   courseIndicatorContainer: {
     flexDirection: 'row',
