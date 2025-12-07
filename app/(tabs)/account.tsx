@@ -26,6 +26,7 @@ import * as registrationsActions from '@/modules/registrations/actions'
 import * as uiActions from '@/modules/ui/actions'
 import * as userActions from '@/modules/user/actions'
 import type { AppDispatch, RootState } from '@/store/types'
+import axios from '@/utils/axiosConfig'
 import {
   PORTAL_URL,
   THAID_API_URL,
@@ -58,6 +59,9 @@ export default function AccountScreen() {
   const [isThaiDLoading, setIsThaiDLoading] = useState(false)
   const [thaiDState, setThaiDState] = useState<string | null>(null)
   const [logoutModalVisible, setLogoutModalVisible] = useState(false)
+
+  // Reward points state
+  const [totalPoints, setTotalPoints] = useState<number>(0)
 
   // Secret debug login tap counter
   const [debugTapCount, setDebugTapCount] = useState(0)
@@ -276,6 +280,29 @@ export default function AccountScreen() {
       dispatch(userActions.loadUser())
     }
   }, [isLoggedIn, dispatch, user?.firstname])
+
+  // Fetch reward points when logged in
+  useEffect(() => {
+    const fetchRewardPoints = async () => {
+      if (!isLoggedIn) {
+        setTotalPoints(0)
+        return
+      }
+      try {
+        const response = await axios.get('/RewardPoints')
+        const points = response.data || []
+        const total = points.reduce(
+          (sum: number, item: { point: number }) => sum + item.point,
+          0
+        )
+        setTotalPoints(total)
+      } catch (error) {
+        console.error('[Account] Error fetching reward points:', error)
+        setTotalPoints(0)
+      }
+    }
+    fetchRewardPoints()
+  }, [isLoggedIn])
 
   // Reset scroll position when component mounts or becomes visible
   React.useEffect(() => {
@@ -704,37 +731,30 @@ export default function AccountScreen() {
           </ThemedView>
         </ThemedView>
 
-        {/* Stats Section */}
-        <ThemedView style={styles.statsContainer}>
-          <ThemedView style={styles.statItem}>
-            <IconSymbol name='book.closed' size={32} color={tintColor} />
-            <ThemedText
-              type='title'
-              style={[styles.statNumber, { color: tintColor }]}
-            >
-              {user?.completedCourses || 0}
+        {/* Coin Balance Card */}
+        <TouchableOpacity
+          style={styles.balanceCard}
+          onPress={() => router.push('/coins' as any)}
+          activeOpacity={0.7}
+        >
+          <ThemedView style={styles.balanceHeader}>
+            <ThemedText style={styles.balanceLabel}>
+              คะแนนการเรียนรู้ของคุณ
             </ThemedText>
-            <ThemedText style={styles.statLabel}>
-              เนื้อหาที่เรียนจบแล้ว
+            <IconSymbol name='chevron.right' size={20} color='#999' />
+          </ThemedView>
+          <ThemedView style={styles.balanceAmount}>
+            <IconSymbol
+              name='star.circle.fill'
+              size={48}
+              color={tintColor}
+              style={styles.coinIcon}
+            />
+            <ThemedText type='title' style={styles.coinNumber}>
+              {totalPoints.toLocaleString()}
             </ThemedText>
           </ThemedView>
-
-          <ThemedView style={styles.statDivider} />
-
-          <TouchableOpacity
-            style={styles.statItem}
-            onPress={() => router.push('/coins' as any)}
-          >
-            <IconSymbol name='star.circle' size={32} color={tintColor} />
-            <ThemedText
-              type='title'
-              style={[styles.statNumber, { color: tintColor }]}
-            >
-              {user?.totalHours || 0}
-            </ThemedText>
-            <ThemedText style={styles.statLabel}>คะแนนการเรียนรู้</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
+        </TouchableOpacity>
 
         {/* Profile Details */}
         {/* <ThemedView style={styles.detailsContainer}>
@@ -1181,6 +1201,49 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 14,
     opacity: 0.7,
+  },
+  balanceCard: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 24,
+    borderRadius: 20,
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 1,
+  },
+  balanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  balanceLabel: {
+    fontSize: 18,
+    color: '#333',
+    lineHeight: 24,
+    fontFamily: 'Prompt-SemiBold',
+  },
+  balanceAmount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  coinIcon: {
+    marginRight: 12,
+  },
+  coinNumber: {
+    fontSize: 48,
+    color: '#333',
+    fontFamily: 'Prompt-SemiBold',
+    marginRight: 8,
+    lineHeight: 72,
   },
   statsContainer: {
     flexDirection: 'row',

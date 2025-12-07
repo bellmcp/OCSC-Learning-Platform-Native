@@ -1,79 +1,31 @@
 import { router } from 'expo-router'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
+  ActivityIndicator,
   Platform,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSelector } from 'react-redux'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import { RootState } from '@/store/types'
+import axios from '@/utils/axiosConfig'
 
-// Mock coin data
-const mockCoinData = {
-  totalCoins: 48,
-  username: 'สมชาย รักเรียน',
-  avatar: 'https://bellmcp.work/img/Profile.jpg',
-  coinHistory: [
-    {
-      id: '1',
-      type: 'earned',
-      amount: 5,
-      description: 'เรียนจบหลักสูตร "การพัฒนาระบบสารสนเทศ"',
-      courseName: 'การพัฒนาระบบสารสนเทศ',
-      date: '15 ธันวาคม 2024',
-      time: '14:30',
-    },
-    {
-      id: '2',
-      type: 'earned',
-      amount: 3,
-      description: 'ทำแบบทดสอบผ่านเกณฑ์ 80%',
-      courseName: 'การจัดการโครงการ',
-      date: '12 ธันวาคม 2024',
-      time: '10:15',
-    },
-    {
-      id: '3',
-      type: 'earned',
-      amount: 2,
-      description: 'เรียนจบบทเรียน "การวางแผนกลยุทธ์"',
-      courseName: 'การวางแผนกลยุทธ์',
-      date: '10 ธันวาคม 2024',
-      time: '16:45',
-    },
-    {
-      id: '4',
-      type: 'earned',
-      amount: 4,
-      description: 'เรียนจบหลักสูตร "การบริหารทรัพยากรมนุษย์"',
-      courseName: 'การบริหารทรัพยากรมนุษย์',
-      date: '8 ธันวาคม 2024',
-      time: '11:20',
-    },
-    {
-      id: '5',
-      type: 'earned',
-      amount: 3,
-      description: 'ทำแบบทดสอบผ่านเกณฑ์ 90%',
-      courseName: 'การสื่อสารในองค์กร',
-      date: '5 ธันวาคม 2024',
-      time: '13:10',
-    },
-    {
-      id: '6',
-      type: 'earned',
-      amount: 2,
-      description: 'เรียนจบบทเรียน "การทำงานเป็นทีมอย่างมีประสิทธิภาพ"',
-      courseName: 'การทำงานเป็นทีม',
-      date: '3 ธันวาคม 2024',
-      time: '15:30',
-    },
-  ],
+// Type for reward point item from API
+interface RewardPoint {
+  id: number
+  userId: string
+  transaction: string
+  point: number
+  createDate: string
+  createDatePrint: string
 }
 
 export default function CoinsScreen() {
@@ -81,20 +33,90 @@ export default function CoinsScreen() {
   const tintColor = useThemeColor({}, 'tint')
   const iconColor = useThemeColor({}, 'icon')
 
+  // Get user from Redux store
+  const { items: user } = useSelector((state: RootState) => state.user)
+
+  // Local state for reward points
+  const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [rewardPoints, setRewardPoints] = useState<RewardPoint[]>([])
+  const [error, setError] = useState<string | null>(null)
+
+  // Calculate total accumulated points
+  const totalPoints = rewardPoints.reduce((sum, item) => sum + item.point, 0)
+
+  // Fetch reward points from API
+  const fetchRewardPoints = async (showRefresh = false) => {
+    try {
+      if (showRefresh) {
+        setIsRefreshing(true)
+      } else {
+        setIsLoading(true)
+      }
+      setError(null)
+
+      const response = await axios.get('/RewardPoints')
+      setRewardPoints(response.data || [])
+    } catch (err: any) {
+      console.error('[Coins] Error fetching reward points:', err)
+      setError(err.message || 'ไม่สามารถโหลดข้อมูลได้')
+      setRewardPoints([])
+    } finally {
+      setIsLoading(false)
+      setIsRefreshing(false)
+    }
+  }
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchRewardPoints()
+  }, [])
+
   const handleBack = () => {
     router.back()
   }
 
-  const getCoinIcon = (type: string) => {
-    return type === 'earned' ? 'star.circle.fill' : 'minus.circle.fill'
+  const handleRefresh = () => {
+    fetchRewardPoints(true)
   }
 
-  const getCoinColor = (type: string) => {
-    return type === 'earned' ? tintColor : '#FF6B6B'
+  // Get icon based on point value (positive = earned, negative = spent)
+  const getPointIcon = (point: number) => {
+    return point >= 0 ? 'star.circle.fill' : 'minus.circle.fill'
   }
 
-  const getCoinPrefix = (type: string) => {
-    return type === 'earned' ? '+' : '-'
+  const getPointColor = (point: number) => {
+    return point >= 0 ? tintColor : '#FF6B6B'
+  }
+
+  const getPointPrefix = (point: number) => {
+    return point >= 0 ? '+' : ''
+  }
+
+  // Format user ID with spaces (e.g., "1234567890123" -> "1 2345 67890 12 3")
+  const formatUserId = (id: string) => {
+    if (!id) return ''
+    // Format: X XXXX XXXXX XX X
+    const digits = id.replace(/\D/g, '')
+    if (digits.length === 13) {
+      return `${digits[0]} ${digits.slice(1, 5)} ${digits.slice(
+        5,
+        10
+      )} ${digits.slice(10, 12)} ${digits[12]}`
+    }
+    return id
+  }
+
+  // Get user display name
+  const getUserName = () => {
+    if (!user) return 'ผู้ใช้งาน'
+    if (user.title && user.firstName && user.lastName) {
+      return `${user.title}${user.firstName} ${user.lastName}`
+    }
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`
+    }
+    return user.firstName || 'ผู้ใช้งาน'
   }
 
   return (
@@ -112,159 +134,190 @@ export default function CoinsScreen() {
         </View>
       </ThemedView>
 
-      {/* Scrollable Content */}
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* User Info Card */}
-        <ThemedView style={styles.userCard}>
+      {/* Loading State */}
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size='large' color={tintColor} />
+          <ThemedText style={styles.loadingText}>กำลังโหลดข้อมูล...</ThemedText>
+        </View>
+      ) : error ? (
+        /* Error State */
+        <View style={styles.errorContainer}>
           <IconSymbol
-            name='person.circle.fill'
-            size={64}
-            color={tintColor}
-            style={styles.userAvatar}
+            name='exclamationmark.triangle'
+            size={48}
+            color='#FF6B6B'
           />
-          <ThemedView style={styles.userInfo}>
-            <ThemedText type='subtitle' style={styles.userName}>
-              {mockCoinData.username}
-            </ThemedText>
-            <ThemedText style={styles.userSubtitle}>
-              1 2345 67890 12 3
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
-
-        {/* Coin Balance Card */}
-        <ThemedView style={styles.balanceCard}>
-          <ThemedView style={styles.balanceHeader}>
-            <ThemedText style={styles.balanceLabel}>
-              คะแนนการเรียนรู้ของคุณ
-            </ThemedText>
-            <IconSymbol name='star.circle.fill' size={32} color={tintColor} />
-          </ThemedView>
-          <ThemedView style={styles.balanceAmount}>
-            <IconSymbol
-              name='star.circle.fill'
-              size={48}
-              color={tintColor}
-              style={styles.coinIcon}
+          <ThemedText style={styles.errorText}>{error}</ThemedText>
+          <TouchableOpacity
+            style={[styles.retryButton, { backgroundColor: tintColor }]}
+            onPress={() => fetchRewardPoints()}
+          >
+            <ThemedText style={styles.retryButtonText}>ลองอีกครั้ง</ThemedText>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        /* Scrollable Content */
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              tintColor={tintColor}
             />
-            <ThemedText type='title' style={styles.coinNumber}>
-              {mockCoinData.totalCoins}
-            </ThemedText>
-            {/* <ThemedText style={styles.coinUnit}>เหรียญ</ThemedText> */}
-          </ThemedView>
-          {/* <ThemedView style={styles.balanceStats}>
-            <ThemedView style={styles.statItem}>
-              <ThemedText style={styles.statNumber}>
-                {mockCoinData.coinHistory.length}
+          }
+        >
+          {/* User Info Card */}
+          {/* <ThemedView style={styles.userCard}>
+            <IconSymbol
+              name='person.circle.fill'
+              size={64}
+              color={tintColor}
+              style={styles.userAvatar}
+            />
+            <ThemedView style={styles.userInfo}>
+              <ThemedText type='subtitle' style={styles.userName}>
+                {getUserName()}
               </ThemedText>
-              <ThemedText style={styles.statLabel}>ครั้งที่ได้รับ</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.statDivider} />
-            <ThemedView style={styles.statItem}>
-              <ThemedText style={styles.statNumber}>
-                {Math.round(
-                  mockCoinData.totalCoins / mockCoinData.coinHistory.length
-                )}
+              <ThemedText style={styles.userSubtitle}>
+                {formatUserId(user?.id || '')}
               </ThemedText>
-              <ThemedText style={styles.statLabel}>เฉลี่ยต่อครั้ง</ThemedText>
             </ThemedView>
           </ThemedView> */}
-        </ThemedView>
 
-        {/* Coin History Section */}
-        <ThemedView style={styles.historySection}>
-          <ThemedView style={styles.sectionHeader}>
-            <ThemedText type='subtitle' style={styles.sectionTitle}>
-              ประวัติการได้รับคะแนน
-            </ThemedText>
-            <ThemedText style={styles.sectionSubtitle}>
-              ดูประวัติการได้รับคะแนน
-            </ThemedText>
+          {/* Coin Balance Card */}
+          <ThemedView style={styles.balanceCard}>
+            <ThemedView style={styles.balanceHeader}>
+              <ThemedText style={styles.balanceLabel}>
+                คะแนนการเรียนรู้ของคุณ
+              </ThemedText>
+              {/* <IconSymbol name='star.circle.fill' size={32} color={tintColor} /> */}
+            </ThemedView>
+            <ThemedView style={styles.balanceAmount}>
+              <IconSymbol
+                name='star.circle.fill'
+                size={48}
+                color={tintColor}
+                style={styles.coinIcon}
+              />
+              <ThemedText type='title' style={styles.coinNumber}>
+                {totalPoints.toLocaleString()}
+              </ThemedText>
+            </ThemedView>
           </ThemedView>
 
-          {mockCoinData.coinHistory.map((item) => (
-            <ThemedView key={item.id} style={styles.historyItem}>
-              <ThemedView style={styles.historyIcon}>
-                <IconSymbol
-                  name={getCoinIcon(item.type)}
-                  size={24}
-                  color={item.type === 'earned' ? tintColor : '#FF6B6B'}
-                />
-              </ThemedView>
+          {/* Coin History Section */}
+          <ThemedView style={styles.historySection}>
+            <ThemedView style={styles.sectionHeader}>
+              <ThemedText type='subtitle' style={styles.sectionTitle}>
+                ประวัติการได้รับคะแนน
+              </ThemedText>
+              <ThemedText style={styles.sectionSubtitle}>
+                {rewardPoints.length > 0
+                  ? `ทั้งหมด ${rewardPoints.length} รายการ`
+                  : 'ยังไม่มีประวัติการได้รับคะแนน'}
+              </ThemedText>
+            </ThemedView>
 
-              <ThemedView style={styles.historyContent}>
-                <ThemedText style={styles.historyDescription}>
-                  {item.description}
+            {rewardPoints.length === 0 ? (
+              <ThemedView style={styles.emptyState}>
+                <IconSymbol name='star.slash' size={48} color='#999' />
+                <ThemedText style={styles.emptyText}>
+                  ยังไม่มีประวัติการได้รับคะแนน
                 </ThemedText>
-                <ThemedText style={styles.historyCourse}>
-                  {item.courseName}
-                </ThemedText>
-                <ThemedView style={styles.historyMeta}>
-                  <ThemedText style={styles.historyDate}>
-                    {item.date} • {item.time}
-                  </ThemedText>
+              </ThemedView>
+            ) : (
+              rewardPoints.map((item) => (
+                <ThemedView key={item.id} style={styles.historyItem}>
+                  <ThemedView
+                    style={[
+                      styles.historyIcon,
+                      {
+                        backgroundColor:
+                          item.point >= 0
+                            ? 'rgba(24, 58, 124, 0.1)'
+                            : 'rgba(255, 107, 107, 0.1)',
+                      },
+                    ]}
+                  >
+                    <IconSymbol
+                      name={getPointIcon(item.point)}
+                      size={24}
+                      color={getPointColor(item.point)}
+                    />
+                  </ThemedView>
+
+                  <ThemedView style={styles.historyContent}>
+                    <ThemedText style={styles.historyDescription}>
+                      {item.transaction}
+                    </ThemedText>
+                    <ThemedView style={styles.historyMeta}>
+                      <ThemedText style={styles.historyDate}>
+                        {item.createDatePrint}
+                      </ThemedText>
+                    </ThemedView>
+                  </ThemedView>
+
+                  <ThemedView style={styles.historyAmount}>
+                    <ThemedText
+                      style={[
+                        styles.amountText,
+                        { color: getPointColor(item.point) },
+                      ]}
+                    >
+                      {getPointPrefix(item.point)}
+                      {item.point.toLocaleString()}
+                    </ThemedText>
+                    <ThemedText style={styles.amountUnit}>คะแนน</ThemedText>
+                  </ThemedView>
                 </ThemedView>
-              </ThemedView>
-
-              <ThemedView style={styles.historyAmount}>
-                <ThemedText
-                  style={[
-                    styles.amountText,
-                    { color: getCoinColor(item.type) },
-                  ]}
-                >
-                  {getCoinPrefix(item.type)}
-                  {item.amount}
-                </ThemedText>
-                <ThemedText style={styles.amountUnit}>คะแนน</ThemedText>
-              </ThemedView>
-            </ThemedView>
-          ))}
-        </ThemedView>
-
-        {/* Info Section */}
-        <ThemedView style={styles.infoSection}>
-          <ThemedText type='subtitle' style={styles.infoTitle}>
-            วิธีรับคะแนน
-          </ThemedText>
-          <ThemedView style={styles.infoItems}>
-            <ThemedView style={styles.infoItem}>
-              <IconSymbol
-                name='checkmark.circle.fill'
-                size={20}
-                color='#2e7d32'
-              />
-              <ThemedText style={styles.infoText}>
-                เรียนจบหลักสูตรหรือบทเรียน
-              </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.infoItem}>
-              <IconSymbol
-                name='checkmark.circle.fill'
-                size={20}
-                color='#2e7d32'
-              />
-              <ThemedText style={styles.infoText}>
-                ทำแบบทดสอบผ่านเกณฑ์ที่กำหนด
-              </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.infoItem}>
-              <IconSymbol
-                name='checkmark.circle.fill'
-                size={20}
-                color='#2e7d32'
-              />
-              <ThemedText style={styles.infoText}>
-                เข้าร่วมกิจกรรมพิเศษ
-              </ThemedText>
-            </ThemedView>
+              ))
+            )}
           </ThemedView>
-        </ThemedView>
-      </ScrollView>
+
+          {/* Info Section */}
+          {/* <ThemedView style={styles.infoSection}>
+            <ThemedText type='subtitle' style={styles.infoTitle}>
+              วิธีรับคะแนน
+            </ThemedText>
+            <ThemedView style={styles.infoItems}>
+              <ThemedView style={styles.infoItem}>
+                <IconSymbol
+                  name='checkmark.circle.fill'
+                  size={20}
+                  color='#2e7d32'
+                />
+                <ThemedText style={styles.infoText}>
+                  เรียนจบหลักสูตรหรือบทเรียน
+                </ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.infoItem}>
+                <IconSymbol
+                  name='checkmark.circle.fill'
+                  size={20}
+                  color='#2e7d32'
+                />
+                <ThemedText style={styles.infoText}>
+                  ทำแบบทดสอบผ่านเกณฑ์ที่กำหนด
+                </ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.infoItem}>
+                <IconSymbol
+                  name='checkmark.circle.fill'
+                  size={20}
+                  color='#2e7d32'
+                />
+                <ThemedText style={styles.infoText}>
+                  เข้าร่วมกิจกรรมพิเศษ
+                </ThemedText>
+              </ThemedView>
+            </ThemedView>
+          </ThemedView> */}
+        </ScrollView>
+      )}
     </ThemedView>
   )
 }
@@ -302,6 +355,41 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     fontFamily: 'Prompt-SemiBold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#666',
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: 'white',
   },
   userCard: {
     flexDirection: 'row',
@@ -357,7 +445,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   balanceLabel: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#333',
     lineHeight: 24,
     fontFamily: 'Prompt-SemiBold',
@@ -378,36 +466,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
     lineHeight: 72,
   },
-  coinUnit: {
-    fontSize: 20,
-    color: '#333',
-    fontFamily: 'Prompt-Medium',
-  },
-  balanceStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 20,
-    fontFamily: 'Prompt-SemiBold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    opacity: 0.8,
-    textAlign: 'center',
-  },
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#E5E5E5',
-  },
   historySection: {
     marginHorizontal: 20,
     marginBottom: 20,
@@ -422,6 +480,18 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: 14,
     opacity: 0.7,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    backgroundColor: 'white',
+    borderRadius: 12,
+  },
+  emptyText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#999',
   },
   historyItem: {
     flexDirection: 'row',
@@ -455,11 +525,6 @@ const styles = StyleSheet.create({
   historyDescription: {
     fontSize: 16,
     fontFamily: 'Prompt-SemiBold',
-    marginBottom: 4,
-  },
-  historyCourse: {
-    fontSize: 14,
-    opacity: 0.7,
     marginBottom: 4,
   },
   historyMeta: {
