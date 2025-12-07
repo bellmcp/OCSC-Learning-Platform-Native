@@ -219,7 +219,7 @@ const ScoreRenderer = forwardRef<ScoreRendererRef, ScoreRendererProps>(
         <head>
           <meta name="viewport" content="width=794, initial-scale=${
             contentWidth / 794
-          }">
+          }, maximum-scale=${contentWidth / 794}, user-scalable=no">
           <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
           <style>
             * { 
@@ -556,6 +556,9 @@ const ScoreRenderer = forwardRef<ScoreRendererRef, ScoreRendererProps>(
           javaScriptEnabled={true}
           domStorageEnabled={true}
           originWhitelist={['*']}
+          bounces={false}
+          setBuiltInZoomControls={false}
+          setDisplayZoomControls={false}
         />
       </View>
     )

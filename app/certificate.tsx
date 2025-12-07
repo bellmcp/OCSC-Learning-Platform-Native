@@ -340,21 +340,11 @@ export default function CertificateScreen() {
         </View>
       </ThemedView>
 
-      {/* Scrollable Content - zoom disabled */}
+      {/* Scrollable Content */}
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
-        pinchGestureEnabled={false}
-        maximumZoomScale={1}
-        minimumZoomScale={1}
-        zoomScale={1}
-        bouncesZoom={false}
-        bounces={false}
-        scrollsToTop={false}
-        directionalLockEnabled={true}
-        scrollEventThrottle={16}
       >
         {/* Title Section */}
         <ThemedView style={styles.titleContainer}>

@@ -233,7 +233,7 @@ const CertificateRenderer = forwardRef<
         <!DOCTYPE html>
         <html>
         <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
           <link href="https://fonts.googleapis.com/css2?family=Athiti:wght@400;500;600&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -302,7 +302,7 @@ const CertificateRenderer = forwardRef<
         <!DOCTYPE html>
         <html>
         <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
           <link href="https://fonts.googleapis.com/css2?family=Athiti:wght@400;500;600&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -626,11 +626,14 @@ const CertificateRenderer = forwardRef<
           scrollEnabled={false}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
-          scalesPageToFit={true}
+          scalesPageToFit={false}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           originWhitelist={['*']}
           allowFileAccess={true}
+          bounces={false}
+          setBuiltInZoomControls={false}
+          setDisplayZoomControls={false}
         />
       </View>
     )
