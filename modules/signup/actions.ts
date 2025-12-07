@@ -90,6 +90,13 @@ const SUBMIT_SIGNUP_SUCCESS =
 const SUBMIT_SIGNUP_FAILURE =
   'learning-portal-native/signup/SUBMIT_SIGNUP_FAILURE'
 
+const UPDATE_MEMBER_REQUEST =
+  'learning-portal-native/signup/UPDATE_MEMBER_REQUEST'
+const UPDATE_MEMBER_SUCCESS =
+  'learning-portal-native/signup/UPDATE_MEMBER_SUCCESS'
+const UPDATE_MEMBER_FAILURE =
+  'learning-portal-native/signup/UPDATE_MEMBER_FAILURE'
+
 const CLEAR_SIGNUP_STATE = 'learning-portal-native/signup/CLEAR_SIGNUP_STATE'
 const CLEAR_PRESENCE_CHECK =
   'learning-portal-native/signup/CLEAR_PRESENCE_CHECK'
@@ -369,6 +376,81 @@ function submitSignup(memberData: MemberData) {
   }
 }
 
+// MemberUpdateData interface for PUT /Members/{id}
+interface MemberUpdateData {
+  userTypeId: number
+  title: string
+  firstName: string
+  lastName: string
+  gender: string
+  educationId: number
+  birthYear: string
+  email: string
+  // Type 1 fields
+  m1_JobTitle?: string
+  m1_JobTypeId?: number
+  m1_JobLevelId?: number
+  m1_MinistryId?: number
+  m1_DepartmentId?: number
+  m1_Division?: string
+  m1_JobStartDate?: string
+  // Type 2 fields
+  m2_JobTitle?: string
+  m2_JobTypeId?: number
+  m2_JobLevel?: string
+  m2_MinistryId?: number
+  m2_DepartmentId?: number
+  m2_Division?: string
+  m2_JobStartDate?: string
+  // Type 3 fields
+  m3_JobTitle?: string
+  m3_JobTypeId?: number
+  m3_JobLevel?: string
+  m3_MinistryId?: number
+  m3_DepartmentId?: number
+  m3_Division?: string
+  m3_JobStartDate?: string
+  // Type 4 fields
+  m4_JobTitle?: string
+  m4_StateEnterpriseId?: number
+  m4_JobStartDate?: string
+  // Type 5 fields
+  m5_JobTitle?: string
+  m5_OccupationId?: number
+  m5_Workplace?: string
+}
+
+function updateMember(memberId: string, memberData: MemberUpdateData) {
+  return async (dispatch: any) => {
+    dispatch({ type: UPDATE_MEMBER_REQUEST })
+    try {
+      const { data } = await axios.put(`/Members/${memberId}`, memberData, {
+        baseURL: portalApiBaseUrl,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      dispatch({
+        type: UPDATE_MEMBER_SUCCESS,
+        payload: {
+          message: 'บันทึกข้อมูลส่วนบุคคลเรียบร้อยแล้ว',
+          data: data,
+        },
+      })
+      return { success: true, data }
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message ||
+        `เกิดข้อผิดพลาดในการบันทึกข้อมูล (${err.response?.status || 'Unknown'})`
+      dispatch({
+        type: UPDATE_MEMBER_FAILURE,
+        payload: { message: errorMessage },
+      })
+      return { success: false, error: errorMessage }
+    }
+  }
+}
+
 function clearSignupState() {
   return { type: CLEAR_SIGNUP_STATE }
 }
@@ -438,4 +520,8 @@ export {
   SUBMIT_SIGNUP_REQUEST,
   SUBMIT_SIGNUP_SUCCESS,
   submitSignup,
+  UPDATE_MEMBER_FAILURE,
+  UPDATE_MEMBER_REQUEST,
+  UPDATE_MEMBER_SUCCESS,
+  updateMember,
 }

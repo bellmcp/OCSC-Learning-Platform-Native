@@ -225,7 +225,7 @@ export default function CertificateListScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Info Card */}
-        <ThemedView style={styles.infoCard}>
+        {/* <ThemedView style={styles.infoCard}>
           <IconSymbol
             name='doc.text.fill'
             size={48}
@@ -238,7 +238,7 @@ export default function CertificateListScreen() {
           <ThemedText style={styles.infoSubtitle}>
             ดูประกาศนียบัตรทั้งหมดที่คุณได้รับจากการเรียนจบหลักสูตรและรายวิชาต่างๆ
           </ThemedText>
-        </ThemedView>
+        </ThemedView> */}
 
         {/* Curriculum Certificates Section */}
         <ThemedView style={styles.sectionContainer}>
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   certificateTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: 'Prompt-SemiBold',
     marginBottom: 4,
   },

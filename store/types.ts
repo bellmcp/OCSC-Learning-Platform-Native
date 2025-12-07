@@ -135,6 +135,7 @@ export interface SignupState {
   isPositionsLoading: boolean
   isCheckingPresence: boolean
   isSubmitting: boolean
+  isUpdating: boolean
   educations: Array<{ id: number; name: string }>
   jobTypes1: Array<{ id: number; name: string }>
   jobTypes2: Array<{ id: number; name: string }>
@@ -157,6 +158,11 @@ export interface SignupState {
     isValid: boolean
   } | null
   submitResult: {
+    success: boolean
+    message: string
+    data?: any
+  } | null
+  updateResult: {
     success: boolean
     message: string
     data?: any

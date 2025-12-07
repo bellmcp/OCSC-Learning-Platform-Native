@@ -448,7 +448,7 @@ export default function SearchScreen() {
           <IconSymbol name='magnifyingglass' size={20} color={iconColor} />
           <TextInput
             style={[styles.searchInput, { color: iconColor }]}
-            placeholder='ค้นหาหลักสูตรหรือรายวิชา...'
+            placeholder='ค้นหาหลักสูตร หรือ รายวิชา...'
             placeholderTextColor={iconColor + '80'}
             value={searchQuery}
             onChangeText={handleSearch}

@@ -253,11 +253,11 @@ export default function RootLayout() {
               />
               <Stack.Screen name='register' options={{ headerShown: false }} />
               <Stack.Screen
-                name='certificate-list'
+                name='edit-profile'
                 options={{ headerShown: false }}
               />
               <Stack.Screen
-                name='edit-profile'
+                name='certificate-list'
                 options={{ headerShown: false }}
               />
               <Stack.Screen

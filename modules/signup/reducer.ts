@@ -38,6 +38,9 @@ import {
   SUBMIT_SIGNUP_FAILURE,
   SUBMIT_SIGNUP_REQUEST,
   SUBMIT_SIGNUP_SUCCESS,
+  UPDATE_MEMBER_FAILURE,
+  UPDATE_MEMBER_REQUEST,
+  UPDATE_MEMBER_SUCCESS,
 } from './actions'
 
 interface SignupState {
@@ -54,6 +57,7 @@ interface SignupState {
   isPositionsLoading: boolean
   isCheckingPresence: boolean
   isSubmitting: boolean
+  isUpdating: boolean
 
   // Data
   educations: Array<{ id: number; name: string }>
@@ -86,6 +90,13 @@ interface SignupState {
     message: string
     data?: any
   } | null
+
+  // Update result
+  updateResult: {
+    success: boolean
+    message: string
+    data?: any
+  } | null
 }
 
 const initialState: SignupState = {
@@ -101,6 +112,7 @@ const initialState: SignupState = {
   isPositionsLoading: false,
   isCheckingPresence: false,
   isSubmitting: false,
+  isUpdating: false,
 
   educations: [],
   jobTypes1: [],
@@ -115,6 +127,7 @@ const initialState: SignupState = {
 
   presenceCheck: null,
   submitResult: null,
+  updateResult: null,
 }
 
 export default function signupReducer(
@@ -286,6 +299,29 @@ export default function signupReducer(
         ...state,
         isSubmitting: false,
         submitResult: {
+          success: false,
+          message: action.payload.message,
+        },
+      }
+
+    // Update Member
+    case UPDATE_MEMBER_REQUEST:
+      return { ...state, isUpdating: true, updateResult: null }
+    case UPDATE_MEMBER_SUCCESS:
+      return {
+        ...state,
+        isUpdating: false,
+        updateResult: {
+          success: true,
+          message: action.payload.message,
+          data: action.payload.data,
+        },
+      }
+    case UPDATE_MEMBER_FAILURE:
+      return {
+        ...state,
+        isUpdating: false,
+        updateResult: {
           success: false,
           message: action.payload.message,
         },
