@@ -675,6 +675,44 @@ export default function AccountScreen() {
           contentContainerStyle={styles.loginScrollContent}
         >
           {loginFormContent}
+
+          {/* Footer Section */}
+          <ThemedView style={styles.footer}>
+            <ThemedText
+              style={[
+                styles.footerText,
+                {
+                  fontFamily: 'Prompt-SemiBold',
+                  fontSize: 13,
+                  marginBottom: 10,
+                },
+              ]}
+            >
+              สำนักงานคณะกรรมการข้าราชการพลเรือน (สำนักงาน ก.พ.)
+            </ThemedText>
+            <ThemedText style={styles.footerText}>
+              47/111 หมู่ 4 ถนนติวานนท์ ตำบลตลาดขวัญ{'\n'}อำเภอเมือง
+              จังหวัดนนทบุรี 11000
+            </ThemedText>
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: '/portal-webview',
+                  params: {
+                    url: 'https://www.ocsc.go.th/cookies-policy/',
+                    title: 'นโยบายการใช้คุกกี้',
+                  },
+                })
+              }
+            >
+              <ThemedText style={[styles.footerText, styles.footerHighlight]}>
+                นโยบายและแนวปฏิบัติในการคุ้มครองข้อมูลส่วนบุคคล
+              </ThemedText>
+            </TouchableOpacity>
+            <ThemedText style={styles.footerText}>
+              Copyright © 2568 Office of the Civil Service Commission
+            </ThemedText>
+          </ThemedView>
         </ScrollView>
         <StatusBarGradient />
       </ThemedView>
@@ -869,9 +907,21 @@ export default function AccountScreen() {
             47/111 หมู่ 4 ถนนติวานนท์ ตำบลตลาดขวัญ{'\n'}อำเภอเมือง
             จังหวัดนนทบุรี 11000
           </ThemedText>
-          <ThemedText style={[styles.footerText, styles.footerHighlight]}>
-            นโยบายและแนวปฏิบัติในการคุ้มครองข้อมูลส่วนบุคคล
-          </ThemedText>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: '/portal-webview',
+                params: {
+                  url: 'https://www.ocsc.go.th/cookies-policy/',
+                  title: 'นโยบายการใช้คุกกี้',
+                },
+              })
+            }
+          >
+            <ThemedText style={[styles.footerText, styles.footerHighlight]}>
+              นโยบายและแนวปฏิบัติในการคุ้มครองข้อมูลส่วนบุคคล
+            </ThemedText>
+          </TouchableOpacity>
           <ThemedText style={styles.footerText}>
             Copyright © 2568 Office of the Civil Service Commission
           </ThemedText>
