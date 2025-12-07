@@ -6,12 +6,13 @@ import * as WebBrowser from 'expo-web-browser'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
-  Alert,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native'
 
@@ -57,6 +58,7 @@ export default function AccountScreen() {
   const [showPassword, setShowPassword] = useState(false)
   const [isThaiDLoading, setIsThaiDLoading] = useState(false)
   const [thaiDState, setThaiDState] = useState<string | null>(null)
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false)
 
   // Secret debug login tap counter
   const [debugTapCount, setDebugTapCount] = useState(0)
@@ -385,27 +387,28 @@ export default function AccountScreen() {
   }
 
   const handleLogout = () => {
-    Alert.alert('ยืนยันการออกจากระบบ', 'คุณต้องการออกจากระบบหรือไม่?', [
-      { text: 'ยกเลิก', style: 'cancel' },
-      {
-        text: 'ออกจากระบบ',
-        style: 'destructive',
-        onPress: async () => {
-          // Clear token from AsyncStorage
-          await AsyncStorage.removeItem('token')
-          console.log('[Auth] Token removed from AsyncStorage')
+    setLogoutModalVisible(true)
+  }
 
-          // Clear all Redux state
-          dispatch(userActions.clearUser())
-          dispatch(registrationsActions.clearRegistrations())
-          dispatch(meActions.clearAllCertificates())
-          dispatch(learnActions.clearLearnState())
-          console.log('[Auth] Redux state cleared')
+  const handleLogoutCancel = () => {
+    setLogoutModalVisible(false)
+  }
 
-          setIsLoggedIn(false)
-        },
-      },
-    ])
+  const handleLogoutConfirm = async () => {
+    setLogoutModalVisible(false)
+
+    // Clear token from AsyncStorage
+    await AsyncStorage.removeItem('token')
+    console.log('[Auth] Token removed from AsyncStorage')
+
+    // Clear all Redux state
+    dispatch(userActions.clearUser())
+    dispatch(registrationsActions.clearRegistrations())
+    dispatch(meActions.clearAllCertificates())
+    dispatch(learnActions.clearLearnState())
+    console.log('[Auth] Redux state cleared')
+
+    setIsLoggedIn(false)
   }
 
   const handlePrintCertificate = () => {
@@ -925,6 +928,48 @@ export default function AccountScreen() {
           </ThemedText>
         </ThemedView>
       </ScrollView>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        visible={logoutModalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={handleLogoutCancel}
+      >
+        <TouchableWithoutFeedback onPress={handleLogoutCancel}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContainer}>
+                <ThemedText style={styles.modalTitle}>
+                  ยืนยันการออกจากระบบ
+                </ThemedText>
+                <ThemedText style={styles.modalMessage}>
+                  คุณต้องการออกจากระบบหรือไม่?
+                </ThemedText>
+                <View style={styles.modalButtonRow}>
+                  <TouchableOpacity
+                    style={styles.modalButtonCancel}
+                    onPress={handleLogoutCancel}
+                  >
+                    <ThemedText style={styles.modalButtonCancelText}>
+                      ยกเลิก
+                    </ThemedText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.modalButtonConfirm}
+                    onPress={handleLogoutConfirm}
+                  >
+                    <ThemedText style={styles.modalButtonConfirmText}>
+                      ออกจากระบบ
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       <StatusBarGradient />
     </ThemedView>
   )
@@ -1370,5 +1415,74 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Prompt-Medium',
     color: '#183A7C',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    maxWidth: 400,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+    marginBottom: 12,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#4B5563',
+    lineHeight: 24,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButtonCancel: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  modalButtonCancelText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+  },
+  modalButtonConfirm: {
+    flex: 1,
+    backgroundColor: '#EF4444',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  modalButtonConfirmText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#FFFFFF',
   },
 })
