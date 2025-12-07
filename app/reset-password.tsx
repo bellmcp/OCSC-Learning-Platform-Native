@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ThemedText } from '@/components/ThemedText'
@@ -78,18 +79,19 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor }]}
+      edges={['top']}
+    >
       {/* Header */}
       <ThemedView style={styles.header}>
-        <View style={styles.headerTop}>
-          <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-            <IconSymbol name='chevron.left' size={24} color={iconColor} />
-          </TouchableOpacity>
-          <ThemedText type='title' style={styles.headerTitle}>
-            ตั้งรหัสผ่านใหม่
-          </ThemedText>
-          <View style={styles.backButton} />
-        </View>
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+          <IconSymbol name='chevron.left' size={24} color={iconColor} />
+        </TouchableOpacity>
+        <ThemedView style={styles.headerTitleContainer}>
+          <ThemedText style={styles.headerTitle}>ตั้งรหัสผ่านใหม่</ThemedText>
+        </ThemedView>
+        <View style={styles.backButton} />
       </ThemedView>
 
       {/* Content */}
@@ -103,141 +105,139 @@ export default function ResetPasswordScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps='handled'
         >
-          <ThemedView style={styles.formCard}>
-            <ThemedText style={styles.formTitle}>
-              ตั้งรหัสผ่านใหม่ / ลืมรหัสผ่าน
+          {/* Form Title */}
+          <ThemedText style={styles.sectionTitle}>
+            ตั้งรหัสผ่านใหม่ / ลืมรหัสผ่าน
+          </ThemedText>
+          <ThemedText style={styles.sectionDescription}>
+            กรุณากรอกรหัสผ่านใหม่ที่ต้องการใช้งาน
+          </ThemedText>
+
+          {/* Password 1 Input */}
+          <View style={styles.inputContainer}>
+            <ThemedText style={styles.inputLabel}>
+              รหัสผ่านใหม่ <ThemedText style={styles.required}>*</ThemedText>
             </ThemedText>
-            <ThemedText style={styles.formDescription}>
-              กรุณากรอกรหัสผ่านใหม่ที่ต้องการใช้งาน
-            </ThemedText>
-
-            {/* Password 1 Input */}
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>รหัสผ่านใหม่</ThemedText>
-              <View
-                style={[
-                  styles.inputContainer,
-                  errors.password1 && styles.inputError,
-                ]}
-              >
-                <IconSymbol
-                  name='lock.fill'
-                  size={20}
-                  color='#9CA3AF'
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.textInput}
-                  placeholder='กรอกรหัสผ่านใหม่'
-                  placeholderTextColor='#9CA3AF'
-                  value={password1}
-                  onChangeText={(text) => {
-                    setPassword1(text)
-                    if (errors.password1) {
-                      setErrors((prev) => ({ ...prev, password1: undefined }))
-                    }
-                  }}
-                  secureTextEntry={!showPassword1}
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword1(!showPassword1)}
-                  style={styles.eyeButton}
-                >
-                  <IconSymbol
-                    name={showPassword1 ? 'eye.slash.fill' : 'eye.fill'}
-                    size={20}
-                    color='#9CA3AF'
-                  />
-                </TouchableOpacity>
-              </View>
-              {errors.password1 && (
-                <ThemedText style={styles.errorText}>
-                  {errors.password1}
-                </ThemedText>
-              )}
-            </View>
-
-            {/* Password 2 Input */}
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>
-                รหัสผ่านใหม่ (พิมพ์ซ้ำอีกครั้ง)
-              </ThemedText>
-              <View
-                style={[
-                  styles.inputContainer,
-                  errors.password2 && styles.inputError,
-                ]}
-              >
-                <IconSymbol
-                  name='lock.fill'
-                  size={20}
-                  color='#9CA3AF'
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.textInput}
-                  placeholder='กรอกรหัสผ่านใหม่อีกครั้ง'
-                  placeholderTextColor='#9CA3AF'
-                  value={password2}
-                  onChangeText={(text) => {
-                    setPassword2(text)
-                    if (errors.password2) {
-                      setErrors((prev) => ({ ...prev, password2: undefined }))
-                    }
-                  }}
-                  secureTextEntry={!showPassword2}
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword2(!showPassword2)}
-                  style={styles.eyeButton}
-                >
-                  <IconSymbol
-                    name={showPassword2 ? 'eye.slash.fill' : 'eye.fill'}
-                    size={20}
-                    color='#9CA3AF'
-                  />
-                </TouchableOpacity>
-              </View>
-              {errors.password2 && (
-                <ThemedText style={styles.errorText}>
-                  {errors.password2}
-                </ThemedText>
-              )}
-            </View>
-
-            {/* Submit Button */}
-            <TouchableOpacity
+            <View
               style={[
-                styles.submitButton,
-                { backgroundColor: tintColor },
-                isLoading && styles.submitButtonDisabled,
+                styles.inputWrapper,
+                errors.password1 && styles.inputError,
               ]}
-              onPress={handleSubmit}
-              disabled={isLoading}
             >
-              {isLoading ? (
-                <ActivityIndicator size='small' color='#FFFFFF' />
-              ) : (
-                <>
-                  <IconSymbol
-                    name='paperplane.fill'
-                    size={20}
-                    color='#FFFFFF'
-                  />
-                  <ThemedText style={styles.submitButtonText}>
-                    ส่งข้อมูล
-                  </ThemedText>
-                </>
-              )}
-            </TouchableOpacity>
-          </ThemedView>
+              <IconSymbol
+                name='lock.fill'
+                size={20}
+                color='#9CA3AF'
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={styles.textInput}
+                placeholder='กรอกรหัสผ่านใหม่'
+                placeholderTextColor='#9CA3AF'
+                value={password1}
+                onChangeText={(text) => {
+                  setPassword1(text)
+                  if (errors.password1) {
+                    setErrors((prev) => ({ ...prev, password1: undefined }))
+                  }
+                }}
+                secureTextEntry={!showPassword1}
+                autoCapitalize='none'
+                autoCorrect={false}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword1(!showPassword1)}
+                style={styles.passwordToggle}
+              >
+                <IconSymbol
+                  name={showPassword1 ? 'eye.slash.fill' : 'eye.fill'}
+                  size={20}
+                  color='#9CA3AF'
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password1 && (
+              <ThemedText style={styles.errorText}>
+                {errors.password1}
+              </ThemedText>
+            )}
+          </View>
+
+          {/* Password 2 Input */}
+          <View style={styles.inputContainer}>
+            <ThemedText style={styles.inputLabel}>
+              รหัสผ่านใหม่ (พิมพ์ซ้ำอีกครั้ง){' '}
+              <ThemedText style={styles.required}>*</ThemedText>
+            </ThemedText>
+            <View
+              style={[
+                styles.inputWrapper,
+                errors.password2 && styles.inputError,
+              ]}
+            >
+              <IconSymbol
+                name='lock.fill'
+                size={20}
+                color='#9CA3AF'
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={styles.textInput}
+                placeholder='กรอกรหัสผ่านใหม่อีกครั้ง'
+                placeholderTextColor='#9CA3AF'
+                value={password2}
+                onChangeText={(text) => {
+                  setPassword2(text)
+                  if (errors.password2) {
+                    setErrors((prev) => ({ ...prev, password2: undefined }))
+                  }
+                }}
+                secureTextEntry={!showPassword2}
+                autoCapitalize='none'
+                autoCorrect={false}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword2(!showPassword2)}
+                style={styles.passwordToggle}
+              >
+                <IconSymbol
+                  name={showPassword2 ? 'eye.slash.fill' : 'eye.fill'}
+                  size={20}
+                  color='#9CA3AF'
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password2 && (
+              <ThemedText style={styles.errorText}>
+                {errors.password2}
+              </ThemedText>
+            )}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ThemedView>
+
+      {/* Fixed Bottom Button */}
+      <View style={[styles.fixedButtonContainer, { backgroundColor }]}>
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            { backgroundColor: tintColor },
+            isLoading && styles.submitButtonDisabled,
+          ]}
+          onPress={handleSubmit}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size='small' color='#FFFFFF' />
+          ) : (
+            <>
+              <IconSymbol name='checkmark.circle' size={20} color='#FFFFFF' />
+              <ThemedText style={styles.submitButtonText}>ส่งข้อมูล</ThemedText>
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   )
 }
 
@@ -246,16 +246,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 80 : 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 20 : 40,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
-  },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
   backButton: {
     width: 40,
@@ -263,10 +260,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
   headerTitle: {
     textAlign: 'center',
     fontSize: 20,
     fontFamily: 'Prompt-SemiBold',
+    lineHeight: 32,
   },
   keyboardAvoid: {
     flex: 1,
@@ -276,57 +278,53 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
-  formCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 0,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
-  },
-  formTitle: {
-    fontSize: 20,
-    lineHeight: 36,
+  sectionTitle: {
+    fontSize: 18,
     fontFamily: 'Prompt-SemiBold',
-    color: '#1F2937',
-    marginBottom: 0,
+    marginBottom: 8,
+    color: '#333',
   },
-  formDescription: {
+  sectionDescription: {
     fontSize: 14,
     fontFamily: 'Prompt-Regular',
     color: '#6B7280',
     marginBottom: 24,
   },
-  inputGroup: {
+  inputContainer: {
+    width: '100%',
     marginBottom: 20,
   },
   inputLabel: {
-    fontSize: 14,
-    fontFamily: 'Prompt-Medium',
-    color: '#374151',
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
     marginBottom: 8,
+    color: '#333',
   },
-  inputContainer: {
+  required: {
+    color: '#ff4444',
+  },
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
+    backgroundColor: 'white',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E0E0E0',
+    borderRadius: 12,
     paddingHorizontal: 16,
-    height: 52,
+    paddingVertical: Platform.OS === 'ios' ? 12 : 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 0,
   },
   inputError: {
-    borderColor: '#EF4444',
+    borderColor: '#ff4444',
   },
   inputIcon: {
     marginRight: 12,
@@ -334,27 +332,46 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     fontSize: 16,
+    color: '#333',
     fontFamily: 'Prompt-Regular',
-    color: '#1F2937',
   },
-  eyeButton: {
-    padding: 8,
-    marginRight: -8,
+  passwordToggle: {
+    padding: 4,
   },
   errorText: {
-    fontSize: 12,
+    color: '#ff4444',
+    fontSize: 14,
     fontFamily: 'Prompt-Regular',
-    color: '#EF4444',
-    marginTop: 6,
+    marginTop: 4,
+  },
+  fixedButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
   },
   submitButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     borderRadius: 12,
-    marginTop: 8,
     gap: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+    minHeight: 52,
   },
   submitButtonDisabled: {
     opacity: 0.7,
