@@ -328,6 +328,11 @@ export default function AccountScreen() {
     <ThemedView style={styles.loginContainer}>
       {/* Header */}
       <ThemedView style={styles.header}>
+        <Image
+          source={require('@/assets/images/logo.png')}
+          style={styles.logo}
+          contentFit='contain'
+        />
         <TouchableOpacity onPress={handleSecretTap} activeOpacity={1}>
           <ThemedText type='title' style={styles.headerTitle}>
             OCSC Learning Space
@@ -906,6 +911,13 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 80 : 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
+  },
+  logo: {
+    width: 200,
+    height: 60,
+    alignSelf: 'center',
+    marginBottom: 36,
+    marginTop: 16,
   },
   headerTitle: {
     fontSize: 28,
