@@ -269,6 +269,7 @@ export default function RootLayout() {
                 options={{ headerShown: false }}
               />
               <Stack.Screen name='coins' options={{ headerShown: false }} />
+              <Stack.Screen name='otp' options={{ headerShown: false }} />
               <Stack.Screen
                 name='portal-webview'
                 options={{ headerShown: false }}

@@ -6,9 +6,18 @@ export interface RootState {
   curriculums: CurriculumsState
   learn: LearnState
   me: MeState
+  otp: OTPState
   press: PressState
   registrations: RegistrationsState
   ui: UIState
+}
+
+export interface OTPState {
+  isLoading: boolean
+  data: {
+    info?: string
+    qr?: string
+  } | null
 }
 
 export interface UserState {

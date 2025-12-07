@@ -891,15 +891,7 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() =>
-              router.push({
-                pathname: '/portal-webview',
-                params: {
-                  url: `${PORTAL_URL}otp`,
-                  title: 'ตั้งค่า OTP',
-                },
-              })
-            }
+            onPress={() => router.push('/otp')}
           >
             <IconSymbol name='gear' size={20} color={tintColor} />
             <ThemedText style={[styles.actionButtonText, { color: tintColor }]}>

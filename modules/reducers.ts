@@ -5,6 +5,7 @@ import courses from './courses/reducer'
 import curriculums from './curriculums/reducer'
 import learn from './learn/reducer'
 import me from './me/reducer'
+import otp from './otp/reducer'
 import press from './press/reducer'
 import registrations from './registrations/reducer'
 import ui from './ui/reducer'
@@ -18,6 +19,7 @@ export default () =>
     curriculums,
     learn,
     me,
+    otp,
     press,
     registrations,
     ui,
