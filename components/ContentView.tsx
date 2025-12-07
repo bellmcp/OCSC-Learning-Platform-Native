@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { Alert, Platform, StyleSheet } from 'react-native'
+import { Alert, Image, Platform, StyleSheet } from 'react-native'
 import WebView from 'react-native-webview'
 
 import { ThemedText } from '@/components/ThemedText'
@@ -10,6 +10,9 @@ import { EvaluationWelcomeCard } from './EvaluationWelcomeCard'
 import { TestWelcomeCard } from './TestWelcomeCard'
 
 import { ClassroomContent } from './types'
+
+// Import hero image for welcome screen
+const HeroImage = require('@/assets/images/hero-learn.png')
 
 interface ContentViewProps {
   selectedContent: ClassroomContent | null
@@ -113,11 +116,22 @@ export function ContentView({
 
   if (!selectedContent) {
     return (
-      <ThemedView style={styles.defaultContent}>
-        <IconSymbol name='book.closed' size={60} color={iconColor} />
-        <ThemedText style={styles.defaultContentText}>
-          เลือกเนื้อหาที่ต้องการเรียน
+      <ThemedView style={styles.welcomeContainer}>
+        <Image
+          source={HeroImage}
+          style={styles.welcomeImage}
+          resizeMode='contain'
+        />
+        <ThemedText style={styles.welcomeTitle}>ยินดีต้อนรับ</ThemedText>
+        <ThemedText style={styles.welcomeSubtitle}>
+          โปรดเลือกเนื้อหาที่ต้องการเรียนจากสารบัญ
         </ThemedText>
+        <IconSymbol
+          name='arrow.down'
+          size={24}
+          color='#9CA3AF'
+          style={styles.welcomeArrow}
+        />
       </ThemedView>
     )
   }
@@ -250,6 +264,36 @@ export function ContentView({
 }
 
 const styles = StyleSheet.create({
+  welcomeContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    paddingTop: 40,
+  },
+  welcomeImage: {
+    width: '100%',
+    height: 200,
+    marginBottom: 12,
+  },
+  welcomeTitle: {
+    lineHeight: 48,
+    fontSize: 24,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+    marginBottom: 0,
+    textAlign: 'center',
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  welcomeArrow: {
+    marginTop: 8,
+  },
   defaultContent: {
     flex: 1,
     justifyContent: 'center',

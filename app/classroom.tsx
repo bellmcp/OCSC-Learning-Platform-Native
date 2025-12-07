@@ -247,18 +247,10 @@ export default function ClassroomScreen() {
     }
   }, [currentCourse, courseContents, contentViews, isCourseCompleted])
 
-  // Initialize selected content and completed contents when data is loaded
+  // Initialize completed contents and progress when data is loaded
+  // Note: Do NOT auto-select content - show welcome screen first (matching desktop behavior)
   useEffect(() => {
     if (courseData && courseData.contents.length > 0) {
-      // Set initial selected content if not already set
-      if (!selectedContentId) {
-        const firstUncompleted = courseData.contents.find((c) => !c.completed)
-        const initialId = firstUncompleted
-          ? firstUncompleted.id
-          : courseData.contents[0].id
-        setSelectedContentId(initialId)
-      }
-
       // Initialize completed contents from data
       const completedIds = new Set(
         courseData.contents.filter((c) => c.completed).map((c) => c.id)
