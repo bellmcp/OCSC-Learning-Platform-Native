@@ -2,9 +2,14 @@ import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
+  BackHandler,
   Dimensions,
+  Modal,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -25,6 +30,7 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 import * as coursesActions from '@/modules/courses/actions'
 import * as learnActions from '@/modules/learn/actions'
 import * as registrationsActions from '@/modules/registrations/actions'
+import * as uiActions from '@/modules/ui/actions'
 import type { AppDispatch, RootState } from '@/store/types'
 
 const { width, height } = Dimensions.get('window')
@@ -101,6 +107,7 @@ export default function ClassroomScreen() {
   const [courseRating, setCourseRating] = useState<number>(0)
   const [showCoinAnimation, setShowCoinAnimation] = useState(false)
   const [accessible, setAccessible] = useState(true)
+  const [showExitModal, setShowExitModal] = useState(false)
 
   const scrollViewRef = useRef<ScrollView>(null)
 
@@ -150,6 +157,38 @@ export default function ClassroomScreen() {
       setAccessible(check)
     }
   }, [preferredRegistration, localDateTime])
+
+  // Handle back press - show confirmation modal
+  const handleBackPress = () => {
+    setShowExitModal(true)
+  }
+
+  // Handle confirm exit
+  const handleConfirmExit = () => {
+    setShowExitModal(false)
+    dispatch(
+      uiActions.setFlashMessage('บันทึกเวลาเรียนสะสมเรียบร้อยแล้ว', 'success')
+    )
+    router.back()
+  }
+
+  // Handle cancel exit
+  const handleCancelExit = () => {
+    setShowExitModal(false)
+  }
+
+  // Handle Android hardware back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        handleBackPress()
+        return true // Prevent default back action
+      }
+    )
+
+    return () => backHandler.remove()
+  }, [])
 
   // Load initial data
   useEffect(() => {
@@ -382,7 +421,11 @@ export default function ClassroomScreen() {
   if (isLoading || !courseData) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <ClassroomHeader courseName='กำลังโหลด...' showCelebration={false} />
+        <ClassroomHeader
+          courseName='กำลังโหลด...'
+          showCelebration={false}
+          onBackPress={handleBackPress}
+        />
         <ThemedView style={styles.loadingContainer}>
           <ActivityIndicator size='large' color={tintColor} />
           <ThemedText style={styles.loadingText}>
@@ -397,7 +440,11 @@ export default function ClassroomScreen() {
   if (!accessible) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <ClassroomHeader courseName={courseData.name} showCelebration={false} />
+        <ClassroomHeader
+          courseName={courseData.name}
+          showCelebration={false}
+          onBackPress={handleBackPress}
+        />
         <ThemedView style={styles.loadingContainer}>
           <ThemedText style={styles.lockedTitle}>
             ไม่สามารถเข้าสู่บทเรียนได้
@@ -416,6 +463,7 @@ export default function ClassroomScreen() {
       <ClassroomHeader
         courseName={courseData.name}
         showCelebration={showCoinAnimation}
+        onBackPress={handleBackPress}
       />
 
       {/* Main Content Container */}
@@ -477,6 +525,47 @@ export default function ClassroomScreen() {
         onContentComplete={handleContentComplete}
         courseRegistrationId={courseRegistrationId}
       />
+
+      {/* Exit Confirmation Modal */}
+      <Modal
+        visible={showExitModal}
+        transparent={true}
+        animationType='fade'
+        onRequestClose={handleCancelExit}
+      >
+        <TouchableWithoutFeedback onPress={handleCancelExit}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContainer}>
+                <ThemedText style={styles.modalTitle}>
+                  ออกจากห้องเรียน?
+                </ThemedText>
+                <ThemedText style={styles.modalMessage}>
+                  เซสชันปัจจุบันจะจบลง และเวลาเรียนสะสมของคุณจะถูกบันทึก
+                </ThemedText>
+                <View style={styles.modalButtonRow}>
+                  <TouchableOpacity
+                    style={styles.modalButtonCancel}
+                    onPress={handleCancelExit}
+                  >
+                    <ThemedText style={styles.modalButtonCancelText}>
+                      ยกเลิก
+                    </ThemedText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.modalButtonConfirm}
+                    onPress={handleConfirmExit}
+                  >
+                    <ThemedText style={styles.modalButtonConfirmText}>
+                      ยืนยัน
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -539,5 +628,74 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     textAlign: 'center',
     lineHeight: 22,
+  },
+  // Exit Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    maxWidth: 400,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+    marginBottom: 12,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    fontFamily: 'Prompt-Regular',
+    color: '#4B5563',
+    lineHeight: 24,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButtonCancel: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  modalButtonCancelText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#1F2937',
+  },
+  modalButtonConfirm: {
+    flex: 1,
+    backgroundColor: '#183A7C',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  modalButtonConfirmText: {
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
+    color: '#FFFFFF',
   },
 })

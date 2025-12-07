@@ -195,7 +195,7 @@ export function ProgressBar({
         <View style={styles.completedContainer}>
           <IconSymbol name='checkmark.circle.fill' size={24} color='#2e7d32' />
           <ThemedText style={styles.completedText}>
-            คุณสะสมเวลาเรียนในหัวข้อนี้ครบตามที่กำหนดแล้ว
+            คุณสะสมเวลาเรียนเนื้อหานี้ครบแล้ว
           </ThemedText>
         </View>
       </View>
@@ -270,14 +270,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   completedContainer: {
+    paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
   completedText: {
-    fontSize: 14,
-    fontFamily: 'Prompt-Medium',
+    fontSize: 16,
+    fontFamily: 'Prompt-SemiBold',
     color: '#1F2937',
     lineHeight: 24,
   },

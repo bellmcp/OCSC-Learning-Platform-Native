@@ -10,11 +10,13 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 interface ClassroomHeaderProps {
   courseName: string
   showCelebration?: boolean
+  onBackPress?: () => void // Optional callback for intercepting back press
 }
 
 export function ClassroomHeader({
   courseName,
   showCelebration,
+  onBackPress,
 }: ClassroomHeaderProps) {
   const textColor = useThemeColor({}, 'text')
   const scaleAnim = useRef(new Animated.Value(1)).current
@@ -59,7 +61,10 @@ export function ClassroomHeader({
 
   return (
     <ThemedView style={styles.header}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={onBackPress || (() => router.back())}
+      >
         <IconSymbol name='chevron.left' size={24} color={textColor} />
       </TouchableOpacity>
       <ThemedView style={styles.headerTitleContainer}>
