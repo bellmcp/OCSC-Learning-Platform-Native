@@ -33,7 +33,7 @@ const userTypes = [
   },
   {
     id: 'state_enterprise',
-    title: 'พนักงานรัฐวิสาหกิจ',
+    title: 'พนักงาน\nรัฐวิสาหกิจ',
     icon: 'building.columns',
   },
   {

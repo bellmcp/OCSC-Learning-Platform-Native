@@ -275,6 +275,10 @@ export default function RootLayout() {
                 options={{ headerShown: false }}
               />
               <Stack.Screen
+                name='thaid-login'
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
                 name='portal-webview'
                 options={{ headerShown: false }}
               />

@@ -551,10 +551,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-SemiBold',
   },
   divider: {
-    height: 1,
+    height: 0,
     backgroundColor: '#E5E7EB',
     marginHorizontal: 20,
-    marginVertical: 24,
+    marginVertical: 0,
   },
   bottomPadding: {
     height: 40,

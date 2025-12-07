@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Image } from 'expo-image'
 import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
-import * as WebBrowser from 'expo-web-browser'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -99,145 +98,54 @@ export default function AccountScreen() {
     return state
   }
 
-  // Handle ThaiD OAuth login
-  const handleThaiDLogin = async () => {
-    try {
-      setIsThaiDLoading(true)
+  // Handle ThaiD OAuth login - opens in-app WebView to bypass iOS system dialog
+  const handleThaiDLogin = () => {
+    // Generate state for security verification
+    const state = generateState()
 
-      // Generate and save state for verification
-      const state = generateState()
-      setThaiDState(state)
+    // Build OAuth URL
+    const authUrl = `${THAID_AUTH_URL}?response_type=code&client_id=${THAID_CLIENT_ID}&redirect_uri=${THAID_REDIRECT_URI}&scope=pid%20given_name%20family_name&state=${state}`
 
-      // Get the app's redirect URI for debugging
-      const appRedirectUri = Linking.createURL('thaid/callback')
-      console.log("App's expected deep link:", appRedirectUri)
-      console.log(
-        "Note: In Expo Go, custom schemes don't work. Use a development build."
-      )
+    console.log('[ThaiD] Opening login in WebView')
+    console.log('[ThaiD] Auth URL:', authUrl)
 
-      // Build OAuth URL
-      const authUrl = `${THAID_AUTH_URL}?response_type=code&client_id=${THAID_CLIENT_ID}&redirect_uri=${THAID_REDIRECT_URI}&scope=pid%20given_name%20family_name&state=${state}`
+    // Navigate to WebView-based login page
+    router.push({
+      pathname: '/thaid-login',
+      params: {
+        authUrl: authUrl,
+        state: state,
+      },
+    })
+  }
 
-      console.log('ThaiD Auth URL:', authUrl)
-      console.log('Server redirect URI:', THAID_REDIRECT_URI)
-      console.log(
-        "The server's callback2.html should redirect to:",
-        'ocsclearningspace://thaid/callback?code=XXX&state=XXX'
-      )
+  // Legacy error handling kept for reference
+  const handleThaiDError = (error: any) => {
+    console.error('ThaiD login error:', error)
 
-      // Use openAuthSessionAsync for better OAuth handling
-      const result = await WebBrowser.openAuthSessionAsync(
-        authUrl,
-        THAID_REDIRECT_URI
-      )
+    // Handle different error types with appropriate messages
+    let errorMessage = 'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง'
 
-      console.log('WebBrowser result:', JSON.stringify(result, null, 2))
-
-      if (result.type === 'success' && result.url) {
-        console.log('Callback URL received:', result.url)
-
-        // Parse the callback URL
-        const urlParams = new URL(result.url)
-        const code = urlParams.searchParams.get('code')
-        const returnedState = urlParams.searchParams.get('state')
-
-        console.log('Code:', code)
-        console.log('Returned state:', returnedState)
-
-        // Verify state matches (security check)
-        if (state && returnedState !== state) {
-          throw new Error('State mismatch - possible CSRF attack')
-        }
-
-        if (!code) {
-          throw new Error('No authorization code received')
-        }
-
-        // Exchange code for token
-        console.log(
-          'Exchanging code for token at:',
-          `${THAID_API_URL}?code=${code}`
-        )
-        const response = await fetch(`${THAID_API_URL}?code=${code}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const responseText = await response.text()
-        console.log('Token exchange response:', responseText)
-
-        if (!response.ok) {
-          throw new Error(`Failed to exchange code for token: ${responseText}`)
-        }
-
-        const data = JSON.parse(responseText)
-
-        if (data.token) {
-          console.log('ThaiD login successful!')
-
-          // Store token in AsyncStorage
-          await AsyncStorage.setItem('token', data.token)
-          console.log(
-            '[Auth] Token stored in AsyncStorage:',
-            data.token.substring(0, 50) + '...'
-          )
-
-          // Verify token was stored
-          const storedToken = await AsyncStorage.getItem('token')
-          console.log(
-            '[Auth] Verified token in storage:',
-            storedToken ? 'YES' : 'NO'
-          )
-
-          // Load user data (loadUser will get userId from token automatically)
-          dispatch(userActions.loadUser())
-
-          setIsLoggedIn(true)
-          setThaiDState(null)
-          dispatch(
-            uiActions.setFlashMessage('เข้าสู่ระบบเรียบร้อยแล้ว', 'success')
-          )
-        } else {
-          throw new Error('No token received')
-        }
-      } else if (result.type === 'cancel') {
-        console.log('User cancelled the login')
+    if (error.response) {
+      const status = error.response.status
+      if (status === 401) {
+        errorMessage = 'รหัสผ่านไม่ถูกต้อง'
+      } else if (status === 404) {
+        errorMessage = 'ไม่พบบัญชีผู้ใช้งานนี้ โปรดลองใหม่อีกครั้ง'
+      } else if (status === 500) {
+        errorMessage = `เกิดข้อผิดพลาด ${status} โปรดลองใหม่อีกครั้ง`
       } else {
-        console.log('Unexpected result type:', result.type)
+        errorMessage = `เกิดข้อผิดพลาด ${status} โปรดลองใหม่อีกครั้ง`
       }
-
-      setIsThaiDLoading(false)
-    } catch (error: any) {
-      console.error('ThaiD login error:', error)
-      setIsThaiDLoading(false)
-
-      // Handle different error types with appropriate messages
-      let errorMessage =
-        'ไม่สามารถเข้าสู่ระบบด้วย ThaiD ได้ กรุณาลองใหม่อีกครั้ง'
-
-      if (error.response) {
-        const status = error.response.status
-        if (status === 401) {
-          errorMessage = 'รหัสผ่านไม่ถูกต้อง'
-        } else if (status === 404) {
-          errorMessage = 'ไม่พบบัญชีผู้ใช้งานนี้ โปรดลองใหม่อีกครั้ง'
-        } else if (status === 500) {
-          errorMessage = `เกิดข้อผิดพลาด ${status} โปรดลองใหม่อีกครั้ง`
-        } else {
-          errorMessage = `เกิดข้อผิดพลาด ${status} โปรดลองใหม่อีกครั้ง`
-        }
-      } else if (error.message) {
-        if (error.message.includes('State mismatch')) {
-          errorMessage = 'เกิดข้อผิดพลาดด้านความปลอดภัย กรุณาลองใหม่อีกครั้ง'
-        } else if (error.message.includes('No authorization code')) {
-          errorMessage = 'ไม่พบรหัสยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
-        }
+    } else if (error.message) {
+      if (error.message.includes('State mismatch')) {
+        errorMessage = 'เกิดข้อผิดพลาดด้านความปลอดภัย กรุณาลองใหม่อีกครั้ง'
+      } else if (error.message.includes('No authorization code')) {
+        errorMessage = 'ไม่พบรหัสยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
       }
-
-      dispatch(uiActions.setFlashMessage(errorMessage, 'error'))
     }
+
+    dispatch(uiActions.setFlashMessage(errorMessage, 'error'))
   }
 
   // Handle deep link callback from ThaiD
