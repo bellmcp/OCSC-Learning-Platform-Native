@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120, // Space for fixed bottom bar
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 70 : 50,
+    paddingTop: Platform.OS === 'ios' ? 80 : 50,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,

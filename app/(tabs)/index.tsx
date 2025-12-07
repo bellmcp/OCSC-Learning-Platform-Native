@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Prompt-SemiBold',
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 80 : 40,
+    paddingTop: Platform.OS === 'ios' ? 80 : 50,
     paddingHorizontal: 20,
     paddingBottom: 24,
     backgroundColor: 'transparent', // Allow RefreshControl spinner to be visible

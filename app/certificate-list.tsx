@@ -409,8 +409,8 @@ const styles = StyleSheet.create({
   },
   certificateTitle: {
     fontSize: 16,
-    fontFamily: 'Prompt-Medium',
-    marginBottom: 0,
+    fontFamily: 'Prompt-SemiBold',
+    marginBottom: 4,
   },
   certificateCode: {
     fontSize: 14,
