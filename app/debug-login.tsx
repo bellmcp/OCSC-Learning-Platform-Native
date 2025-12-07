@@ -387,7 +387,7 @@ export default function DebugLoginScreen() {
             <IconSymbol name='chevron.left' size={24} color={iconColor} />
           </TouchableOpacity>
           <ThemedText type='title' style={styles.headerTitle}>
-            Helpdesk
+            ฝ่ายช่วยเหลือ
           </ThemedText>
           <TouchableOpacity style={styles.backButton} onPress={handleReload}>
             <IconSymbol name='arrow.clockwise' size={20} color={iconColor} />

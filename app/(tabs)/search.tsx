@@ -91,6 +91,15 @@ export default function SearchScreen() {
     (state: RootState) => state.categories
   )
 
+  // Local loading states for search page only (independent of Redux)
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false)
+  const [isLoadingCurriculums, setIsLoadingCurriculums] = useState(false)
+  // Local snapshots of data for search page (won't be affected by detail pages)
+  const [searchPageCourses, setSearchPageCourses] = useState<any[]>([])
+  const [searchPageCurriculums, setSearchPageCurriculums] = useState<any[]>([])
+  // Cache flag to prevent unnecessary reloads
+  const hasLoadedInitialData = useRef(false)
+
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
   const [filteredCurriculums, setFilteredCurriculums] = useState<Curriculum[]>(
@@ -98,41 +107,74 @@ export default function SearchScreen() {
   )
   const [hasSearched, setHasSearched] = useState(false)
 
-  // Load initial data only if not already present in Redux (from home page)
+  // Load initial data only if not already present
   useEffect(() => {
-    // Only load courses if not already in Redux
-    if (courses.length === 0 && !isCoursesLoading) {
-      console.log('SearchScreen: Loading courses from API...')
-      dispatch(coursesActions.loadCourses() as any)
-    } else if (courses.length > 0) {
-      console.log('SearchScreen: Using cached courses from Redux')
-    }
+    // Check if we already have data in local snapshots or Redux
+    const hasSnapshotData =
+      searchPageCourses.length > 0 && searchPageCurriculums.length > 0
+    const hasReduxData = courses.length > 0 && curriculums.length > 0
 
-    // Only load curriculums if not already in Redux
-    if (curriculums.length === 0 && !isCurriculumsLoading) {
-      console.log('SearchScreen: Loading curriculums from API...')
-      dispatch(curriculumsActions.loadCurriculums('') as any)
-    } else if (curriculums.length > 0) {
-      console.log('SearchScreen: Using cached curriculums from Redux')
-    }
-
-    // Only load categories if not already in Redux
-    if (categories.length === 0) {
-      console.log('SearchScreen: Loading categories from API...')
-      dispatch(categoriesActions.loadCategories() as any)
-    } else {
-      console.log('SearchScreen: Using cached categories from Redux')
+    if (!hasLoadedInitialData.current && !hasSnapshotData) {
+      // Need to load data
+      if (!hasReduxData) {
+        console.log('SearchScreen: Loading data from API...')
+        setIsLoadingCourses(true)
+        setIsLoadingCurriculums(true)
+        dispatch(coursesActions.loadCourses() as any)
+        dispatch(curriculumsActions.loadCurriculums('') as any)
+      }
+      // Load categories if not present
+      if (categories.length === 0) {
+        dispatch(categoriesActions.loadCategories() as any)
+      }
+      hasLoadedInitialData.current = true
+    } else if (hasSnapshotData || hasReduxData) {
+      console.log('SearchScreen: Using cached data')
+      hasLoadedInitialData.current = true
     }
   }, []) // Empty dependency - only run once on mount
 
-  // Filter results when search query or data changes
+  // Turn off local loading states and save snapshots when data arrives
+  useEffect(() => {
+    // Save snapshot of courses when Redux finishes loading
+    if (courses.length > 0 && !isCoursesLoading) {
+      if (isLoadingCourses) {
+        setSearchPageCourses([...courses])
+        setIsLoadingCourses(false)
+      } else if (searchPageCourses.length === 0) {
+        // Initial load from cache
+        setSearchPageCourses([...courses])
+      }
+    }
+    // Save snapshot of curriculums when Redux finishes loading
+    if (curriculums.length > 0 && !isCurriculumsLoading) {
+      if (isLoadingCurriculums) {
+        setSearchPageCurriculums([...curriculums])
+        setIsLoadingCurriculums(false)
+      } else if (searchPageCurriculums.length === 0) {
+        // Initial load from cache
+        setSearchPageCurriculums([...curriculums])
+      }
+    }
+  }, [
+    isCoursesLoading,
+    isCurriculumsLoading,
+    courses,
+    curriculums,
+    isLoadingCourses,
+    isLoadingCurriculums,
+    searchPageCourses.length,
+    searchPageCurriculums.length,
+  ])
+
+  // Filter results when search query or data changes (using local snapshots)
   useEffect(() => {
     // When search query is empty, show all courses and curriculums
     if (searchQuery.trim() === '') {
-      const allCourses = courses.map((course: any) =>
+      const allCourses = searchPageCourses.map((course: any) =>
         convertCourseToDisplayFormat(course, categories)
       )
-      const allCurriculums = curriculums.map((curriculum: any) =>
+      const allCurriculums = searchPageCurriculums.map((curriculum: any) =>
         convertCurriculumToDisplayFormat(curriculum)
       )
       setFilteredCourses(allCourses)
@@ -144,7 +186,7 @@ export default function SearchScreen() {
     const searchLower = searchQuery.toLowerCase()
 
     // Filter courses by name and code (matching desktop behavior)
-    const courseResults = courses
+    const courseResults = searchPageCourses
       .filter((course: any) => {
         return (
           course.name?.toLowerCase().includes(searchLower) ||
@@ -154,7 +196,7 @@ export default function SearchScreen() {
       .map((course: any) => convertCourseToDisplayFormat(course, categories))
 
     // Filter curriculums by name and code (matching desktop behavior)
-    const curriculumResults = curriculums
+    const curriculumResults = searchPageCurriculums
       .filter((curriculum: any) => {
         return (
           curriculum.name?.toLowerCase().includes(searchLower) ||
@@ -166,7 +208,7 @@ export default function SearchScreen() {
     setFilteredCourses(courseResults)
     setFilteredCurriculums(curriculumResults)
     setHasSearched(true)
-  }, [searchQuery, courses, curriculums, categories])
+  }, [searchQuery, searchPageCourses, searchPageCurriculums, categories])
 
   // Reset scroll position when component mounts
   useEffect(() => {
@@ -213,14 +255,15 @@ export default function SearchScreen() {
     router.push('/curriculums')
   }
 
-  const isLoading = isCoursesLoading || isCurriculumsLoading
+  // Use local loading states instead of Redux (independent of detail pages)
+  const isLoading = isLoadingCourses || isLoadingCurriculums
   const hasResults =
     filteredCourses.length > 0 || filteredCurriculums.length > 0
   const showNoResults = hasSearched && !hasResults && !isLoading
 
   // Render course search section
   const renderCourseSection = () => {
-    if (isCoursesLoading && hasSearched) {
+    if (isLoadingCourses && hasSearched) {
       return (
         <ThemedView style={styles.sectionContainer}>
           <ThemedView style={styles.sectionHeader}>
@@ -293,7 +336,7 @@ export default function SearchScreen() {
 
   // Render curriculum search section
   const renderCurriculumSection = () => {
-    if (isCurriculumsLoading && hasSearched) {
+    if (isLoadingCurriculums && hasSearched) {
       return (
         <ThemedView style={styles.sectionContainer}>
           <ThemedView style={styles.sectionHeader}>
