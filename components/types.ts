@@ -10,6 +10,7 @@ export interface ClassroomContent {
   testId1?: number | null
   testId2?: number | null
   testId3?: number | null
+  testId?: number | null // testId from ContentView (for test submission)
   evaluationId?: number | null
   completed: boolean
   completeDate?: string | null
@@ -43,5 +44,6 @@ export interface ContentView {
   contentSeconds?: number | null
   testScore?: number | null
   testTries?: number | null
+  testId?: number | null
   no: number
 }

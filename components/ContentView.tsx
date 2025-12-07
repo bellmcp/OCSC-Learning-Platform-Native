@@ -17,6 +17,7 @@ const HeroImage = require('@/assets/images/hero-learn.png')
 interface ContentViewProps {
   selectedContent: ClassroomContent | null
   courseName: string
+  courseRegistrationId?: number
   onTestStart: (contentId: number) => void
   onContentLoadStart?: () => void
   onOpenTest: () => void
@@ -106,6 +107,7 @@ const buildYouTubeIframeHtml = (videoId: string): string => {
 export function ContentView({
   selectedContent,
   courseName,
+  courseRegistrationId,
   onTestStart,
   onContentLoadStart,
   onOpenTest,
@@ -138,10 +140,17 @@ export function ContentView({
 
   // Render test welcome screen for test content type
   if (selectedContent.type === 't') {
+    // testId comes from contentView - backend randomly selects one of testId1/2/3
+    // Do NOT fallback to testId1/2/3 on frontend as that would bypass the random selection
+    const testId = selectedContent.testId
+
     return (
       <TestWelcomeCard
         selectedContent={selectedContent}
         courseName={courseName}
+        courseRegistrationId={courseRegistrationId}
+        contentViewId={selectedContent.contentViewId}
+        testId={testId}
         onOpenTest={onOpenTest}
       />
     )

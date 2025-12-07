@@ -220,6 +220,8 @@ export default function ClassroomScreen() {
           testId1: content.testId1,
           testId2: content.testId2,
           testId3: content.testId3,
+          // testId comes from contentView - backend randomly selects one of testId1/2/3
+          testId: view?.testId || null,
           evaluationId: content.evaluationId,
           completed: isContentCompleted,
           completeDate: view?.completeDate || null,
@@ -436,6 +438,7 @@ export default function ClassroomScreen() {
             <ContentView
               selectedContent={selectedContent}
               courseName={courseData.name}
+              courseRegistrationId={courseRegistrationId}
               onTestStart={handleTestStart}
               onOpenTest={handleOpenTest}
               onOpenEvaluation={handleOpenEvaluation}
